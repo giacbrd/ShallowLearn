@@ -43,9 +43,9 @@ class GensimFTClassifier(BaseClassifier):
     A supervised learning model based on the fastText algorithm [1]_ and written in Python.
     The core code, as this documentation, is copied from `Gensim <https://radimrehurek.com/gensim>`_,
     it takes advantage of its optimizations and support.
-    The parameter names are equivalent to the ones in the original fasText implementation (https://github.com/facebookresearch/fastText)
+    The parameter names are equivalent to the ones in the original fasText implementation (https://github.com/facebookresearch/fastText).
 
-    For now it only uses Hierarchical Softmax for output computation.
+    For now it only uses Hierarchical Softmax for output computation, and it is obviously limited to the CBOW method.
 
     `size` is the dimensionality of the feature vectors.
 
@@ -193,4 +193,4 @@ class GensimFTClassifier(BaseClassifier):
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
         return [predictions[0] for predictions in self._iter_predict(documents)]
 
-        # FIXME serialization with pickle (is it possible?)
+    # FIXME serialization with pickle (is it possible?)

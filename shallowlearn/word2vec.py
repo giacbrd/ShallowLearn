@@ -28,13 +28,8 @@ def train_batch_labeled_cbow(model, sentences, alpha, work=None, neu1=None):
     result = 0
     for sentence in sentences:
         document, target = sentence
-        word_vocabs, target_vocabs = [], []
-        for w in document:
-            if w in model.vocab:
-                word_vocabs.append(model.vocab[w])
-        for t in target:
-            if t in model.lvocab:
-                target_vocabs.append(model.lvocab[t])
+        word_vocabs = [model.vocab[w] for w in document if w in model.vocab]
+        target_vocabs = [model.lvocab[t] for t in target if t in model.lvocab]
         for target in target_vocabs:
             word2_indices = [w.index for w in word_vocabs]
             l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x vector_size
@@ -56,10 +51,7 @@ def score_document_labeled_cbow(model, document, label, work=None, neu1=None):
     if model.negative:
         raise RuntimeError("scoring is only available for HS=True")
 
-    word_vocabs, target_vocabs = [], []
-    for w in document:
-        if w in model.vocab:
-            word_vocabs.append(model.vocab[w])
+    word_vocabs = [model.vocab[w] for w in document if w in model.vocab]
 
     if label in model.lvocab:
         target = model.lvocab[label]
@@ -78,6 +70,8 @@ class LabeledWord2Vec(Word2Vec):
         """
         Exactly as the parent class `Word2Vec <https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec>`_.
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
+        It basically build two vocabularies, one for the sample words and one for the labels, so that the input layer is only made of words
+        while the output layer is only made of labels.
         """
         self.lvocab = {}  # Vocabulary of labels only
         self.index2label = []

@@ -15,15 +15,18 @@ Models
 
 ``shallowlearn.models.DeepIRClassifier``
     **TODO** - Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
+
 Performances
 ------------
-**TODO** - Comparison with other classifiers in effectiveness and computation cost
+**TODO**  Comparison with other classifiers in effectiveness and computation cost
+
 TODO
 ----
 
 - Tests!
 - Documents can be structured, made of different sections, learned independently.
 - Taking into account https://github.com/RaRe-Technologies/gensim/pull/847, implementing the hashing trick
+
 References
 ----------
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification

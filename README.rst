@@ -8,17 +8,18 @@ Models
 ``shallowlearn.models.GensimFTClassifier``
     A supervised learning model based on the fastText algorithm [1]_.
     The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
-    It takes advantage of its optimizations and support.
+    it takes advantage of its optimizations and support.
+    **TODO**: Cython code
 
-``shallowlearn.models.fastTextClassifier``
-    **TODO** - The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
+``shallowlearn.models.FastTextClassifier``
+    **TODO**: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
 
 ``shallowlearn.models.DeepIRClassifier``
-    **TODO** - Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
+    **TODO**: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
 
 Performances
 ------------
-**TODO**  Comparison with other classifiers in effectiveness and computation cost
+**TODO**:  Comparison with other classifiers in effectiveness and computation cost
 
 TODO
 ----

@@ -42,7 +42,7 @@ class GensimFTClassifier(BaseClassifier):
     """
     A supervised learning model based on the fastText algorithm [1]_ and written in Python.
     The core code, as this documentation, is copied from `Gensim <https://radimrehurek.com/gensim>`_,
-    It takes advantage of its optimizations and support.
+    it takes advantage of its optimizations and support.
     The parameter names are equivalent to the ones in the original fasText implementation (https://github.com/facebookresearch/fastText)
 
     For now it only uses Hierarchical Softmax for output computation.

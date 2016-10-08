@@ -94,7 +94,7 @@ class GensimFTClassifier(BaseClassifier):
     `pre_trained` can be set with a Word2Vec object in order to set word vectors previously computed with,
     for example, a word2vec algorithm. Use `partial_fit` method to learn a supervised model over the pre-trained one.
 
-    .. [1] Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean. Efficient Estimation of Word Representations in Vector Space. In Proceedings of Workshop at ICLR, 2013.
+    .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
 
     """
 

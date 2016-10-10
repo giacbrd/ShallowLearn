@@ -23,7 +23,7 @@ except NameError:
 from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from sklearn.base import BaseEstimator, ClassifierMixin
 
-from word2vec import LabeledWord2Vec, score_document_labeled_cbow
+from .word2vec import LabeledWord2Vec, score_document_labeled_cbow
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 

@@ -76,7 +76,7 @@ class LabeledWord2Vec(Word2Vec):
         self.lvocab = {}  # Vocabulary of labels only
         self.index2label = []
         kwargs['sg'] = 0
-        kwargs['window'] = sys.maxint
+        kwargs['window'] = sys.maxsize
         kwargs['hs'] = 1
         kwargs['negative'] = 0
         kwargs['sentences'] = None
@@ -120,7 +120,7 @@ class LabeledWord2Vec(Word2Vec):
 
         # Build words and labels vocabularies in two different oobjects
         words_vocab = FakeSelf(self.max_vocab_size, self.min_count, self.sample, self.estimate_memory)
-        labels_vocab = FakeSelf(sys.maxint, 0, 0, self.estimate_memory)
+        labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.__class__.scan_vocab(words_vocab, sentences, progress_per=progress_per, trim_rule=trim_rule)
         self.__class__.scan_vocab(labels_vocab, labels, progress_per=progress_per, trim_rule=None)
         self.__class__.scale_vocab(words_vocab, keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)

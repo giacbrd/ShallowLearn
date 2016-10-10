@@ -26,9 +26,12 @@ Exclusive Features
 ------------------
 **TODO**
 
-Performances
-------------
-**TODO**:  Comparison with other classifiers in effectiveness and computation cost
+Benchmarks
+----------
+``scripts/document_classification_20newsgroups.py`` refers to this `Scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_ in which text classifiers are compared on a reference dataset.
+We added ``GensimFTClassifier`` and the original *fastText* implementation for a solid benchmark of our models.
+Results as for release **0.0.1**:
+**TODO**
 
 TODO
 ----

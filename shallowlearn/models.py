@@ -100,11 +100,9 @@ class GensimFTClassifier(BaseClassifier):
 
     def __init__(self, size=100, alpha=0.025, min_count=5, max_vocab_size=None, sample=1e-3, workers=3,
                  min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
-                 batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None, verbose=False):
+                 batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
         # FIXME logging configuration must be project wise, rewrite this condition
         super(GensimFTClassifier, self).__init__()
-        if verbose:
-            logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
         self.set_params(
             size=size,
             alpha=alpha,

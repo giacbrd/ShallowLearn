@@ -4,7 +4,7 @@ A collection of supervised learning models based on shallow neural network appro
 with some additional exclusive features.
 They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_
 
-.. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=develop
+.. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
     :target: https://travis-ci.org/giacbrd/ShallowLearn
 
 Installation

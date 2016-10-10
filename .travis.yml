@@ -1,8 +1,21 @@
 language: python
+branches:
+  only:
+    - master
+    - develop
 python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-install: "python setup.py install"
-script: "python setup.py test"
+  - 2.7
+  - 3.3
+  - 3.4
+  - 3.5
+addons:
+  apt:
+    packages:
+    - libblas-dev
+    - liblapack-dev
+    - gfortran
+    - graphviz
+before_install:
+  - pip install -U pip setuptools wheel
+install: python setup.py install
+script: python setup.py test

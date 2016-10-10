@@ -3,6 +3,7 @@ ShallowLearn
 A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)
 with some additional exclusive features.
 They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_
+
 .. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=develop
     :target: https://travis-ci.org/giacbrd/ShallowLearn
     

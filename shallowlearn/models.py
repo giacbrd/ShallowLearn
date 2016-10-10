@@ -7,7 +7,18 @@
 import logging
 import operator
 from collections import Iterable
-from itertools import izip_longest
+try:
+    from future_builtins import zip_longest
+except ImportError: # not 2.6+ or is 3.x
+    try:
+        from itertools import izip_longest as zip_longest # < 2.5 or 3.x
+    except ImportError:
+        pass
+try:
+    basestring = basestring
+except NameError:
+    # 'unicode' is undefined, must be Python 3
+    basestring = (str, bytes)
 
 from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from sklearn.base import BaseEstimator, ClassifierMixin
@@ -136,7 +147,7 @@ class GensimFTClassifier(BaseClassifier):
     def _data_iter(cls, documents, y):
         class DocIter(object):
             def __iter__(self):
-                for sample, targets in izip_longest(documents, y or []):
+                for sample, targets in zip_longest(documents, y or []):
                     targets = cls._target_list(targets)
                     yield (sample, targets)
 

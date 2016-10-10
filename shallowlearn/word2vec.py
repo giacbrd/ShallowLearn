@@ -70,8 +70,8 @@ class LabeledWord2Vec(Word2Vec):
         """
         Exactly as the parent class `Word2Vec <https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec>`_.
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
-        It basically build two vocabularies, one for the sample words and one for the labels, so that the input layer is only made of words
-        while the output layer is only made of labels.
+        It basically builds two vocabularies, one for the sample words and one for the labels,
+        so that the input layer is only made of words, while the output layer is only made of labels.
         """
         self.lvocab = {}  # Vocabulary of labels only
         self.index2label = []

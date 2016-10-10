@@ -18,7 +18,8 @@ def readfile(fname):
 setup(
     name='ShallowLearn',
     version='0.0.1',
-    description='A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)',
+    description='A collection of supervised learning models based on shallow neural network approaches '
+                '(e.g., word2vec and fastText)',
     long_description=readfile('README.rst'),
     classifiers=[
         'Environment :: Console',
@@ -30,7 +31,6 @@ setup(
         'Topic :: Text Processing :: Linguistic',
     ],
     url='https://github.com/giacbrd/ShallowLearn',
-    download_url='',
     author='Giacomo Berardi',
     author_email='barnets@gmail.com',
     packages=find_packages(exclude=['tests']),
@@ -38,8 +38,7 @@ setup(
         'gensim==0.13.2',
         'scikit-learn>=0.18'
     ],
-    test_suite='nose.collector',
-    tests_require=['nose'],
-    include_package_data=True,
-    zip_safe=False
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
+    include_package_data=True
 )

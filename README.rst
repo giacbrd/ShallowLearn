@@ -6,7 +6,6 @@ They are written in Python and fully compatible with `Scikit-learn <http://sciki
 
 .. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=develop
     :target: https://travis-ci.org/giacbrd/ShallowLearn
-    
 Installation
 ------------
 ``pip install shallowlearn``

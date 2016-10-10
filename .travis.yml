@@ -6,16 +6,16 @@ branches:
 python:
   - 2.7
   - 3.5
-addons:
-  apt:
-    packages:
-    - libblas-dev
-    - liblapack-dev
-    - gfortran
-    - graphviz
 before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda2/bin:$PATH
+  - conda update --yes conda
   - pip install -U pip setuptools wheel
-install: python setup.py install
+install:
+  - conda install -c anaconda scikit-learn=0.18
+  - python setup.py install
 script: python setup.py test
 cache:
   - apt

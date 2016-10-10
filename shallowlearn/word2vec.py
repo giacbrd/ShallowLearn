@@ -18,6 +18,8 @@ except ImportError:
     from Queue import Queue, Empty
 
 from numpy import prod, exp, empty, zeros, ones, float32 as REAL, dot, sum as np_sum
+from six.moves import range
+
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
@@ -159,7 +161,7 @@ class LabeledWord2Vec(Word2Vec):
         logger.info("resetting layer weights")
         self.syn0 = empty((len(self.vocab), self.vector_size), dtype=REAL)
         # randomize weights vector by vector, rather than materializing a huge random matrix in RAM at once
-        for i in xrange(len(self.vocab)):
+        for i in range(len(self.vocab)):
             # construct deterministic seed from word AND seed argument
             self.syn0[i] = self.seeded_vector(self.index2word[i] + str(self.seed))
         # Output layer is only made of labels

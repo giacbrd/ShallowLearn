@@ -4,14 +4,7 @@
 # Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 import io
-try:
-    from future_builtins import zip
-except ImportError: # not 2.6+ or is 3.x
-    try:
-        from itertools import izip as zip # < 2.5 or 3.x
-    except ImportError:
-        pass
-
+from six.moves import zip
 import pickle
 
 import numpy

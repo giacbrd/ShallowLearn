@@ -7,13 +7,8 @@
 import logging
 import operator
 from collections import Iterable
-try:
-    from future_builtins import zip_longest
-except ImportError: # not 2.6+ or is 3.x
-    try:
-        from itertools import izip_longest as zip_longest # < 2.5 or 3.x
-    except ImportError:
-        pass
+from six.moves import zip_longest
+
 try:
     basestring = basestring
 except NameError:

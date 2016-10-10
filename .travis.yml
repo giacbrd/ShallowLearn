@@ -19,3 +19,7 @@ before_install:
   - pip install -U pip setuptools wheel
 install: python setup.py install
 script: python setup.py test
+cache:
+  - apt
+  - directories:
+    - $HOME/.cache/pip

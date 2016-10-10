@@ -39,10 +39,10 @@ setup(
     author_email='barnets@gmail.com',
     packages=['shallowlearn'] + find_packages('shallowlearn'),
     install_requires=[
-        'numpy==1.11.2',
-        'scipy==0.18.1',
         'scikit-learn>=0.18',
-        'gensim==0.13.2'
+        'gensim==0.13.2',
+        'scipy>=0.18.1',
+        'numpy>=1.11.2'
     ],
     setup_requires=['pytest-runner==2.9'],
     tests_require=['pytest==3.0.3'],

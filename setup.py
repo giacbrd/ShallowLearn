@@ -19,9 +19,13 @@ setup(
     name='ShallowLearn',
     version='0.0.1',
     description='A collection of supervised learning models based on shallow neural network approaches '
-                '(e.g., word2vec and fastText)',
+                '(e.g., word2vec and fastText) with some additional exclusive features',
     long_description=readfile('README.rst'),
     classifiers=[
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Environment :: Console',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
@@ -33,7 +37,7 @@ setup(
     url='https://github.com/giacbrd/ShallowLearn',
     author='Giacomo Berardi',
     author_email='barnets@gmail.com',
-    packages=find_packages(exclude=['tests']),
+    packages=['shallowlearn'] + find_packages('shallowlearn'),
     install_requires=[
         'gensim==0.13.2',
         'scikit-learn>=0.18'

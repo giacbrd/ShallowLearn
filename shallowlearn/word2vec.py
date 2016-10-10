@@ -172,6 +172,6 @@ class LabeledWord2Vec(Word2Vec):
         Borrow shareable pre-built structures (like vocab) from the other_model. Useful
         if testing multiple models in parallel on the same corpus.
         """
-        self.lvocab = other_model.lvocab
-        self.index2label = other_model.index2label
+        self.lvocab = getattr(other_model, 'lvocab', other_model.vocab)
+        self.index2label = getattr(other_model, 'index2label', other_model.index2word)
         super(LabeledWord2Vec, self).reset_from(other_model)

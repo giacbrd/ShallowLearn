@@ -91,19 +91,18 @@ class GensimFTClassifier(BaseClassifier):
     thus cython routines). Default is 10000. (Larger batches will be passed if individual
     texts are longer than 10000 words, but the standard cython code truncates to that maximum.)
 
-    `pre_trained` can be set with a Word2Vec object in order to set word vectors previously computed with,
-    for example, a word2vec algorithm. Use `partial_fit` method to learn a supervised model over the pre-trained one.
+    `pre_trained` can be set with a ``Word2Vec`` object in order to set pre-trained word vectors and vocabularies.
+    Use ``partial_fit`` method to learn a supervised model starting from the pre-trained one.
 
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
 
     """
 
-    def __init__(self, size=100, alpha=0.025, min_count=5,
-                 max_vocab_size=None, sample=1e-3, workers=3, min_alpha=0.0001,
-                 cbow_mean=1, hashfxn=hash, null_word=0,
-                 trim_rule=None, sorted_vocab=1, batch_words=MAX_WORDS_IN_BATCH,
-                 max_iter=5, random_state=1, pre_trained=None, verbose=False):
+    def __init__(self, size=100, alpha=0.025, min_count=5, max_vocab_size=None, sample=1e-3, workers=3,
+                 min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
+                 batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None, verbose=False):
         # FIXME logging configuration must be project wise, rewrite this condition
+        super(GensimFTClassifier, self).__init__()
         if verbose:
             logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
         self.set_params(
@@ -132,7 +131,6 @@ class GensimFTClassifier(BaseClassifier):
         del params['verbose']
         del params['pre_trained']
         self._classifier = LabeledWord2Vec(**params)
-        # FIXME this should work with Word2Vec and not only with LabeledWord2Vec
         if pre_trained is not None:
             self._classifier.reset_from(pre_trained)
 
@@ -145,6 +143,14 @@ class GensimFTClassifier(BaseClassifier):
                     yield (sample, targets)
 
         return DocIter()
+
+    @property
+    def classifier(self):
+        """
+        The word embeddings model
+        :return: An instance of ``LabeledWord2Vec``, a CBOW model in wich input vectors are words, output vectors are labels.
+        """
+        return self._classifier
 
     def fit(self, documents, y=None, **fit_params):
         """
@@ -185,6 +191,9 @@ class GensimFTClassifier(BaseClassifier):
         """
         return list(self._iter_predict(documents))
 
+    def decision_function(self, documents):
+        return self.predict_proba(documents)
+
     def predict(self, documents):
         """
         :param documents: Iterator over lists of words
@@ -192,5 +201,3 @@ class GensimFTClassifier(BaseClassifier):
         """
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
         return [predictions[0] for predictions in self._iter_predict(documents)]
-
-    # FIXME serialization with pickle (is it possible?)

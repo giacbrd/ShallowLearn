@@ -2,7 +2,12 @@ ShallowLearn
 ============
 A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)
 with some additional exclusive features.
-They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_
+They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_.
+
+.. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
+    :target: https://travis-ci.org/giacbrd/ShallowLearn
+.. image:: https://badge.fury.io/py/shallowlearn.svg
+    :target: https://badge.fury.io/py/shallowlearn
 
 Getting Started
 ---------------
@@ -16,16 +21,16 @@ single label (or a list in case of multi-label training set) associated with the
 
 Models
 ------
-``shallowlearn.models.GensimFTClassifier``
+``shallowlearn.models.GensimFastText``
     A supervised learning model based on the fastText algorithm [1]_.
     The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
     it takes advantage of its optimizations and support.
     **TODO**: Cython code
 
-``shallowlearn.models.FastTextClassifier``
+``shallowlearn.models.FastText``
     **TODO**: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
 
-``shallowlearn.models.DeepIRClassifier``
+``shallowlearn.models.DeepInverseRegression``
     **TODO**: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
 
 Exclusive Features
@@ -38,13 +43,6 @@ Benchmarks
 We added ``GensimFTClassifier`` and the original *fastText* implementation for a solid benchmark of our models.
 Results as for release **0.0.1**:
 **TODO**
-
-TODO
-----
-
-- Documents can be structured, made of different sections, learned independently
-- Taking into account https://github.com/RaRe-Technologies/gensim/pull/847, implementing the hashing trick
-- Given the previous point, implementing n-grams of words
 
 References
 ----------

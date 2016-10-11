@@ -98,3 +98,4 @@ Thumbs.db
 # Others
 .idea
 temp/
+.pypirc

@@ -44,7 +44,7 @@ class BaseClassifier(ClassifierMixin, BaseEstimator):
         self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex))
 
 
-class GensimFTClassifier(BaseClassifier):
+class GensimFastText(BaseClassifier):
     """
     A supervised learning model based on the fastText algorithm [1]_ and written in Python.
     The core code, as this documentation, is copied from `Gensim <https://radimrehurek.com/gensim>`_,
@@ -108,7 +108,7 @@ class GensimFTClassifier(BaseClassifier):
                  min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
         # FIXME logging configuration must be project wise, rewrite this condition
-        super(GensimFTClassifier, self).__init__()
+        super(GensimFastText, self).__init__()
         self.set_params(
             size=size,
             alpha=alpha,

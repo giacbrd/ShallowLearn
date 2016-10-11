@@ -17,7 +17,7 @@ before_install:
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib
   - python setup.py install
 script:
   - python setup.py test

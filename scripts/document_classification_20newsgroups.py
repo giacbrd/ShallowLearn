@@ -48,8 +48,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils.extmath import density
 from sklearn import metrics
 
+from shallowlearn.models import GensimFastText
+
 
 # Display progress logs on stdout
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 
@@ -141,6 +144,9 @@ print()
 # split a training set and a test set
 y_train, y_test = data_train.target, data_test.target
 
+train_text = [s.encode('utf-8').split() for s in data_train.data]
+test_text = [s.encode('utf-8').split() for s in data_test.data]
+
 print("Extracting features from the training data using a sparse vectorizer")
 t0 = time()
 if opts.use_hashing:
@@ -200,12 +206,18 @@ def benchmark(clf):
     print("Training: ")
     print(clf)
     t0 = time()
-    clf.fit(X_train, y_train)
+    if isinstance(clf, GensimFastText):
+        clf.fit(train_text, y_train)
+    else:
+        clf.fit(X_train, y_train)
     train_time = time() - t0
     print("train time: %0.3fs" % train_time)
 
     t0 = time()
-    pred = clf.predict(X_test)
+    if isinstance(clf, GensimFastText):
+        pred = clf.predict(test_text)
+    else:
+        pred = clf.predict(X_test)
     test_time = time() - t0
     print("test time:  %0.3fs" % test_time)
 
@@ -285,6 +297,10 @@ results.append(benchmark(Pipeline([
   ('feature_selection', LinearSVC(penalty="l1", dual=False, tol=1e-3)),
   ('classification', LinearSVC())
 ])))
+
+print('=' * 80)
+print("Gensim fastText")
+results.append(benchmark(GensimFastText()))
 
 # make some plots
 

@@ -5,14 +5,17 @@ with some additional exclusive features.
 They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_.
 
 .. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
-:target: https://travis-ci.org/giacbrd/ShallowLearn
+    :target: https://travis-ci.org/giacbrd/ShallowLearn
 .. image:: https://badge.fury.io/py/shallowlearn.svg
-:target: https://badge.fury.io/py/shallowlearn
+    :target: https://badge.fury.io/py/shallowlearn
 
 Getting Started
 ---------------
 Install the latest version:
-``pip install shallowlearn``
+.. code:: shell
+
+    pip install shallowlearn
+
 Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in Scikit-learn,
 e.g., ``fit(X, y)``, ``predict(X)``, etc.
 
@@ -43,7 +46,7 @@ The script ``scripts/document_classification_20newsgroups.py`` refers to this
 `Scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_
 in which text classifiers are compared on a reference dataset.
 We added in the comparison the ``GensimFastText`` classifier and the original *fastText* implementation,
- in order to obtain an adequate benchmark of our models.
+in order to obtain an adequate benchmark of our models.
 
 Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.1>`_:
 **TODO**

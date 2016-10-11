@@ -4,9 +4,15 @@ A collection of supervised learning models based on shallow neural network appro
 with some additional exclusive features.
 They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_
 
-Installation
-------------
+Getting Started
+---------------
+Install the latest version:
 ``pip install shallowlearn``
+Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in Scikit-learn,
+e.g., ``fit(X, y)``, ``predict(X)``, etc.
+
+Data is raw text, each sample is a list of tokens (words of a document), while each target value in ``y`` can be a
+single label (or a list in case of multi-label training set) associated with the relative sample.
 
 Models
 ------
@@ -36,7 +42,6 @@ Results as for release **0.0.1**:
 TODO
 ----
 
-- Tests!
 - Documents can be structured, made of different sections, learned independently
 - Taking into account https://github.com/RaRe-Technologies/gensim/pull/847, implementing the hashing trick
 - Given the previous point, implementing n-grams of words

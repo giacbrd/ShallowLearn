@@ -21,4 +21,4 @@ install:
   - python setup.py install
 script:
   - python setup.py test
-  - python scripts/document_classification_20newsgroups.py
+  #FIXME add a script like: python scripts/document_classification_20newsgroups.py

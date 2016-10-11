@@ -121,17 +121,12 @@ class LabeledWord2Vec(Word2Vec):
                 self.estimate_memory = estimate_memory
 
         # Build words and labels vocabularies in two different oobjects
-        words_vocab = FakeSelf(self.max_vocab_size, self.min_count, self.sample, self.estimate_memory)
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
-        self.__class__.scan_vocab(words_vocab, sentences, progress_per=progress_per, trim_rule=trim_rule)
+        self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
         self.__class__.scan_vocab(labels_vocab, labels, progress_per=progress_per, trim_rule=None)
-        self.__class__.scale_vocab(words_vocab, keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
+        self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
         self.__class__.scale_vocab(labels_vocab, keep_raw_vocab=False, trim_rule=None)
-        self.corpus_count = words_vocab.corpus_count
-        self.raw_vocab = words_vocab.raw_vocab
-        self.vocab = words_vocab.vocab
         self.lvocab = labels_vocab.vocab
-        self.index2word = words_vocab.index2word
         self.index2label = labels_vocab.index2word
         self.finalize_vocab()  # build tables & arrays
 

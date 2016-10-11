@@ -148,8 +148,6 @@ class GensimFastText(BaseClassifier):
                 self.documents = documents
 
             def __iter__(self):
-                if not numpy.any(self.y):
-                    self.y = []
                 for sample, targets in zip_longest(self.documents, self.y):
                     targets = cls._target_list(targets)
                     yield (sample, targets)
@@ -173,8 +171,7 @@ class GensimFastText(BaseClassifier):
         :return:
         """
         # TODO if y=None just learn the word vectors
-        if numpy.any(y):
-            self._build_label_info(y)
+        self._build_label_info(y)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
         self._classifier.train(self._data_iter(documents, y))

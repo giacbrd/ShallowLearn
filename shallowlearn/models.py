@@ -7,6 +7,8 @@
 import logging
 import operator
 from collections import Iterable
+
+import numpy
 from six.moves import zip_longest
 
 try:
@@ -132,7 +134,6 @@ class GensimFastText(BaseClassifier):
         del params['max_iter']
         params['seed'] = params['random_state']
         del params['random_state']
-        del params['verbose']
         del params['pre_trained']
         self._classifier = LabeledWord2Vec(**params)
         if pre_trained is not None:
@@ -140,13 +141,20 @@ class GensimFastText(BaseClassifier):
 
     @classmethod
     def _data_iter(cls, documents, y):
+
         class DocIter(object):
+            def __init__(self, documents, y):
+                self.y = y
+                self.documents = documents
+
             def __iter__(self):
-                for sample, targets in zip_longest(documents, y or []):
+                if not numpy.any(self.y):
+                    self.y = []
+                for sample, targets in zip_longest(self.documents, self.y):
                     targets = cls._target_list(targets)
                     yield (sample, targets)
 
-        return DocIter()
+        return DocIter(documents, y)
 
     @property
     def classifier(self):
@@ -165,7 +173,7 @@ class GensimFastText(BaseClassifier):
         :return:
         """
         # TODO if y=None just learn the word vectors
-        if y:
+        if numpy.any(y):
             self._build_label_info(y)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
@@ -186,7 +194,7 @@ class GensimFastText(BaseClassifier):
             result = [(label, score_document_labeled_cbow(self._classifier, document=doc, label=label)) for
                       label in self._label_set]
             result.sort(key=operator.itemgetter(1), reverse=True)
-            return result
+            yield result
 
     def predict_proba(self, documents):
         """
@@ -204,4 +212,4 @@ class GensimFastText(BaseClassifier):
         :return: For each document, the one most probable label (i.e. the classification)
         """
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
-        return [predictions[0] for predictions in self._iter_predict(documents)]
+        return [predictions[0][0] for predictions in self._iter_predict(documents)]

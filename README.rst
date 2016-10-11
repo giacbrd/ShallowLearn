@@ -9,9 +9,18 @@ They are written in Python and fully compatible with `Scikit-learn <http://sciki
 .. image:: https://badge.fury.io/py/shallowlearn.svg
     :target: https://badge.fury.io/py/shallowlearn
 
-Installation
-------------
-``pip install shallowlearn``
+Getting Started
+---------------
+Install the latest version:
+.. code:: shell
+
+    pip install shallowlearn
+
+Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in Scikit-learn,
+e.g., ``fit(X, y)``, ``predict(X)``, etc.
+
+Data is raw text, each sample is a list of tokens (words of a document), while each target value in ``y`` can be a
+single label (or a list in case of multi-label training set) associated with the relative sample.
 
 Models
 ------
@@ -31,9 +40,16 @@ Exclusive Features
 ------------------
 **TODO**
 
-Performances
-------------
-**TODO**:  Comparison with other classifiers in effectiveness and computation cost
+Benchmarks
+----------
+The script ``scripts/document_classification_20newsgroups.py`` refers to this
+`Scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_
+in which text classifiers are compared on a reference dataset.
+We added in the comparison the ``GensimFastText`` classifier and the original *fastText* implementation,
+in order to obtain an adequate benchmark of our models.
+
+Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.1>`_:
+**TODO**
 
 References
 ----------

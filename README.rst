@@ -12,6 +12,7 @@ They are written in Python and fully compatible with `Scikit-learn <http://sciki
 Getting Started
 ---------------
 Install the latest version:
+
 .. code:: shell
 
     pip install shallowlearn

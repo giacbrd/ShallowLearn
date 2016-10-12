@@ -22,6 +22,9 @@ The bar plot indicates the accuracy, training time (normalized) and test time
 #         Lars Buitinck
 # License: BSD 3 clause
 
+# Modifications by Giacomo Berardi <giacbrd.com> (2016)
+# Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
+
 from __future__ import print_function
 
 import logging
@@ -144,9 +147,6 @@ print()
 # split a training set and a test set
 y_train, y_test = data_train.target, data_test.target
 
-train_text = [s.encode('utf-8').split() for s in data_train.data]
-test_text = [s.encode('utf-8').split() for s in data_test.data]
-
 print("Extracting features from the training data using a sparse vectorizer")
 t0 = time()
 if opts.use_hashing:
@@ -189,6 +189,11 @@ if opts.select_chi2:
                          in ch2.get_support(indices=True)]
     print("done in %fs" % (time() - t0))
     print()
+
+
+train_text = [[feature_names[i] for i in v.nonzero()[1]] for v in X_train]
+test_text = [[feature_names[i] for i in v.nonzero()[1]] for v in X_test]
+
 
 if feature_names:
     feature_names = np.asarray(feature_names)
@@ -300,7 +305,7 @@ results.append(benchmark(Pipeline([
 
 print('=' * 80)
 print("Gensim fastText")
-results.append(benchmark(GensimFastText()))
+results.append(benchmark(GensimFastText(size=300, min_count=0, sample=0)))
 
 # make some plots
 

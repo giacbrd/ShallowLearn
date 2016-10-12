@@ -17,14 +17,12 @@ def readfile(fname):
 
 setup(
     name='ShallowLearn',
-    version='0.0.1',
+    version='0.0.2',
     description='A collection of supervised learning models based on shallow neural network approaches '
                 '(e.g., word2vec and fastText) with some additional exclusive features',
     long_description=readfile('README.rst'),
     classifiers=[
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Environment :: Console',
         'Intended Audience :: Science/Research',
@@ -39,10 +37,10 @@ setup(
     author_email='barnets@gmail.com',
     packages=['shallowlearn'] + find_packages('shallowlearn'),
     install_requires=[
-        'gensim==0.13.2',
-        'scikit-learn>=0.18'
+        'scikit-learn>=0.18',
+        'gensim==0.13.2'
     ],
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    setup_requires=['pytest-runner==2.9'],
+    tests_require=['pytest==3.0.3'],
     include_package_data=True
 )

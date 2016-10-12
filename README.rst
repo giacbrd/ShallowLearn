@@ -2,41 +2,58 @@ ShallowLearn
 ============
 A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)
 with some additional exclusive features.
-They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_
+They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_.
 
-Installation
-------------
-``pip install shallowlearn``
+.. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
+    :target: https://travis-ci.org/giacbrd/ShallowLearn
+.. image:: https://badge.fury.io/py/shallowlearn.svg
+    :target: https://badge.fury.io/py/shallowlearn
+
+Getting Started
+---------------
+Install the latest version:
+
+.. code:: shell
+
+    pip install shallowlearn
+
+Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in Scikit-learn,
+e.g., ``fit(X, y)``, ``predict(X)``, etc.
+
+Data is raw text, each sample is a list of tokens (words of a document), while each target value in ``y`` can be a
+single label (or a list in case of multi-label training set) associated with the relative sample.
 
 Models
 ------
-``shallowlearn.models.GensimFTClassifier``
+``shallowlearn.models.GensimFastText``
     A supervised learning model based on the fastText algorithm [1]_.
     The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
     it takes advantage of its optimizations and support.
     **TODO**: Cython code
 
-``shallowlearn.models.FastTextClassifier``
+``shallowlearn.models.FastText``
     **TODO**: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
 
-``shallowlearn.models.DeepIRClassifier``
+``shallowlearn.models.DeepInverseRegression``
     **TODO**: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
 
 Exclusive Features
 ------------------
 **TODO**
 
-Performances
-------------
-**TODO**:  Comparison with other classifiers in effectiveness and computation cost
+Benchmarks
+----------
+The script ``scripts/document_classification_20newsgroups.py`` refers to this
+`Scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_
+in which text classifiers are compared on a reference dataset.
+We added our models to the comparison, the current results are not satisfactory but they are still preliminary.
 
-TODO
-----
+Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_,
+with ``chi2_select`` seto to 80%:
 
-- Tests!
-- Documents can be structured, made of different sections, learned independently
-- Taking into account https://github.com/RaRe-Technologies/gensim/pull/847, implementing the hashing trick
-- Given the previous point, implementing n-grams of words
+.. image:: benchmark.png
+    :alt: Text classifiers comparison
+    :align: center
 
 References
 ----------

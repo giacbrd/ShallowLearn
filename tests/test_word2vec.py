@@ -4,16 +4,16 @@
 # Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 import io
-from itertools import izip
-
 import pickle
 
 import numpy
 import pytest
+from six.moves import zip
+
 from shallowlearn.models import BaseClassifier
+from shallowlearn.word2vec import LabeledWord2Vec, score_document_labeled_cbow
 from .resources import dataset_samples
 from .resources import dataset_targets
-from shallowlearn.word2vec import LabeledWord2Vec, score_document_labeled_cbow
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
@@ -21,8 +21,9 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 @pytest.fixture
 def small_model():
     model = LabeledWord2Vec(iter=1, size=30, min_count=0)
-    model.build_vocab(dataset_samples, BaseClassifier._target_list(dataset_targets))
-    model.train(izip(dataset_samples, dataset_targets))
+    model.build_vocab(dataset_samples, frozenset(
+        target for targets in dataset_targets for target in BaseClassifier._target_list(targets)))
+    model.train(zip(dataset_samples, dataset_targets))
     return model
 
 
@@ -51,8 +52,8 @@ def test_serializzation(small_model):
         pickle.dump(small_model, fileobj)
         fileobj.seek(0)
         loaded = pickle.load(fileobj)
-        assert all(unicode(loaded.vocab[w]) == unicode(small_model.vocab[w]) for w in small_model.vocab)
-        assert all(unicode(loaded.lvocab[w]) == unicode(small_model.lvocab[w]) for w in small_model.lvocab)
+        assert all(str(loaded.vocab[w]) == str(small_model.vocab[w]) for w in small_model.vocab)
+        assert all(str(loaded.lvocab[w]) == str(small_model.lvocab[w]) for w in small_model.lvocab)
         assert numpy.array_equiv(loaded.syn1, small_model.syn1)
         assert numpy.array_equiv(loaded.syn0, small_model.syn0)
 

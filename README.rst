@@ -2,7 +2,7 @@ ShallowLearn
 ============
 A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)
 with some additional exclusive features.
-They are written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_.
+Written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_.
 
 .. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
     :target: https://travis-ci.org/giacbrd/ShallowLearn
@@ -50,7 +50,7 @@ We added our models to the comparison, the current results are not satisfactory 
 Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_,
 with *chi2_select* option set to 80%.
 The times take into account of *tf-idf* vectorization in the “classic” classifiers;
-the evaluation measure is macro :math:`F_{1}`.
+the evaluation measure is *macro F1*.
 
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/feature/cython/benchmark.svg
     :alt: Text classifiers comparison

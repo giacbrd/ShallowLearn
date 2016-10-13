@@ -11,7 +11,7 @@ efficiently handle sparse matrices.
 The dataset used in this example is the 20 newsgroups dataset. It will be
 automatically downloaded, then cached.
 
-The bar plot indicates the accuracy, training time (normalized) and test time
+The bar plot indicates the macro F1, training time (normalized) and test time
 (normalized) of each classifier.
 
 """
@@ -224,8 +224,8 @@ def benchmark(clf):
         test_time = test_duration + (time() - t0)
     print("test time:  %0.3fs" % test_time)
 
-    score = metrics.accuracy_score(y_test, pred)
-    print("accuracy:   %0.3f" % score)
+    score = metrics.f1_score(y_test, pred, average='macro')
+    print("macro F1:   %0.3f" % score)
 
     if hasattr(clf, 'coef_'):
         print("dimensionality: %d" % clf.coef_.shape[1])

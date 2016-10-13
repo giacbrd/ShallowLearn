@@ -49,7 +49,8 @@ We added our models to the comparison, the current results are not satisfactory 
 
 Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_,
 with *chi2_select* option set to 80%.
-Times take into account of *tf-idf* vectorization in the “classic” classifiers.
+The times take into account of *tf-idf* vectorization in the “classic” classifiers;
+the evaluation measure is macro :math:`F_{1}`.
 
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/feature/cython/benchmark.svg
     :alt: Text classifiers comparison

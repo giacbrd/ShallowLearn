@@ -54,7 +54,7 @@ with *chi2_select* option set to 80%.
 The times take into account of *tf-idf* vectorization in the “classic” classifiers;
 the evaluation measure is *macro F1*.
 
-.. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/feature/cython/benchmark.svg
+.. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/develop/benchmark.svg
     :alt: Text classifiers comparison
     :align: center
 

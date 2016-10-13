@@ -4,7 +4,10 @@
 # cython: cdivision=True
 # coding: utf-8
 #
-# Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
+# Copyright (C) 2013 Radim Rehurek <me@radimrehurek.com>
+# Licensed under the GNU LGPL v2.1 - http://www.gnu.org/licenses/lgpl.html
+#
+# Modifications by Giacomo Berardi <giacbrd.com> (2016)
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
 import cython
@@ -227,8 +230,8 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
                     k = idx_end
                 if hs:
                     fast_sentence_cbow_hs(points[i], codes[i], codelens, neu1, syn0, syn1, size, indexes, _alpha, work, i, j, k, cbow_mean, word_locks)
-                if negative:
-                    next_random = fast_sentence_cbow_neg(negative, cum_table, cum_table_len, codelens, neu1, syn0, syn1neg, size, indexes, _alpha, work, i, j, k, cbow_mean, next_random, word_locks)
+                # if negative:
+                #     next_random = fast_sentence_cbow_neg(negative, cum_table, cum_table_len, codelens, neu1, syn0, syn1neg, size, indexes, _alpha, work, i, j, k, cbow_mean, next_random, word_locks)
 
     return effective_words
 

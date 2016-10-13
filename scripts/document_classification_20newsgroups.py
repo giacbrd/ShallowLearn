@@ -21,7 +21,7 @@ The bar plot indicates the accuracy, training time (normalized) and test time
 #         Mathieu Blondel <mathieu@mblondel.org>
 #         Lars Buitinck
 # License: BSD 3 clause
-
+#
 # Modifications by Giacomo Berardi <giacbrd.com> (2016)
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
@@ -157,24 +157,21 @@ else:
     vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5,
                                  stop_words='english')
     X_train = vectorizer.fit_transform(data_train.data)
-duration = time() - t0
-print("done in %fs at %0.3fMB/s" % (duration, data_train_size_mb / duration))
+train_duration = time() - t0
+print("done in %fs at %0.3fMB/s" % (train_duration, data_train_size_mb / train_duration))
 print("n_samples: %d, n_features: %d" % X_train.shape)
 print()
 
 print("Extracting features from the test data using the same vectorizer")
 t0 = time()
 X_test = vectorizer.transform(data_test.data)
-duration = time() - t0
-print("done in %fs at %0.3fMB/s" % (duration, data_test_size_mb / duration))
+test_duration = time() - t0
+print("done in %fs at %0.3fMB/s" % (test_duration, data_test_size_mb / test_duration))
 print("n_samples: %d, n_features: %d" % X_test.shape)
 print()
 
 # mapping from integer feature name to original token string
-if opts.use_hashing:
-    feature_names = None
-else:
-    feature_names = vectorizer.get_feature_names()
+feature_names = vectorizer.get_feature_names()
 
 if opts.select_chi2:
     print("Extracting %d best features by a chi-squared test" %
@@ -190,10 +187,8 @@ if opts.select_chi2:
     print("done in %fs" % (time() - t0))
     print()
 
-
 train_text = [[feature_names[i] for i in v.nonzero()[1]] for v in X_train]
 test_text = [[feature_names[i] for i in v.nonzero()[1]] for v in X_test]
-
 
 if feature_names:
     feature_names = np.asarray(feature_names)
@@ -207,23 +202,26 @@ def trim(s):
 ###############################################################################
 # Benchmark classifiers
 def benchmark(clf):
+    global train_duration, test_duration
     print('_' * 80)
     print("Training: ")
     print(clf)
     t0 = time()
     if isinstance(clf, GensimFastText):
         clf.fit(train_text, y_train)
+        train_time = time() - t0
     else:
         clf.fit(X_train, y_train)
-    train_time = time() - t0
+        train_time = train_duration + (time() - t0)
     print("train time: %0.3fs" % train_time)
 
     t0 = time()
     if isinstance(clf, GensimFastText):
         pred = clf.predict(test_text)
+        test_time = time() - t0
     else:
         pred = clf.predict(X_test)
-    test_time = time() - t0
+        test_time = test_duration + (time() - t0)
     print("test time:  %0.3fs" % test_time)
 
     score = metrics.accuracy_score(y_test, pred)

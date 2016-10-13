@@ -29,7 +29,6 @@ Models
     A supervised learning model based on the fastText algorithm [1]_.
     The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
     it takes advantage of its optimizations and support.
-    **TODO**: Cython code
 
 ``shallowlearn.models.FastText``
     **TODO**: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
@@ -49,7 +48,8 @@ in which text classifiers are compared on a reference dataset.
 We added our models to the comparison, the current results are not satisfactory but they are still preliminary.
 
 Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_,
-with ``chi2_select`` seto to 80%:
+with *chi2_select* option set to 80%.
+Times take into account of *tf-idf* vectorization in the “classic” classifiers.
 
 .. image:: benchmark.png
     :alt: Text classifiers comparison

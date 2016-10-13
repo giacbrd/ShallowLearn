@@ -44,8 +44,10 @@ Benchmarks
 ----------
 The script ``scripts/document_classification_20newsgroups.py`` refers to this
 `Scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_
-in which text classifiers are compared on a reference dataset.
-We added our models to the comparison, the current results are not satisfactory but they are still preliminary.
+in which text classifiers are compared on a reference dataset;
+we added our models to the comparison.
+**The current results, even if still preliminary, are comparable with other
+approaches, achieving the best performance in speed**.
 
 Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_,
 with *chi2_select* option set to 80%.

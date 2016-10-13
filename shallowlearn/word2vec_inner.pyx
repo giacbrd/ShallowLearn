@@ -103,11 +103,8 @@ cdef void fast_sentence_cbow_hs(
     memset(neu1, 0, size * cython.sizeof(REAL_t))
     count = <REAL_t>0.0
     for m in range(j, k):
-        if m == i:
-            continue
-        else:
-            count += ONEF
-            our_saxpy(&size, &ONEF, &syn0[indexes[m] * size], &ONE, neu1, &ONE)
+        count += ONEF
+        our_saxpy(&size, &ONEF, &syn0[indexes[m] * size], &ONE, neu1, &ONE)
     if count > (<REAL_t>0.5):
         inv_count = ONEF/count
     if cbow_mean:
@@ -128,15 +125,10 @@ cdef void fast_sentence_cbow_hs(
         sscal(&size, &inv_count, work, &ONE)  # (does this need BLAS-variants like saxpy?)
 
     for m in range(j, k):
-        if m == i:
-            continue
-        else:
-            our_saxpy(&size, &word_locks[indexes[m]], work, &ONE, &syn0[indexes[m] * size], &ONE)
+        our_saxpy(&size, &word_locks[indexes[m]], work, &ONE, &syn0[indexes[m] * size], &ONE)
 
 
 def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
-    cdef int hs = model.hs
-    cdef int negative = model.negative
     cdef int sample = (model.sample != 0)
     cdef int cbow_mean = model.cbow_mean
 
@@ -148,12 +140,11 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
 
     cdef int codelens[MAX_SENTENCE_LEN]
     cdef np.uint32_t indexes[MAX_SENTENCE_LEN]
-    cdef np.uint32_t reduced_windows[MAX_SENTENCE_LEN]
     cdef int sentence_idx[MAX_SENTENCE_LEN + 1]
-    cdef int window = model.window
+    cdef int sentence_labels[MAX_SENTENCE_LEN + 1]
 
     cdef int i, j, k
-    cdef int effective_words = 0, effective_sentences = 0
+    cdef int effective_words = 0, effective_labels = 0, effective_sentences = 0
     cdef int sent_idx, idx_start, idx_end
 
     # For hierarchical softmax
@@ -161,21 +152,12 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     cdef np.uint32_t *points[MAX_SENTENCE_LEN]
     cdef np.uint8_t *codes[MAX_SENTENCE_LEN]
 
-    # For negative sampling
-    cdef REAL_t *syn1neg
-    cdef np.uint32_t *cum_table
-    cdef unsigned long long cum_table_len
     # for sampling (negative and frequent-word downsampling)
     cdef unsigned long long next_random
 
-    if hs:
-        syn1 = <REAL_t *>(np.PyArray_DATA(model.syn1))
+    syn1 = <REAL_t *>(np.PyArray_DATA(model.syn1))
 
-    if negative:
-        syn1neg = <REAL_t *>(np.PyArray_DATA(model.syn1neg))
-        cum_table = <np.uint32_t *>(np.PyArray_DATA(model.cum_table))
-        cum_table_len = len(model.cum_table)
-    if negative or sample:
+    if sample:
         next_random = (2**24) * model.random.randint(0, 2**24) + model.random.randint(0, 2**24)
 
     # convert Python structures to primitive types, so we can release the GIL
@@ -184,23 +166,37 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
 
     # prepare C structures so we can go "full C" and release the Python GIL
     vlookup = model.vocab
+    llookup = model.lvocab
     sentence_idx[0] = 0  # indices of the first sentence always start at 0
+    sentence_labels[0] = 0
+
     for sent in sentences:
-        if not sent:
+        targets = sent[1]
+        doc = sent[0]
+
+        if not doc or not targets:
             continue  # ignore empty sentences; leave effective_sentences unchanged
-        for token in sent:
+
+        for token in doc:
             word = vlookup[token] if token in vlookup else None
             if word is None:
                 continue  # leaving `effective_words` unchanged = shortening the sentence = expanding the window
             if sample and word.sample_int < random_int32(&next_random):
                 continue
             indexes[effective_words] = word.index
-            if hs:
-                codelens[effective_words] = <int>len(word.code)
-                codes[effective_words] = <np.uint8_t *>np.PyArray_DATA(word.code)
-                points[effective_words] = <np.uint32_t *>np.PyArray_DATA(word.point)
             effective_words += 1
             if effective_words == MAX_SENTENCE_LEN:
+                break  # TODO: log warning, tally overflow?
+
+        for target in targets:
+            label = llookup[target] if target in llookup else None
+            if label is None:
+                continue
+            codelens[effective_labels] = <int>len(label.code)
+            codes[effective_labels] = <np.uint8_t *>np.PyArray_DATA(label.code)
+            points[effective_labels] = <np.uint32_t *>np.PyArray_DATA(label.point)
+            effective_labels += 1
+            if effective_labels == MAX_SENTENCE_LEN:
                 break  # TODO: log warning, tally overflow?
 
         # keep track of which words go into which sentence, so we don't train
@@ -208,35 +204,25 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
         # indices of sentence number X are between <sentence_idx[X], sentence_idx[X])
         effective_sentences += 1
         sentence_idx[effective_sentences] = effective_words
+        sentence_labels[effective_sentences] = effective_labels
 
         if effective_words == MAX_SENTENCE_LEN:
             break  # TODO: log warning, tally overflow?
-
-    # precompute "reduced window" offsets in a single randint() call
-    for i, item in enumerate(model.random.randint(0, window, effective_words)):
-        reduced_windows[i] = item
 
     # release GIL & train on all sentences
     with nogil:
         for sent_idx in range(effective_sentences):
             idx_start = sentence_idx[sent_idx]
             idx_end = sentence_idx[sent_idx + 1]
-            for i in range(idx_start, idx_end):
-                j = i - window + reduced_windows[i]
-                if j < idx_start:
-                    j = idx_start
-                k = i + window + 1 - reduced_windows[i]
-                if k > idx_end:
-                    k = idx_end
-                if hs:
-                    fast_sentence_cbow_hs(points[i], codes[i], codelens, neu1, syn0, syn1, size, indexes, _alpha, work, i, j, k, cbow_mean, word_locks)
-                # if negative:
-                #     next_random = fast_sentence_cbow_neg(negative, cum_table, cum_table_len, codelens, neu1, syn0, syn1neg, size, indexes, _alpha, work, i, j, k, cbow_mean, next_random, word_locks)
+            label_start = sentence_labels[sent_idx]
+            label_end = sentence_labels[sent_idx + 1]
+            for i in range(label_start, label_end):
+                fast_sentence_cbow_hs(points[i], codes[i], codelens, neu1, syn0, syn1, size, indexes, _alpha, work, i, idx_start, idx_end, cbow_mean, word_locks)
 
     return effective_words
 
 
-def score_document_labeled_cbow(model, sentence, _work, _neu1):
+def score_document_labeled_cbow(model, document, label, _work, _neu1):
 
     cdef int cbow_mean = model.cbow_mean
 
@@ -245,18 +231,17 @@ def score_document_labeled_cbow(model, sentence, _work, _neu1):
     cdef REAL_t *neu1
     cdef int size = model.layer1_size
 
-    cdef int codelens[MAX_SENTENCE_LEN]
+    cdef int codelens[1]
     cdef np.uint32_t indexes[MAX_SENTENCE_LEN]
     cdef int sentence_len
-    cdef int window = model.window
 
     cdef int i, j, k
     cdef long result = 0
 
     # For hierarchical softmax
     cdef REAL_t *syn1
-    cdef np.uint32_t *points[MAX_SENTENCE_LEN]
-    cdef np.uint8_t *codes[MAX_SENTENCE_LEN]
+    cdef np.uint32_t *points[1]
+    cdef np.uint8_t *codes[1]
 
     syn1 = <REAL_t *>(np.PyArray_DATA(model.syn1))
 
@@ -265,39 +250,35 @@ def score_document_labeled_cbow(model, sentence, _work, _neu1):
     neu1 = <REAL_t *>np.PyArray_DATA(_neu1)
 
     vlookup = model.vocab
+    llookup = model.lvocab
     i = 0
-    for token in sentence:
+    for token in document:
         word = vlookup[token] if token in vlookup else None
         if word is None:
             continue  # for score, should this be a default negative value?
         indexes[i] = word.index
-        codelens[i] = <int>len(word.code)
-        codes[i] = <np.uint8_t *>np.PyArray_DATA(word.code)
-        points[i] = <np.uint32_t *>np.PyArray_DATA(word.point)
         result += 1
         i += 1
         if i == MAX_SENTENCE_LEN:
             break  # TODO: log warning, tally overflow?
+
     sentence_len = i
 
+    label_voc = llookup[label] if label in llookup else None
+    codelens[0] = <int>len(label_voc.code)
+    codes[0] = <np.uint8_t *>np.PyArray_DATA(label_voc.code)
+    points[0] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
+
     # release GIL & train on the sentence
-    work[0] = 0.0
+    work[0] = 1.0
     with nogil:
-        for i in range(sentence_len):
-            if codelens[i] == 0:
-                continue
-            j = i - window
-            if j < 0:
-                j = 0
-            k = i + window + 1
-            if k > sentence_len:
-                k = sentence_len
-            score_pair_cbow_hs(points[i], codes[i], codelens, neu1, syn0, syn1, size, indexes, work, i, j, k, cbow_mean)
+        if codelens[i] != 0:
+            score_labeled_pair_cbow_hs(points[0], codes[0], codelens, neu1, syn0, syn1, size, indexes, work, 0, 0, sentence_len, cbow_mean)
 
     return work[0]
 
 
-cdef void score_pair_cbow_hs(
+cdef void score_labeled_pair_cbow_hs(
     const np.uint32_t *word_point, const np.uint8_t *word_code, int codelens[MAX_SENTENCE_LEN],
     REAL_t *neu1, REAL_t *syn0, REAL_t *syn1, const int size,
     const np.uint32_t indexes[MAX_SENTENCE_LEN], REAL_t *work,
@@ -311,11 +292,8 @@ cdef void score_pair_cbow_hs(
     memset(neu1, 0, size * cython.sizeof(REAL_t))
     count = <REAL_t>0.0
     for m in range(j, k):
-        if m == i or codelens[m] == 0:
-            continue
-        else:
-            count += ONEF
-            our_saxpy(&size, &ONEF, &syn0[indexes[m] * size], &ONE, neu1, &ONE)
+        count += ONEF
+        our_saxpy(&size, &ONEF, &syn0[indexes[m] * size], &ONE, neu1, &ONE)
     if count > (<REAL_t>0.5):
         inv_count = ONEF/count
     if cbow_mean:
@@ -328,8 +306,7 @@ cdef void score_pair_cbow_hs(
         f = sgn*f
         if f <= -MAX_EXP or f >= MAX_EXP:
             continue
-        f = LOG_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
-        work[0] += f
+        work[0] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
 
 
 def init():

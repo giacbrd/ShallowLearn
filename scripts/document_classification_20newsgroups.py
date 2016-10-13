@@ -303,7 +303,7 @@ results.append(benchmark(Pipeline([
 
 print('=' * 80)
 print("Gensim fastText")
-results.append(benchmark(GensimFastText(size=300, min_count=0, sample=0)))
+results.append(benchmark(GensimFastText(size=300, min_count=0)))
 
 # make some plots
 

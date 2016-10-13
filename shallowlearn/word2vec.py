@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 try:
 
-    from word2vec_inner import train_batch_labeled_cbow, score_document_labeled_cbow as sdlc
+    from .word2vec_inner import train_batch_labeled_cbow, score_document_labeled_cbow as sdlc
     logger.debug('Fast version of {0} is being used'.format(__name__))
 
     def score_document_labeled_cbow(model, document, label, work=ones(1, dtype=REAL), neu1=None):

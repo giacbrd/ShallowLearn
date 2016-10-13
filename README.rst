@@ -51,7 +51,7 @@ Results as of release `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/t
 with *chi2_select* option set to 80%.
 Times take into account of *tf-idf* vectorization in the “classic” classifiers.
 
-.. image:: benchmark.png
+.. image:: benchmark.svg
     :alt: Text classifiers comparison
     :align: center
 

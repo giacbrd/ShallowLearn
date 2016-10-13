@@ -43,6 +43,7 @@ setup(
     author_email='barnets@gmail.com',
     packages=['shallowlearn'] + find_packages('shallowlearn'),
     install_requires=[
+        'cython>=0.24.1',
         'scikit-learn>=0.18',
         'gensim==0.13.2'
     ],

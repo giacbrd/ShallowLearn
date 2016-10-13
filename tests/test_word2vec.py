@@ -4,15 +4,16 @@
 # Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 import io
-from six.moves import zip
 import pickle
 
 import numpy
 import pytest
+from six.moves import zip
+
 from shallowlearn.models import BaseClassifier
+from shallowlearn.word2vec import LabeledWord2Vec, score_document_labeled_cbow
 from .resources import dataset_samples
 from .resources import dataset_targets
-from shallowlearn.word2vec import LabeledWord2Vec, score_document_labeled_cbow
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
@@ -20,7 +21,8 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 @pytest.fixture
 def small_model():
     model = LabeledWord2Vec(iter=1, size=30, min_count=0)
-    model.build_vocab(dataset_samples, BaseClassifier._target_list(dataset_targets))
+    model.build_vocab(dataset_samples, frozenset(
+        target for targets in dataset_targets for target in BaseClassifier._target_list(targets)))
     model.train(zip(dataset_samples, dataset_targets))
     return model
 

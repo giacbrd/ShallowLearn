@@ -7,6 +7,8 @@
 import logging
 import operator
 from collections import Iterable
+
+import numpy
 from six.moves import zip_longest
 
 try:
@@ -44,7 +46,7 @@ class BaseClassifier(ClassifierMixin, BaseEstimator):
         self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex))
 
 
-class GensimFTClassifier(BaseClassifier):
+class GensimFastText(BaseClassifier):
     """
     A supervised learning model based on the fastText algorithm [1]_ and written in Python.
     The core code, as this documentation, is copied from `Gensim <https://radimrehurek.com/gensim>`_,
@@ -104,11 +106,11 @@ class GensimFTClassifier(BaseClassifier):
 
     """
 
-    def __init__(self, size=100, alpha=0.025, min_count=5, max_vocab_size=None, sample=1e-3, workers=3,
+    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, workers=3,
                  min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
         # FIXME logging configuration must be project wise, rewrite this condition
-        super(GensimFTClassifier, self).__init__()
+        super(GensimFastText, self).__init__()
         self.set_params(
             size=size,
             alpha=alpha,
@@ -132,7 +134,6 @@ class GensimFTClassifier(BaseClassifier):
         del params['max_iter']
         params['seed'] = params['random_state']
         del params['random_state']
-        del params['verbose']
         del params['pre_trained']
         self._classifier = LabeledWord2Vec(**params)
         if pre_trained is not None:
@@ -140,13 +141,18 @@ class GensimFTClassifier(BaseClassifier):
 
     @classmethod
     def _data_iter(cls, documents, y):
+
         class DocIter(object):
+            def __init__(self, documents, y):
+                self.y = y
+                self.documents = documents
+
             def __iter__(self):
-                for sample, targets in zip_longest(documents, y or []):
+                for sample, targets in zip_longest(self.documents, self.y):
                     targets = cls._target_list(targets)
                     yield (sample, targets)
 
-        return DocIter()
+        return DocIter(documents, y)
 
     @property
     def classifier(self):
@@ -165,8 +171,7 @@ class GensimFTClassifier(BaseClassifier):
         :return:
         """
         # TODO if y=None just learn the word vectors
-        if y:
-            self._build_label_info(y)
+        self._build_label_info(y)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
         self._classifier.train(self._data_iter(documents, y))
@@ -186,7 +191,7 @@ class GensimFTClassifier(BaseClassifier):
             result = [(label, score_document_labeled_cbow(self._classifier, document=doc, label=label)) for
                       label in self._label_set]
             result.sort(key=operator.itemgetter(1), reverse=True)
-            return result
+            yield result
 
     def predict_proba(self, documents):
         """
@@ -204,4 +209,4 @@ class GensimFTClassifier(BaseClassifier):
         :return: For each document, the one most probable label (i.e. the classification)
         """
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
-        return [predictions[0] for predictions in self._iter_predict(documents)]
+        return [predictions[0][0] for predictions in self._iter_predict(documents)]

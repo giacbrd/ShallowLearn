@@ -1,6 +1,9 @@
 import io
 import os
 
+import numpy
+from Cython.Build import cythonize
+from setuptools import Extension
 from setuptools import setup, find_packages
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -15,9 +18,12 @@ def readfile(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
     return io.open(path, encoding='utf8').read()
 
+
+package_dir = os.path.join(os.path.dirname(__file__), 'shallowlearn')
+
 setup(
     name='ShallowLearn',
-    version='0.0.1',
+    version='0.0.2',
     description='A collection of supervised learning models based on shallow neural network approaches '
                 '(e.g., word2vec and fastText) with some additional exclusive features',
     long_description=readfile('README.rst'),
@@ -37,10 +43,13 @@ setup(
     author_email='barnets@gmail.com',
     packages=['shallowlearn'] + find_packages('shallowlearn'),
     install_requires=[
+        'cython>=0.24.1',
         'scikit-learn>=0.18',
         'gensim==0.13.2'
     ],
     setup_requires=['pytest-runner==2.9'],
     tests_require=['pytest==3.0.3'],
-    include_package_data=True
+    include_package_data=True,
+    ext_modules=cythonize(Extension('word2vec_inner', [os.path.join(package_dir, 'word2vec_inner.pyx')],
+                                    include_dirs=[numpy.get_include()]))
 )

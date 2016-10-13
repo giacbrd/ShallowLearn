@@ -9,6 +9,7 @@ from __future__ import division  # py3 "true division"
 import logging
 import sys
 
+from gensim import matutils
 from gensim.models import Word2Vec
 from gensim.models.word2vec import train_cbow_pair, Vocab
 
@@ -25,46 +26,60 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 
 logger = logging.getLogger(__name__)
 
+try:
 
-def train_batch_labeled_cbow(model, sentences, alpha, work=None, neu1=None):
-    result = 0
-    for sentence in sentences:
-        document, target = sentence
+    from word2vec_inner import train_batch_labeled_cbow, score_document_labeled_cbow as sdlc
+    logger.debug('Fast version of {0} is being used'.format(__name__))
+
+    def score_document_labeled_cbow(model, document, label, work=ones(1, dtype=REAL), neu1=None):
+        if neu1 is None:
+            neu1 = matutils.zeros_aligned(model.layer1_size, dtype=REAL)
+        return sdlc(model, document, label, work, neu1)
+
+except ImportError:
+
+    # failed... fall back to plain numpy (20-80x slower training than the above)
+    logger.warning('Slow version of {0} is being used'.format(__name__))
+
+    def train_batch_labeled_cbow(model, sentences, alpha, work=None, neu1=None):
+        result = 0
+        for sentence in sentences:
+            document, target = sentence
+            word_vocabs = [model.vocab[w] for w in document if w in model.vocab and
+                           model.vocab[w].sample_int > model.random.rand() * 2**32]
+            target_vocabs = [model.lvocab[t] for t in target if t in model.lvocab]
+            for target in target_vocabs:
+                word2_indices = [w.index for w in word_vocabs]
+                l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x vector_size
+                if word2_indices and model.cbow_mean:
+                    l1 /= len(word2_indices)
+                train_cbow_pair(model, target, word2_indices, l1, alpha)
+            result += len(word_vocabs)
+        return result
+
+    def score_document_labeled_cbow(model, document, label, work=None, neu1=None):
+        if model.negative:
+            raise RuntimeError("scoring is only available for HS=True")
+
         word_vocabs = [model.vocab[w] for w in document if w in model.vocab]
-        target_vocabs = [model.lvocab[t] for t in target if t in model.lvocab]
-        for target in target_vocabs:
-            word2_indices = [w.index for w in word_vocabs]
-            l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x vector_size
-            if word2_indices and model.cbow_mean:
-                l1 /= len(word2_indices)
-            train_cbow_pair(model, target, word2_indices, l1, alpha)
-        result += len(word_vocabs)
-    return result
+
+        if label in model.lvocab:
+            target = model.lvocab[label]
+        else:
+            raise KeyError('Class label %s not found in the vocabulary' % label)
+
+        word2_indices = [word2.index for word2 in word_vocabs]
+        l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x layer1_size
+        if word2_indices and model.cbow_mean:
+            l1 /= len(word2_indices)
+        return score_cbow_labeled_pair(model, target, word2_indices, l1)
 
 
-def score_cbow_labeled_pair(model, target, word2_indices, l1):
-    l2a = model.syn1[target.point]  # 2d matrix, codelen x layer1_size
-    sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
-    prob = 1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))
-    return prod(prob)
-
-
-def score_document_labeled_cbow(model, document, label, work=None, neu1=None):
-    if model.negative:
-        raise RuntimeError("scoring is only available for HS=True")
-
-    word_vocabs = [model.vocab[w] for w in document if w in model.vocab]
-
-    if label in model.lvocab:
-        target = model.lvocab[label]
-    else:
-        raise KeyError('Class label %s not found in the vocabulary' % label)
-
-    word2_indices = [word2.index for word2 in word_vocabs]
-    l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x layer1_size
-    if word2_indices and model.cbow_mean:
-        l1 /= len(word2_indices)
-    return score_cbow_labeled_pair(model, target, word2_indices, l1)
+    def score_cbow_labeled_pair(model, target, word2_indices, l1):
+        l2a = model.syn1[target.point]  # 2d matrix, codelen x layer1_size
+        sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
+        prob = 1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))
+        return prod(prob)
 
 
 class LabeledWord2Vec(Word2Vec):
@@ -121,11 +136,12 @@ class LabeledWord2Vec(Word2Vec):
                 self.estimate_memory = estimate_memory
 
         # Build words and labels vocabularies in two different oobjects
+        #FIXME set the right estimate memory for labels
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
         self.__class__.scan_vocab(labels_vocab, [labels], progress_per=progress_per, trim_rule=None)
         self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
-        self.__class__.scale_vocab(labels_vocab, keep_raw_vocab=False, trim_rule=None)
+        self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None)
         self.lvocab = labels_vocab.vocab
         self.index2label = labels_vocab.index2word
         self.finalize_vocab()  # build tables & arrays

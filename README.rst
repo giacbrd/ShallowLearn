@@ -2,7 +2,7 @@ ShallowLearn
 ============
 A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)
 with some additional exclusive features.
-Written in Python and fully compatible with `Scikit-learn <http://scikit-learn.org>`_.
+Written in Python and fully compatible with `scikit-learn <http://scikit-learn.org>`_.
 
 .. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
     :target: https://travis-ci.org/giacbrd/ShallowLearn
@@ -18,7 +18,7 @@ Install the latest version:
     pip install cython
     pip install shallowlearn
 
-Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in Scikit-learn,
+Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in scikit-learn,
 e.g., ``fit(X, y)``, ``predict(X)``, etc.
 
 Data is raw text, each sample is a list of tokens (words of a document), while each target value in ``y`` can be a
@@ -44,7 +44,7 @@ Exclusive Features
 Benchmarks
 ----------
 The script ``scripts/document_classification_20newsgroups.py`` refers to this
-`Scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_
+`scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_
 in which text classifiers are compared on a reference dataset;
 we added our models to the comparison.
 **The current results, even if still preliminary, are comparable with other

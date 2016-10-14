@@ -15,6 +15,7 @@ Install the latest version:
 
 .. code:: shell
 
+    pip install cython
     pip install shallowlearn
 
 Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in Scikit-learn,
@@ -28,7 +29,7 @@ Models
 ``shallowlearn.models.GensimFastText``
     A supervised learning model based on the fastText algorithm [1]_.
     The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
-    it takes advantage of its optimizations and support.
+    it takes advantage of its optimizations (e.g. Cython) and support.
 
 ``shallowlearn.models.FastText``
     **TODO**: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py

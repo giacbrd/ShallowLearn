@@ -99,3 +99,4 @@ Thumbs.db
 .idea
 temp/
 .pypirc
+*.sh

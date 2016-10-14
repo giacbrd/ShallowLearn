@@ -10,6 +10,8 @@
 # Modifications by Giacomo Berardi <giacbrd.com> (2016)
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
+#TODO remove unused statements, also in other cython files
+
 import cython
 import numpy as np
 cimport numpy as np

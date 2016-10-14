@@ -2,7 +2,6 @@ import io
 import os
 
 import numpy
-from Cython.Build import cythonize
 from setuptools import Extension
 from setuptools import setup, find_packages
 
@@ -50,6 +49,6 @@ setup(
     setup_requires=['pytest-runner==2.9'],
     tests_require=['pytest==3.0.3'],
     include_package_data=True,
-    ext_modules=cythonize(Extension('word2vec_inner', [os.path.join(package_dir, 'word2vec_inner.pyx')],
-                                    include_dirs=[numpy.get_include()]))
+    ext_modules=[Extension('shallowlearn', [os.path.join(package_dir, 'word2vec_inner.pyx')],
+                                    include_dirs=[numpy.get_include()])]
 )

@@ -62,5 +62,4 @@ the evaluation measure is *macro F1*.
 
 References
 ----------
-    
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification

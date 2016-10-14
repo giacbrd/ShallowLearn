@@ -52,7 +52,7 @@ setup(
     ext_modules=[
         Extension(
             'shallowlearn.word2vec_inner',
-            sources=[os.path.join(package_dir, 'word2vec_inner.pyx')],
+            sources=['./shallowlearn/word2vec_inner.pyx'],
             include_dirs=[package_dir, numpy.get_include()]
         )
     ]

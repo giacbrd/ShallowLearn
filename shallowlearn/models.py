@@ -138,6 +138,7 @@ class GensimFastText(BaseClassifier):
         self._classifier = LabeledWord2Vec(**params)
         if pre_trained is not None:
             self._classifier.reset_from(pre_trained)
+            self._build_label_info(pre_trained.lvocab.keys())
 
     @classmethod
     def _data_iter(cls, documents, y):

@@ -22,4 +22,4 @@ install:
   - python setup.py install
 script:
   - python setup.py test
-  #FIXME add a script like "python scripts/document_classification_20newsgroups.py" without plotting
+  - python scripts/document_classification_20newsgroups.py --chi2_select 80

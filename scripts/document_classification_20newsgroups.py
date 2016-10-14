@@ -32,7 +32,6 @@ import numpy as np
 from optparse import OptionParser
 import sys
 from time import time
-import matplotlib.pyplot as plt
 
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -307,27 +306,38 @@ results.append(benchmark(GensimFastText(size=300, min_count=0)))
 
 # make some plots
 
-indices = np.arange(len(results))
+try:
 
-results = [[x[i] for x in results] for i in range(4)]
+    import prettyplotlib as ppl
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+    from prettyplotlib import brewer2mpl
 
-clf_names, score, training_time, test_time = results
-training_time = np.array(training_time) / np.max(training_time)
-test_time = np.array(test_time) / np.max(test_time)
+    indices = np.arange(len(results))
 
-plt.figure(figsize=(12, 8))
-plt.title("Score")
-plt.barh(indices, score, .2, label="score", color='navy')
-plt.barh(indices + .3, training_time, .2, label="training time",
-         color='c')
-plt.barh(indices + .6, test_time, .2, label="test time", color='darkorange')
-plt.yticks(())
-plt.legend(loc='best')
-plt.subplots_adjust(left=.25)
-plt.subplots_adjust(top=.95)
-plt.subplots_adjust(bottom=.05)
+    results = [[x[i] for x in results] for i in range(4)]
 
-for i, c in zip(indices, clf_names):
-    plt.text(-.3, i, c)
+    clf_names, score, training_time, test_time = results
+    training_time = np.array(training_time) / np.max(training_time)
+    test_time = np.array(test_time) / np.max(test_time)
 
-plt.show()
+    plt.figure(figsize=(12, 8))
+    plt.title("Score")
+    ppl.barh(indices, score, .2, label="score", color='navy')
+    ppl.barh(indices + .3, training_time, .2, label="training time",
+             color='c')
+    ppl.barh(indices + .6, test_time, .2, label="test time", color='darkorange')
+    plt.yticks(())
+    ppl.legend(loc='best')
+    plt.subplots_adjust(left=.25)
+    plt.subplots_adjust(top=.95)
+    plt.subplots_adjust(bottom=.05)
+
+    for i, c in zip(indices, clf_names):
+        plt.text(-.3, i, c)
+
+    plt.show()
+
+except ImportError:
+
+    print("WARNING: Prettyplotlib not installed, no plots can be shown")

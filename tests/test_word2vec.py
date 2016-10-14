@@ -27,6 +27,24 @@ def small_model():
     return model
 
 
+@pytest.fixture(scope='module')
+def bunch_of_models():
+    models = [
+        LabeledWord2Vec(iter=1, size=30, min_count=0),
+        LabeledWord2Vec(iter=1, alpha=1.0, size=300, min_count=0),
+        LabeledWord2Vec(iter=1, size=100, min_count=1),
+        LabeledWord2Vec(iter=1, size=100, min_count=0, sample=0),
+        LabeledWord2Vec(iter=3, size=100, min_count=0),
+        LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0)
+    ]
+    targets = frozenset(
+        target for targets in dataset_targets for target in BaseClassifier._target_list(targets))
+    for model in models:
+        model.build_vocab(dataset_samples, targets)
+        model.train(zip(dataset_samples, dataset_targets))
+    return models
+
+
 def test_init():
     model1 = LabeledWord2Vec()
     model2 = LabeledWord2Vec(iter=1, size=50)
@@ -58,8 +76,9 @@ def test_serializzation(small_model):
         assert numpy.array_equiv(loaded.syn0, small_model.syn0)
 
 
-def test_learning_functions(small_model):
-    a = score_document_labeled_cbow(small_model, ('study', 'to', 'learn'), 'a')
-    b = score_document_labeled_cbow(small_model, ('study', 'to', 'learn'), 'b')
-    c = score_document_labeled_cbow(small_model, ('study', 'to', 'learn'), 'c')
-    assert round(a + b + c) == 1.
+def test_learning_functions(bunch_of_models):
+    for model in bunch_of_models:
+        a = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'a')
+        b = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'b')
+        c = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'c')
+        assert round(a + b + c, 1) == 1.

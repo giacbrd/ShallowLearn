@@ -89,6 +89,7 @@ class LabeledWord2Vec(Word2Vec):
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
         It basically builds two vocabularies, one for the sample words and one for the labels,
         so that the input layer is only made of words, while the output layer is only made of labels.
+        **Parent class methods that are not overridden here are not tested and not safe to use**.
         """
         self.lvocab = {}  # Vocabulary of labels only
         self.index2label = []

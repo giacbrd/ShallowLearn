@@ -58,6 +58,7 @@ the evaluation measure is *macro F1*.
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/develop/benchmark.svg
     :alt: Text classifiers comparison
     :align: center
+    :width: 888 px
 
 References
 ----------

@@ -118,9 +118,11 @@ class LabeledWord2Vec(Word2Vec):
             tally += train_batch_labeled_cbow(self, sentences, alpha, work, neu1)
         return tally, self._raw_word_count(sentences)
 
+    #TODO use TaggedDocument from Gensim?
+    #FIXME pass just an iterator over (doc, label) like for train
     def build_vocab(self, sentences, labels, keep_raw_vocab=False, trim_rule=None, progress_per=10000):
         """
-        Build vocabularies from a sequence of sentences (can be a once-only generator stream) and the set of labels.
+        Build vocabularies from a sequence of sentences/documents (can be a once-only generator stream) and the set of labels.
         Each sentence must be a list of unicode strings. `labels` is an iterable over the label names.
 
         """

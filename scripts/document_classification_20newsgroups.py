@@ -308,10 +308,9 @@ results.append(benchmark(GensimFastText(size=300, min_count=0)))
 
 try:
 
-    import prettyplotlib as ppl
     import matplotlib.pyplot as plt
-    import matplotlib as mpl
-    from prettyplotlib import brewer2mpl
+
+    plt.style.use('ggplot')
 
     indices = np.arange(len(results))
 
@@ -323,12 +322,12 @@ try:
 
     plt.figure(figsize=(12, 8))
     plt.title("Score")
-    ppl.barh(indices, score, .2, label="score", color='navy')
-    ppl.barh(indices + .3, training_time, .2, label="training time",
+    plt.barh(indices, score, .2, label="score", color='navy')
+    plt.barh(indices + .3, training_time, .2, label="training time",
              color='c')
-    ppl.barh(indices + .6, test_time, .2, label="test time", color='darkorange')
+    plt.barh(indices + .6, test_time, .2, label="test time", color='darkorange')
     plt.yticks(())
-    ppl.legend(loc='best')
+    plt.legend(loc='best')
     plt.subplots_adjust(left=.25)
     plt.subplots_adjust(top=.95)
     plt.subplots_adjust(bottom=.05)
@@ -340,4 +339,4 @@ try:
 
 except ImportError:
 
-    print("WARNING: Prettyplotlib not installed, no plots can be shown")
+    print("WARNING: matplotlib not installed, no plots can be shown")

@@ -1,6 +1,16 @@
 Changelog
 =========
 
+`0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_ (2016-xx-xx)
+----------------------------------------------------------------------------------
+
+* FastText classifier based on version 0.8.0 of https://github.com/salestock/fastText.py
+* GensimFastText has now:
+    - negative sampling
+    - softmax as alternative output function
+    - an almost complete LabeledWord2Vec as subclass of Gensim's Word2Vec (ready for a pull request to Gensim)
+* More tests
+
 `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_ (2016-14-10)
 ----------------------------------------------------------------------------------
 

@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 try:
 
     from .word2vec_inner import train_batch_labeled_cbow, score_document_labeled_cbow as sdlc
+    from .word2vec_inner import FAST_VERSION, MAX_WORDS_IN_BATCH
 
     logger.debug('Fast version of {0} is being used'.format(__name__))
 
@@ -84,12 +85,11 @@ except ImportError:
             sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
             prob = 1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))
         # Softmax
-        if model.negative:
+        else:
             def exp_dot(x):
-                return exp(dot(l1, x))
+                return exp(dot(l1, x.T))
 
-            l2a = model.syn1neg[target.index]
-            prob_num = exp_dot(l2a.T)
+            prob_num = exp_dot(model.syn1neg[target.index])
             prob_den = np_sum(apply_along_axis(exp_dot, 1, model.syn1neg))
             prob = prob_num / prob_den
         return prod(prob)

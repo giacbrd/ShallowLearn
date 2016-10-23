@@ -32,14 +32,14 @@ Models
     it takes advantage of its optimizations (e.g. Cython) and support.
 
 ``shallowlearn.models.FastText``
-    **TODO**: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
+    *TODO*: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
 
 ``shallowlearn.models.DeepInverseRegression``
-    **TODO**: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
+    *TODO*: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
 
 Exclusive Features
 ------------------
-**TODO**
+*TODO: future features are going to be listed as Issues*
 
 Benchmarks
 ----------

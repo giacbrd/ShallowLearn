@@ -8,7 +8,6 @@ import logging
 import operator
 from collections import Iterable
 
-import numpy
 from six.moves import zip_longest
 
 try:
@@ -75,6 +74,13 @@ class GensimFastText(BaseClassifier):
     `sample` = threshold for configuring which higher-frequency words are randomly downsampled;
         default is 1e-3, useful range is (0, 1e-5).
 
+    `hs` = if 1, hierarchical softmax will be used for model training.
+    If set to 0 (default), and `negative` is non-zero, negative sampling will be used.
+
+    `negative` = if > 0, negative sampling will be used, the int for negative
+    specifies how many "noise words" should be drawn (usually between 5-20).
+    Default is 5. If set to 0, no negative samping is used.
+
     `workers` = use this many worker threads to train the model (=faster training with multicore machines).
 
     `cbow_mean` = if 0, use the sum of the context word vectors. If 1 (default), use the mean.
@@ -106,7 +112,7 @@ class GensimFastText(BaseClassifier):
 
     """
 
-    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, workers=3,
+    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, hs=0, negative=5, workers=3,
                  min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
         # FIXME logging configuration must be project wise, rewrite this condition
@@ -126,7 +132,9 @@ class GensimFastText(BaseClassifier):
             sorted_vocab=sorted_vocab,
             batch_words=batch_words,
             max_iter=max_iter,
-            random_state=random_state
+            random_state=random_state,
+            hs=hs,
+            negative=negative
         )
         params = self.get_params()
         # Convert name conventions from Scikit-learn to Gensim

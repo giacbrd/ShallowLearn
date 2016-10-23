@@ -8,7 +8,7 @@ Changelog
 * GensimFastText has now:
     - negative sampling
     - softmax as alternative output function
-    - an almost complete LabeledWord2Vec as subclass of Gensim's Word2Vec (ready for a pull request to Gensim)
+    - almost complete LabeledWord2Vec as subclass of Gensim's Word2Vec
 * More tests
 
 `0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_ (2016-14-10)

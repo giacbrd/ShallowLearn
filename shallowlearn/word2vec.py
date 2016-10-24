@@ -18,9 +18,8 @@ try:
 except ImportError:
     from Queue import Queue, Empty
 
-from numpy import prod, exp, empty, zeros, ones, float32 as REAL, dot, sum as np_sum
+from numpy import prod, exp, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
 from six.moves import range
-
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
@@ -29,7 +28,10 @@ logger = logging.getLogger(__name__)
 try:
 
     from .word2vec_inner import train_batch_labeled_cbow, score_document_labeled_cbow as sdlc
+    from .word2vec_inner import FAST_VERSION, MAX_WORDS_IN_BATCH
+
     logger.debug('Fast version of {0} is being used'.format(__name__))
+
 
     def score_document_labeled_cbow(model, document, label, work=ones(1, dtype=REAL), neu1=None):
         if neu1 is None:
@@ -40,13 +42,16 @@ except ImportError:
 
     # failed... fall back to plain numpy (20-80x slower training than the above)
     logger.warning('Slow version of {0} is being used'.format(__name__))
+    FAST_VERSION = -1
+    MAX_WORDS_IN_BATCH = 10000
+
 
     def train_batch_labeled_cbow(model, sentences, alpha, work=None, neu1=None):
         result = 0
         for sentence in sentences:
             document, target = sentence
             word_vocabs = [model.vocab[w] for w in document if w in model.vocab and
-                           model.vocab[w].sample_int > model.random.rand() * 2**32]
+                           model.vocab[w].sample_int > model.random.rand() * 2 ** 32]
             target_vocabs = [model.lvocab[t] for t in target if t in model.lvocab]
             for target in target_vocabs:
                 word2_indices = [w.index for w in word_vocabs]
@@ -57,9 +62,8 @@ except ImportError:
             result += len(word_vocabs)
         return result
 
+
     def score_document_labeled_cbow(model, document, label, work=None, neu1=None):
-        if model.negative:
-            raise RuntimeError("scoring is only available for HS=True")
 
         word_vocabs = [model.vocab[w] for w in document if w in model.vocab]
 
@@ -76,9 +80,18 @@ except ImportError:
 
 
     def score_cbow_labeled_pair(model, target, word2_indices, l1):
-        l2a = model.syn1[target.point]  # 2d matrix, codelen x layer1_size
-        sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
-        prob = 1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))
+        if model.hs:
+            l2a = model.syn1[target.point]  # 2d matrix, codelen x layer1_size
+            sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
+            prob = 1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))
+        # Softmax
+        else:
+            def exp_dot(x):
+                return exp(dot(l1, x.T))
+
+            prob_num = exp_dot(model.syn1neg[target.index])
+            prob_den = np_sum(apply_along_axis(exp_dot, 1, model.syn1neg))
+            prob = prob_num / prob_den
         return prod(prob)
 
 
@@ -95,8 +108,6 @@ class LabeledWord2Vec(Word2Vec):
         self.index2label = []
         kwargs['sg'] = 0
         kwargs['window'] = sys.maxsize
-        kwargs['hs'] = 1
-        kwargs['negative'] = 0
         kwargs['sentences'] = None
         super(LabeledWord2Vec, self).__init__(**kwargs)
 
@@ -118,8 +129,8 @@ class LabeledWord2Vec(Word2Vec):
             tally += train_batch_labeled_cbow(self, sentences, alpha, work, neu1)
         return tally, self._raw_word_count(sentences)
 
-    #TODO use TaggedDocument from Gensim?
-    #FIXME pass just an iterator over (doc, label) like for train
+    # TODO use TaggedDocument from Gensim?
+    # FIXME pass just an iterator over (doc, label) like for train
     def build_vocab(self, sentences, labels, keep_raw_vocab=False, trim_rule=None, progress_per=10000):
         """
         Build vocabularies from a sequence of sentences/documents (can be a once-only generator stream) and the set of labels.
@@ -139,7 +150,7 @@ class LabeledWord2Vec(Word2Vec):
                 self.estimate_memory = estimate_memory
 
         # Build words and labels vocabularies in two different oobjects
-        #FIXME set the right estimate memory for labels
+        # FIXME set the right estimate memory for labels
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
         self.__class__.scan_vocab(labels_vocab, [labels], progress_per=progress_per, trim_rule=None)
@@ -147,19 +158,29 @@ class LabeledWord2Vec(Word2Vec):
         self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None)
         self.lvocab = labels_vocab.vocab
         self.index2label = labels_vocab.index2word
+        # If we want to sample more negative labels that their count
+        if self.negative and self.negative >= len(self.index2label):
+            self.negative = len(self.index2label) - 1
         self.finalize_vocab()  # build tables & arrays
 
     def finalize_vocab(self):
         """Build tables and model weights based on final vocabulary settings."""
 
-        class FakeSelf(LabeledWord2Vec):
-            def __init__(self, vocab):
-                self.vocab = vocab
-
+        if not self.index2word:
+            self.scale_vocab()
         if self.sorted_vocab:
             self.sort_vocab()
-        # add info about each word's Huffman encoding
-        self.__class__.create_binary_tree(FakeSelf(self.lvocab))
+        if self.hs:
+            class FakeSelf(LabeledWord2Vec):
+                def __init__(self, vocab):
+                    self.vocab = vocab
+
+            # add info about each word's Huffman encoding
+            self.__class__.create_binary_tree(FakeSelf(self.lvocab))
+        if self.negative:
+            # build the table for drawing random words (for negative sampling)
+            self.make_cum_table()
+
         if self.null_word:
             # create null pseudo-word for padding when using concatenative L1 (run-of-words)
             # this word is only ever input – never predicted – so count, huffman-point, etc doesn't matter
@@ -179,7 +200,10 @@ class LabeledWord2Vec(Word2Vec):
             # construct deterministic seed from word AND seed argument
             self.syn0[i] = self.seeded_vector(self.index2word[i] + str(self.seed))
         # Output layer is only made of labels
-        self.syn1 = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
+        if self.hs:
+            self.syn1 = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
+        if self.negative:
+            self.syn1neg = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
         self.syn0norm = None
         self.syn0_lockf = ones(len(self.vocab), dtype=REAL)  # zeros suppress learning
 
@@ -191,3 +215,49 @@ class LabeledWord2Vec(Word2Vec):
         self.lvocab = getattr(other_model, 'lvocab', other_model.vocab)
         self.index2label = getattr(other_model, 'index2label', other_model.index2word)
         super(LabeledWord2Vec, self).reset_from(other_model)
+
+    def make_cum_table(self, power=0.75, domain=2 ** 31 - 1):
+        """
+        Create a cumulative-distribution table using stored vocabulary label counts for
+        drawing random labels in the negative-sampling training routines.
+
+        To draw a label index, choose a random integer up to the maximum value in the
+        table (cum_table[-1]), then finding that integer's sorted insertion point
+        (as if by bisect_left or ndarray.searchsorted()). That insertion point is the
+        drawn index, coming up in proportion equal to the increment at that slot.
+
+        Called internally from 'build_vocab()'.
+        """
+        vocab_size = len(self.index2label)
+        self.cum_table = zeros(vocab_size, dtype=uint32)
+        # compute sum of all power (Z in paper)
+        train_words_pow = float(sum([self.lvocab[word].count ** power for word in self.lvocab]))
+        cumulative = 0.0
+        for word_index in range(vocab_size):
+            cumulative += self.lvocab[self.index2label[word_index]].count ** power / train_words_pow
+            self.cum_table[word_index] = round(cumulative * domain)
+        if len(self.cum_table) > 0:
+            assert self.cum_table[-1] == domain
+
+    def train(self, sentences, total_words=None, word_count=0,
+              total_examples=None, queue_factor=2, report_delay=1.0):
+        """
+        Update the model's neural weights from a sequence of sentences (can be a once-only generator stream).
+        For Word2Vec, each sentence must be a list of unicode strings. (Subclasses may accept other examples.)
+
+        To support linear learning-rate decay from (initial) alpha to min_alpha, either total_examples
+        (count of sentences) or total_words (count of raw words in sentences) should be provided, unless the
+        sentences are the same as those that were used to initially build the vocabulary.
+
+        """
+        if FAST_VERSION < 0:
+            import warnings
+            warnings.warn("C extension not loaded for Word2Vec, training will be slow. "
+                          "Install a C compiler and reinstall gensim for fast training.")
+            self.neg_labels = []
+            if self.negative > 0:
+                # precompute negative labels optimization for pure-python training
+                self.neg_labels = zeros(self.negative + 1)
+                self.neg_labels[0] = 1.
+        return super(LabeledWord2Vec, self).train(sentences, total_words, word_count,
+                                                  total_examples, queue_factor, report_delay)

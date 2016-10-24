@@ -17,8 +17,8 @@ def bunch_of_classifiers():
 
 def test_predict(bunch_of_classifiers):
     for model in bunch_of_classifiers:
-        p = model.predict([('study', 'to', 'learn')])
+        p = model.predict([('study', 'to', 'learn', 'me')])
         assert p == ['a']
-        p = model.predict_proba([('study', 'to', 'learn')])
+        p = model.predict_proba([('study', 'to', 'learn', 'me')])
         assert p[0][0][0] == 'a'
-        assert p[0][0][1] >= .34
+        assert p[0][0][1] > .3333333

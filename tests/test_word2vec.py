@@ -20,7 +20,7 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 
 @pytest.fixture
 def small_model():
-    model = LabeledWord2Vec(iter=1, size=30, min_count=0)
+    model = LabeledWord2Vec(iter=1, size=30, min_count=0, hs=1, negative=0)
     model.build_vocab(dataset_samples, frozenset(
         target for targets in dataset_targets for target in BaseClassifier._target_list(targets)))
     model.train(zip(dataset_samples, dataset_targets))
@@ -29,14 +29,16 @@ def small_model():
 
 @pytest.fixture(scope='module')
 def bunch_of_models():
-    models = [
-        LabeledWord2Vec(iter=1, size=30, min_count=0),
-        LabeledWord2Vec(iter=1, alpha=1.0, size=300, min_count=0),
-        LabeledWord2Vec(iter=1, size=100, min_count=1),
-        LabeledWord2Vec(iter=1, size=100, min_count=0, sample=0),
-        LabeledWord2Vec(iter=3, size=100, min_count=0),
-        LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0)
-    ]
+    models = []
+    for kwarg in ({'hs': 1, 'negative': 0}, {'hs': 0, 'negative': 5}):
+        models.extend([
+            LabeledWord2Vec(iter=1, size=30, min_count=0, **kwarg),
+            LabeledWord2Vec(iter=1, alpha=1.0, size=300, min_count=0, **kwarg),
+            LabeledWord2Vec(iter=1, size=100, min_count=1, **kwarg),
+            LabeledWord2Vec(iter=1, size=100, min_count=0, sample=0, **kwarg),
+            LabeledWord2Vec(iter=3, size=100, min_count=0, **kwarg),
+            LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0, **kwarg)
+        ])
     targets = frozenset(
         target for targets in dataset_targets for target in BaseClassifier._target_list(targets))
     for model in models:

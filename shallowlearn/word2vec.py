@@ -18,7 +18,7 @@ try:
 except ImportError:
     from Queue import Queue, Empty
 
-from numpy import prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
+from numpy import copy, prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
 from six.moves import range
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -51,11 +51,12 @@ except ImportError:
 
         target_vect = zeros(l1.shape)
         target_vect[target.index] = 1.
-        fa = 1. / (1. + exp(-dot(l1, model.syn1neg.T)))  # propagate hidden -> output
+        l2 = copy(model.syn1neg)
+        fa = 1. / (1. + exp(-dot(l1, l2.T)))  # propagate hidden -> output
         ga = (target_vect - fa) * alpha  # vector of error gradients multiplied by the learning rate
         if learn_hidden:
             model.syn1neg += outer(ga, l1)  # learn hidden -> output
-        neu1e += dot(ga, model.syn1neg)  # save error
+        neu1e += dot(ga, l2)  # save error
 
         if learn_vectors:
             # learn input -> hidden, here for all words in the window separately

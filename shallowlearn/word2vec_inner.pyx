@@ -401,22 +401,27 @@ cdef void score_labeled_pair_cbow_hs(
             work[0] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
     # Softmax
     else:
-        den = 0.0
+        row2 = label_index * size
+        f = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
+        if -MAX_EXP < f < MAX_EXP:
+            f = TRUE_EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+            den = f
+        else:
+            work[0] = 1.0
+            return
         for b in range(label_count):
+            if b == label_index:
+                continue
             row2 = b * size
             temp_dot = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-            if b == label_index:
-                f = temp_dot
             if -MAX_EXP < temp_dot < MAX_EXP:
                 den += TRUE_EXP_TABLE[<int>((temp_dot + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
             else:
                 work[0] = 0.0
                 return
-        if -MAX_EXP < f < MAX_EXP and den != 0.0:
-            f = TRUE_EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+        if den != 0.0:
             work[0] *= f / den
-        else:
-            work[0] = 1.0
+
 
 
 def init():

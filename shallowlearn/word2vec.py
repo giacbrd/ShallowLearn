@@ -109,6 +109,21 @@ class LabeledWord2Vec(Word2Vec):
         kwargs['sg'] = 0
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
+        self.softmax = False
+        loss = kwargs['loss']
+        if loss == 'hs':
+            kwargs['hs'] = 1
+            kwargs['negative'] = 0
+        elif loss == 'ns':
+            kwargs['hs'] = 0
+            assert kwargs['negative'] > 0
+        elif loss == 'softmax':
+            kwargs['hs'] = 0
+            kwargs['negative'] = 0
+            self.softmax = True
+        else:
+            raise ValueError('loss argument must be set with "ns", "hs" or "softmax"')
+        del kwargs['loss']
         super(LabeledWord2Vec, self).__init__(**kwargs)
 
     def _raw_word_count(self, job):
@@ -202,7 +217,8 @@ class LabeledWord2Vec(Word2Vec):
         # Output layer is only made of labels
         if self.hs:
             self.syn1 = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
-        if self.negative:
+        # Use syn1neg also for softmax outputs
+        if self.negative or self.softmax:
             self.syn1neg = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
         self.syn0norm = None
         self.syn0_lockf = ones(len(self.vocab), dtype=REAL)  # zeros suppress learning

@@ -74,12 +74,13 @@ class GensimFastText(BaseClassifier):
     `sample` = threshold for configuring which higher-frequency words are randomly downsampled;
         default is 1e-3, useful range is (0, 1e-5).
 
-    `hs` = if 1, hierarchical softmax will be used for model training.
-    If set to 0 (default), and `negative` is non-zero, negative sampling will be used.
+    `loss` = one value in {ns, hs, softmax}. If "ns" is selected negative sampling will be used
+    as loss function, together with the parameter `negative`. With "hs" hierarchical softmax will be used,
+    while with "softmax" (default) the sandard softmax function (the other two are "approximations")
 
     `negative` = if > 0, negative sampling will be used, the int for negative
     specifies how many "noise words" should be drawn (usually between 5-20).
-    Default is 5. If set to 0, no negative samping is used.
+    Default is 5. If set to 0, no negative samping is used. It works only if `loss = ns`
 
     `workers` = use this many worker threads to train the model (=faster training with multicore machines).
 
@@ -112,7 +113,7 @@ class GensimFastText(BaseClassifier):
 
     """
 
-    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, hs=0, negative=5, workers=3,
+    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5, workers=3,
                  min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
         # FIXME logging configuration must be project wise, rewrite this condition
@@ -133,7 +134,7 @@ class GensimFastText(BaseClassifier):
             batch_words=batch_words,
             max_iter=max_iter,
             random_state=random_state,
-            hs=hs,
+            loss=loss,
             negative=negative
         )
         params = self.get_params()

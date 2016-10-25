@@ -18,7 +18,7 @@ try:
 except ImportError:
     from Queue import Queue, Empty
 
-from numpy import prod, exp, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
+from numpy import prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
 from six.moves import range
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -46,6 +46,27 @@ except ImportError:
     MAX_WORDS_IN_BATCH = 10000
 
 
+    def train_cbow_pair_softmax(model, target, input_word_indices, l1, alpha, learn_vectors=True, learn_hidden=True):
+        neu1e = zeros(l1.shape)
+
+        target_vect = zeros(l1.shape)
+        target_vect[target.index] = 1.
+        fa = 1. / (1. + exp(-dot(l1, model.syn1neg.T)))  # propagate hidden -> output
+        ga = (target_vect - fa) * alpha  # vector of error gradients multiplied by the learning rate
+        if learn_hidden:
+            model.syn1neg += outer(ga, l1)  # learn hidden -> output
+        neu1e += dot(ga, model.syn1neg)  # save error
+
+        if learn_vectors:
+            # learn input -> hidden, here for all words in the window separately
+            if not model.cbow_mean and input_word_indices:
+                neu1e /= len(input_word_indices)
+            for i in input_word_indices:
+                model.syn0[i] += neu1e * model.syn0_lockf[i]
+
+        return neu1e
+
+
     def train_batch_labeled_cbow(model, sentences, alpha, work=None, neu1=None):
         result = 0
         for sentence in sentences:
@@ -58,7 +79,10 @@ except ImportError:
                 l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x vector_size
                 if word2_indices and model.cbow_mean:
                     l1 /= len(word2_indices)
-                train_cbow_pair(model, target, word2_indices, l1, alpha)
+                if model.softmax:
+                    train_cbow_pair_softmax(model, target, word2_indices, l1, alpha)
+                else:
+                    train_cbow_pair(model, target, word2_indices, l1, alpha)
             result += len(word_vocabs)
         return result
 
@@ -96,7 +120,7 @@ except ImportError:
 
 
 class LabeledWord2Vec(Word2Vec):
-    def __init__(self, **kwargs):
+    def __init__(self, loss='softmax', **kwargs):
         """
         Exactly as the parent class `Word2Vec <https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec>`_.
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
@@ -110,7 +134,6 @@ class LabeledWord2Vec(Word2Vec):
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
         self.softmax = False
-        loss = kwargs['loss']
         if loss == 'hs':
             kwargs['hs'] = 1
             kwargs['negative'] = 0
@@ -123,7 +146,6 @@ class LabeledWord2Vec(Word2Vec):
             self.softmax = True
         else:
             raise ValueError('loss argument must be set with "ns", "hs" or "softmax"')
-        del kwargs['loss']
         super(LabeledWord2Vec, self).__init__(**kwargs)
 
     def _raw_word_count(self, job):

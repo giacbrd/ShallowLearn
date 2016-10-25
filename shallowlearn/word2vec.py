@@ -124,6 +124,12 @@ class LabeledWord2Vec(Word2Vec):
         """
         Exactly as the parent class `Word2Vec <https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec>`_.
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
+
+        `loss` = one value in {ns, hs, softmax}. If "ns" is selected negative sampling will be used
+        as loss function, together with the parameter `negative`. With "hs" hierarchical softmax will be used,
+        while with "softmax" (default) the sandard softmax function (the other two are "approximations").
+         The `hs` argument does not exist anymore.
+
         It basically builds two vocabularies, one for the sample words and one for the labels,
         so that the input layer is only made of words, while the output layer is only made of labels.
         **Parent class methods that are not overridden here are not tested and not safe to use**.

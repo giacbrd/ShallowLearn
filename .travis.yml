@@ -21,5 +21,5 @@ install:
   - pip install cython
   - python setup.py install
 script:
-  - python scripts/test.sh
+  - ./scripts/test.sh
   - python scripts/document_classification_20newsgroups.py --chi2_select 80

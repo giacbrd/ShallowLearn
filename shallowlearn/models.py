@@ -26,10 +26,6 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 logger = logging.getLogger(__name__)
 
 
-# TODO model based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
-# TODO model based on https://github.com/salestock/fastText.py
-
-
 class BaseClassifier(ClassifierMixin, BaseEstimator):
     def __init__(self):
         self._classifier = None
@@ -115,7 +111,6 @@ class GensimFastText(BaseClassifier):
     def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, hs=0, negative=5, workers=3,
                  min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
-        # FIXME logging configuration must be project wise, rewrite this condition
         super(GensimFastText, self).__init__()
         self.set_params(
             size=size,
@@ -179,7 +174,7 @@ class GensimFastText(BaseClassifier):
         :param fit_params: Nothing for now
         :return:
         """
-        # TODO if y=None just learn the word vectors
+        # TODO if y=None learn a one-class classifier
         self._build_label_info(y)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)

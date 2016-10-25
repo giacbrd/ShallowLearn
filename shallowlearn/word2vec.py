@@ -49,7 +49,7 @@ except ImportError:
     def train_cbow_pair_softmax(model, target, input_word_indices, l1, alpha, learn_vectors=True, learn_hidden=True):
         neu1e = zeros(l1.shape)
 
-        target_vect = zeros(l1.shape)
+        target_vect = zeros(model.syn1neg.shape[0])
         target_vect[target.index] = 1.
         l2 = copy(model.syn1neg)
         fa = 1. / (1. + exp(-dot(l1, l2.T)))  # propagate hidden -> output

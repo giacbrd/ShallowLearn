@@ -26,27 +26,30 @@ single label (or a list in case of multi-label training set) associated with the
 
 Models
 ------
-``shallowlearn.models.GensimFastText``
-    A supervised learning model based on the fastText algorithm [1]_.
-    The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
-    it takes advantage of its optimizations (e.g. Cython) and support.
+GensimFastText
+~~~~~~~~~~~~~~
+A supervised learning model based on the fastText algorithm [1]_.
+The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
+it takes advantage of its optimizations (e.g. Cython) and support.
 
-    It is possible to choose the Softmax loss function (default) or one of its two "approximations":
-    Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trained word vectors at initialization,
-    passing a Gensim ``Word2Vec`` instance.
+It is possible to choose the Softmax loss function (default) or one of its two "approximations":
+Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trained word vectors at initialization,
+passing a Gensim ``Word2Vec`` instance.
 
-    Constructor arguments convention is a mix between the one of Gensim and the one of fastText, see the class docstring.
+Constructor arguments convention is a mix between the one of Gensim and the one of fastText, see the class docstring.
 
-    .. code:: python
-    
-        from shallowlearn.word2vec import LabeledWord2Vec
-        clf = LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0, loss='hs', max_iter=3, random_state=66)
+.. code:: python
 
-``shallowlearn.models.FastText``
-    *TODO*: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
+    from shallowlearn.models import GensimFastText
+    clf = GensimFastText(size=100, min_count=0, loss='hs', max_iter=3, random_state=66)
 
-``shallowlearn.models.DeepInverseRegression``
-    *TODO*: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
+FastText
+~~~~~~~~
+*TODO*: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
+
+DeepInverseRegression
+~~~~~~~~~~~~~~~~~~~~~
+*TODO*: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
 
 Exclusive Features
 ------------------

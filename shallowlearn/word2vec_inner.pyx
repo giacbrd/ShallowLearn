@@ -186,9 +186,50 @@ cdef unsigned long long fast_sentence_cbow_neg(
     return next_random
 
 
+cdef unsigned long long fast_sentence_cbow_softmax(
+    int codelens[MAX_SENTENCE_LEN],
+    REAL_t *neu1,  REAL_t *syn0, REAL_t *syn1neg, const int size, const int label_count,
+    const np.uint32_t indexes[MAX_SENTENCE_LEN], const np.uint32_t label_index, const REAL_t alpha, REAL_t *work,
+    int i, int j, int k, int cbow_mean, REAL_t *word_locks) nogil:
+
+    cdef long long a
+    cdef long long row2
+    cdef REAL_t f, g, count, inv_count = 1.0
+    cdef int d, m
+
+    memset(neu1, 0, size * cython.sizeof(REAL_t))
+    count = <REAL_t>0.0
+    for m in range(j, k):
+        count += ONEF
+        our_saxpy(&size, &ONEF, &syn0[indexes[m] * size], &ONE, neu1, &ONE)
+    if count > (<REAL_t>0.5):
+        inv_count = ONEF/count
+    if cbow_mean:
+        sscal(&size, &inv_count, neu1, &ONE)  # (does this need BLAS-variants like saxpy?)
+
+    memset(work, 0, size * cython.sizeof(REAL_t))
+
+    for d in range(label_count):
+        row2 = d * size
+        f = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
+        if f <= -MAX_EXP or f >= MAX_EXP:
+            continue
+        f = EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+        g = ((1.0 if d == label_index else 0.0)  - f) * alpha
+        our_saxpy(&size, &g, &syn1neg[row2], &ONE, work, &ONE)
+        our_saxpy(&size, &g, neu1, &ONE, &syn1neg[row2], &ONE)
+
+    if not cbow_mean:  # divide error over summed window vectors
+        sscal(&size, &inv_count, work, &ONE)  # (does this need BLAS-variants like saxpy?)
+
+    for m in range(j,k):
+        our_saxpy(&size, &word_locks[indexes[m]], work, &ONE, &syn0[indexes[m]*size], &ONE)
+
+
 def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     cdef int hs = model.hs
     cdef int negative = model.negative
+    cdef int softmax = 1 if model.softmax else 0
     cdef int sample = (model.sample != 0)
     cdef int cbow_mean = model.cbow_mean
 
@@ -197,6 +238,7 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     cdef REAL_t *work
     cdef REAL_t _alpha = alpha
     cdef int size = model.layer1_size
+    cdef int label_count
 
     cdef int codelens[MAX_SENTENCE_LEN]
     cdef np.uint32_t indexes[MAX_SENTENCE_LEN]
@@ -224,8 +266,10 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     if hs:
         syn1 = <REAL_t *>(np.PyArray_DATA(model.syn1))
 
-    if negative:
+    if negative or softmax:
         syn1neg = <REAL_t *>(np.PyArray_DATA(model.syn1neg))
+        label_count = model.syn1neg.shape[0]
+    if negative:
         cum_table = <np.uint32_t *>(np.PyArray_DATA(model.cum_table))
         cum_table_len = len(model.cum_table)
     if negative or sample:
@@ -294,6 +338,8 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
                     fast_sentence_cbow_hs(points[i], codes[i], codelens, neu1, syn0, syn1, size, indexes, _alpha, work, i, idx_start, idx_end, cbow_mean, word_locks)
                 if negative:
                     next_random = fast_sentence_cbow_neg(negative, cum_table, cum_table_len, codelens, neu1, syn0, syn1neg, size, indexes, label_indexes[i], _alpha, work, i, idx_start, idx_end, cbow_mean, next_random, word_locks)
+                if softmax:
+                    fast_sentence_cbow_softmax(codelens, neu1, syn0, syn1neg, size, label_count, indexes, label_indexes[i], _alpha, work, i, idx_start, idx_end, cbow_mean, word_locks)
 
     return effective_words
 
@@ -302,6 +348,7 @@ def score_document_labeled_cbow(model, document, label, _work, _neu1):
 
     cdef int hs = model.hs
     cdef int negative = model.negative
+    cdef int softmax = 1 if model.softmax else 0
 
     cdef int cbow_mean = model.cbow_mean
 
@@ -330,7 +377,7 @@ def score_document_labeled_cbow(model, document, label, _work, _neu1):
 
     if hs:
         syn1 = <REAL_t *>(np.PyArray_DATA(model.syn1))
-    if negative:
+    if negative or softmax:
         syn1neg = <REAL_t *>(np.PyArray_DATA(model.syn1neg))
 
     # convert Python structures to primitive types, so we can release the GIL
@@ -421,7 +468,6 @@ cdef void score_labeled_pair_cbow_hs(
                 return
         if den != 0.0:
             work[0] *= f / den
-
 
 
 def init():

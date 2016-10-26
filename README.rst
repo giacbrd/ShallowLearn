@@ -34,7 +34,8 @@ it takes advantage of its optimizations (e.g. Cython) and support.
 
 It is possible to choose the Softmax loss function (default) or one of its two "approximations":
 Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trained word vectors at initialization,
-passing a Gensim ``Word2Vec`` instance.
+passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (the latter is retrievable from a
+``GensimFastText`` model by the attribute ``classifier``).
 
 Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see the class docstring).
 

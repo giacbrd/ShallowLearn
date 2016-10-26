@@ -18,7 +18,7 @@ try:
 except ImportError:
     from Queue import Queue, Empty
 
-from numpy import prod, exp, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
+from numpy import copy, prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
 from six.moves import range
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -46,6 +46,28 @@ except ImportError:
     MAX_WORDS_IN_BATCH = 10000
 
 
+    def train_cbow_pair_softmax(model, target, input_word_indices, l1, alpha, learn_vectors=True, learn_hidden=True):
+        neu1e = zeros(l1.shape)
+
+        target_vect = zeros(model.syn1neg.shape[0])
+        target_vect[target.index] = 1.
+        l2 = copy(model.syn1neg)
+        fa = 1. / (1. + exp(-dot(l1, l2.T)))  # propagate hidden -> output
+        ga = (target_vect - fa) * alpha  # vector of error gradients multiplied by the learning rate
+        if learn_hidden:
+            model.syn1neg += outer(ga, l1)  # learn hidden -> output
+        neu1e += dot(ga, l2)  # save error
+
+        if learn_vectors:
+            # learn input -> hidden, here for all words in the window separately
+            if not model.cbow_mean and input_word_indices:
+                neu1e /= len(input_word_indices)
+            for i in input_word_indices:
+                model.syn0[i] += neu1e * model.syn0_lockf[i]
+
+        return neu1e
+
+
     def train_batch_labeled_cbow(model, sentences, alpha, work=None, neu1=None):
         result = 0
         for sentence in sentences:
@@ -58,7 +80,10 @@ except ImportError:
                 l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x vector_size
                 if word2_indices and model.cbow_mean:
                     l1 /= len(word2_indices)
-                train_cbow_pair(model, target, word2_indices, l1, alpha)
+                if model.softmax:
+                    train_cbow_pair_softmax(model, target, word2_indices, l1, alpha)
+                else:
+                    train_cbow_pair(model, target, word2_indices, l1, alpha)
             result += len(word_vocabs)
         return result
 
@@ -96,10 +121,16 @@ except ImportError:
 
 
 class LabeledWord2Vec(Word2Vec):
-    def __init__(self, **kwargs):
+    def __init__(self, loss='softmax', **kwargs):
         """
         Exactly as the parent class `Word2Vec <https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec>`_.
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
+
+        `loss` = one value in {ns, hs, softmax}. If "ns" is selected negative sampling will be used
+        as loss function, together with the parameter `negative`. With "hs" hierarchical softmax will be used,
+        while with "softmax" (default) the sandard softmax function (the other two are "approximations").
+         The `hs` argument does not exist anymore.
+
         It basically builds two vocabularies, one for the sample words and one for the labels,
         so that the input layer is only made of words, while the output layer is only made of labels.
         **Parent class methods that are not overridden here are not tested and not safe to use**.
@@ -109,6 +140,19 @@ class LabeledWord2Vec(Word2Vec):
         kwargs['sg'] = 0
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
+        self.softmax = False
+        if loss == 'hs':
+            kwargs['hs'] = 1
+            kwargs['negative'] = 0
+        elif loss == 'ns':
+            kwargs['hs'] = 0
+            assert kwargs['negative'] > 0
+        elif loss == 'softmax':
+            kwargs['hs'] = 0
+            kwargs['negative'] = 0
+            self.softmax = True
+        else:
+            raise ValueError('loss argument must be set with "ns", "hs" or "softmax"')
         super(LabeledWord2Vec, self).__init__(**kwargs)
 
     def _raw_word_count(self, job):
@@ -202,7 +246,8 @@ class LabeledWord2Vec(Word2Vec):
         # Output layer is only made of labels
         if self.hs:
             self.syn1 = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
-        if self.negative:
+        # Use syn1neg also for softmax outputs
+        if self.negative or self.softmax:
             self.syn1neg = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
         self.syn0norm = None
         self.syn0_lockf = ones(len(self.vocab), dtype=REAL)  # zeros suppress learning

@@ -30,6 +30,9 @@ Models
     A supervised learning model based on the fastText algorithm [1]_.
     The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
     it takes advantage of its optimizations (e.g. Cython) and support.
+    It is possible to choose the Softmax loss function (default) or one of its two "approximations":
+    Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trained word vectors at initialization,
+    passing a Gensim ``Word2Vec`` instance.
 
 ``shallowlearn.models.FastText``
     *TODO*: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py

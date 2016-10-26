@@ -20,7 +20,7 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 
 @pytest.fixture
 def small_model():
-    model = LabeledWord2Vec(iter=1, size=30, min_count=0, hs=1, negative=0)
+    model = LabeledWord2Vec(iter=1, size=30, min_count=0, loss='hs', negative=0)
     model.build_vocab(dataset_samples, frozenset(
         target for targets in dataset_targets for target in BaseClassifier._target_list(targets)))
     model.train(zip(dataset_samples, dataset_targets))
@@ -30,7 +30,7 @@ def small_model():
 @pytest.fixture(scope='module')
 def bunch_of_models():
     models = []
-    for kwarg in ({'hs': 1, 'negative': 0}, {'hs': 0, 'negative': 5}):
+    for kwarg in ({'loss': 'hs', 'negative': 0}, {'loss': 'ns', 'negative': 5}, {'loss': 'softmax', 'negative': 0}):
         models.extend([
             LabeledWord2Vec(iter=1, size=30, min_count=0, **kwarg),
             LabeledWord2Vec(iter=1, alpha=1.0, size=300, min_count=0, **kwarg),

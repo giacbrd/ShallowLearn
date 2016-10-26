@@ -37,10 +37,9 @@ Models
 
     Constructor arguments convention is a mix between the one of Gensim and the one of fastText, see the class docstring.
 
-    ```python
+    .. code-block:: python
     from shallowlearn.word2vec import LabeledWord2Vec
     clf = LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0, loss='hs', max_iter=3, random_state=66)
-    ```
 
 ``shallowlearn.models.FastText``
     *TODO*: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py

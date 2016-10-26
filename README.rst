@@ -36,12 +36,15 @@ It is possible to choose the Softmax loss function (default) or one of its two "
 Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trained word vectors at initialization,
 passing a Gensim ``Word2Vec`` instance.
 
-Constructor arguments convention is a mix between the one of Gensim and the one of fastText, see the class docstring.
+Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see the class docstring).
 
 .. code:: python
 
-    from shallowlearn.models import GensimFastText
-    clf = GensimFastText(size=100, min_count=0, loss='hs', max_iter=3, random_state=66)
+    >>> from shallowlearn.models import GensimFastText
+    >>> clf = GensimFastText(size=100, min_count=0, loss='hs', max_iter=3, random_state=66)
+    >>> clf.fit([('i', 'am', 'tall'), ('you', 'are', 'fat')], ['yes', 'no'])
+    >>> clf.predict([('tall', 'am', 'i')])
+    ['yes']
 
 FastText
 ~~~~~~~~

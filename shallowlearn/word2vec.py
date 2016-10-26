@@ -96,7 +96,7 @@ except ImportError:
         if label in model.lvocab:
             target = model.lvocab[label]
         else:
-            raise KeyError('Class label %s not found in the vocabulary' % label)
+            raise KeyError('Class label "%s" not found in the vocabulary' % label)
 
         word2_indices = [word2.index for word2 in word_vocabs]
         l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x layer1_size
@@ -197,7 +197,7 @@ class LabeledWord2Vec(Word2Vec):
         # FIXME set the right estimate memory for labels
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
-        self.__class__.scan_vocab(labels_vocab, iter(labels), progress_per=progress_per, trim_rule=None)
+        self.__class__.scan_vocab(labels_vocab, [labels], progress_per=progress_per, trim_rule=None)
         self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
         self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None)
         self.lvocab = labels_vocab.vocab

@@ -109,8 +109,8 @@ class GensimFastText(BaseClassifier):
 
     """
 
-    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5, workers=3,
-                 min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
+    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5,
+                 workers=3, min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
         super(GensimFastText, self).__init__()
         self.set_params(
@@ -142,7 +142,26 @@ class GensimFastText(BaseClassifier):
         self._classifier = LabeledWord2Vec(**params)
         if pre_trained is not None:
             self._classifier.reset_from(pre_trained)
-            self._build_label_info(pre_trained.lvocab.keys())
+            if hasattr(pre_trained, 'lvocab'):
+                self._build_label_info(pre_trained.lvocab.keys())
+            self.set_params(
+                size=pre_trained.layer1_size,
+                alpha=pre_trained.alpha,
+                min_count=pre_trained.min_count,
+                max_vocab_size=pre_trained.max_vocab_size,
+                sample=pre_trained.sample,
+                workers=pre_trained.workers,
+                min_alpha=pre_trained.min_alpha,
+                cbow_mean=pre_trained.cbow_mean,
+                hashfxn=pre_trained.hashfxn,
+                null_word=pre_trained.null_word,
+                sorted_vocab=pre_trained.sorted_vocab,
+                batch_words=pre_trained.batch_words,
+                max_iter=pre_trained.iter,
+                random_state=pre_trained.seed,
+                loss='softmax' if pre_trained.softmax else ('hs' if pre_trained.hs else 'ns'),
+                negative=pre_trained.negative
+            )
 
     @classmethod
     def _data_iter(cls, documents, y):

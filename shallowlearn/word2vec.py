@@ -18,7 +18,8 @@ try:
 except ImportError:
     from Queue import Queue, Empty
 
-from numpy import copy, prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, apply_along_axis
+from numpy import copy, prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, \
+    apply_along_axis
 from six.moves import range
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -181,7 +182,6 @@ class LabeledWord2Vec(Word2Vec):
         Each sentence must be a list of unicode strings. `labels` is an iterable over the label names.
 
         """
-
         class FakeSelf(LabeledWord2Vec):
             def __init__(self, max_vocab_size, min_count, sample, estimate_memory):
                 self.max_vocab_size = max_vocab_size
@@ -197,7 +197,7 @@ class LabeledWord2Vec(Word2Vec):
         # FIXME set the right estimate memory for labels
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
-        self.__class__.scan_vocab(labels_vocab, [labels], progress_per=progress_per, trim_rule=None)
+        self.__class__.scan_vocab(labels_vocab, iter(labels), progress_per=progress_per, trim_rule=None)
         self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
         self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None)
         self.lvocab = labels_vocab.vocab
@@ -306,3 +306,19 @@ class LabeledWord2Vec(Word2Vec):
                 self.neg_labels[0] = 1.
         return super(LabeledWord2Vec, self).train(sentences, total_words, word_count,
                                                   total_examples, queue_factor, report_delay)
+
+    def score(self, **kwargs):
+        raise NotImplementedError('This method has no reason to exist in this class (for now)')
+
+    def save_word2vec_format(self, **kwargs):
+        raise NotImplementedError('This is not a word2vec model')
+
+    @classmethod
+    def load_word2vec_format(cls, **kwargs):
+        raise NotImplementedError('This is not a word2vec model')
+
+    def intersect_word2vec_format(self, **kwargs):
+        raise NotImplementedError('This is not a word2vec model')
+
+    def accuracy(self, **kwargs):
+        raise NotImplementedError('This method has no reason to exist in this class (for now)')

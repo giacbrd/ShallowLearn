@@ -13,4 +13,4 @@ dataset_samples = (
     ('supervised', 'machine', 'learning', 'is', 'the', 'topic', 'of', 'today'),
     ('my', 'study', 'is', 'dedicated', 'to', 'me')
 )
-dataset_targets = (('a', 'b'), 'b', 'c', 'b', 'a')
+dataset_targets = (('aa', 'b'), 'b', 'cc', 'b', 'aa')

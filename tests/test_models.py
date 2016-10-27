@@ -19,9 +19,9 @@ def bunch_of_classifiers():
 def _predict(model):
     example = [('study', 'to', 'learn', 'me', 'study', 'to', 'learn', 'me', 'machine', 'learning')]
     p = model.predict(example)
-    assert p == ['a'] or p == ['b']
+    assert p == ['aa'] or p == ['b']
     p = model.predict_proba(example)
-    assert p[0][0][0] == 'a' or p[0][0][0] == 'b'
+    assert p[0][0][0] == 'aa' or p[0][0][0] == 'b'
     assert p[0][0][1] > .3333333
 
 

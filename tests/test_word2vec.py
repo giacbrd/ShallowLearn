@@ -57,7 +57,7 @@ def test_init():
 
 def test_vocabulary(small_model):
     assert 'to' in small_model.vocab
-    assert frozenset(('a', 'b', 'c')) == frozenset(small_model.lvocab.keys())
+    assert frozenset(('aa', 'b', 'cc')) == frozenset(small_model.lvocab.keys())
     assert max(v.index for v in small_model.lvocab.values()) == 2
 
 
@@ -80,7 +80,7 @@ def test_serializzation(small_model):
 
 def test_learning_functions(bunch_of_models):
     for model in bunch_of_models:
-        a = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'a')
+        a = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'aa')
         b = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'b')
-        c = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'c')
+        c = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'cc')
         assert round(a + b + c, 1) == 1.

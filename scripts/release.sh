@@ -6,7 +6,7 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 git flow release start $1
 git flow release finish $1
-git push --tags
+git push --follow-tags
 rm -fr build/*
 rm -fr dist/*
 rm -fr ShallowLearn.egg-info/*

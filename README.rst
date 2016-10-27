@@ -49,7 +49,24 @@ Constructor argument names are a mix between the ones of Gensim and the ones of 
 
 FastText
 ~~~~~~~~
-*TODO*: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
+The supervised algorithm of fastText implemented in `fastText.py <https://github.com/salestock/fastText.py>`_ ,
+which exposes an interface on the original C++ code.
+The current advantages of this class over ``GensimFastText`` are the *subwords* ant the *n-gram features* implemented
+via the *hashing trick*.
+The constructor arguments are equivalent to the original `supervised model
+<https://github.com/salestock/fastText.py#supervised-model>`_, except for ``input_file``, ``output`` and
+``label_prefix``.
+
+**WARNING**: The only way of loading datasets in fastText.py is through the filesystem (as of version 0.8.0),
+so data passed to ``fit(X, y)`` will be written in temporary files on disk.
+
+.. code:: python
+
+    >>> from shallowlearn.models import FastText
+    >>> clf = FastText(dim=100, min_count=0, loss='hs', epoch=3, bucket=5, word_ngrams=2)
+    >>> clf.fit([('i', 'am', 'tall'), ('you', 'are', 'fat')], ['yes', 'no'])
+    >>> clf.predict([('tall', 'am', 'i')])
+    ['yes']
 
 DeepInverseRegression
 ~~~~~~~~~~~~~~~~~~~~~
@@ -70,8 +87,8 @@ approaches, achieving the best performance in speed**.
 
 Results as of release `0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_,
 with *chi2_select* option set to 80%.
-The times take into account of *tf-idf* vectorization in the “classic” classifiers;
-the evaluation measure is *macro F1*.
+The times take into account of *tf-idf* vectorization in the “classic” classifiers, and the I/O operations for the
+training of fastText.py. The evaluation measure is *macro F1*.
 
 .. image:: https://rawgit.com/giacbrd/ShallowLearn/develop/benchmark.svg
     :alt: Text classifiers comparison

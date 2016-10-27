@@ -7,7 +7,7 @@
 # Copyright (C) 2013 Radim Rehurek <me@radimrehurek.com>
 # Licensed under the GNU LGPL v2.1 - http://www.gnu.org/licenses/lgpl.html
 #
-# Modifications by Giacomo Berardi <giacbrd.com> (2016)
+# Modifications by Giacomo Berardi <giacbrd.com> Copyright (C) 2016
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
 #TODO remove unused statements, also in other cython files

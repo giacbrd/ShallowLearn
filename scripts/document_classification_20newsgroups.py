@@ -22,17 +22,18 @@ The bar plot indicates the macro F1, training time (normalized) and test time
 #         Lars Buitinck
 # License: BSD 3 clause
 #
-# Modifications by Giacomo Berardi <giacbrd.com> (2016)
+# Modifications by Giacomo Berardi <giacbrd.com> Copyright (C) 2016
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
 from __future__ import print_function
 
 import logging
+from collections import Counter
+
 import numpy as np
 from optparse import OptionParser
 import sys
 from time import time
-import matplotlib.pyplot as plt
 
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -51,8 +52,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils.extmath import density
 from sklearn import metrics
 
-from shallowlearn.models import GensimFastText
-
+from shallowlearn.models import GensimFastText, FastText
 
 # Display progress logs on stdout
 
@@ -146,6 +146,7 @@ print()
 
 # split a training set and a test set
 y_train, y_test = data_train.target, data_test.target
+most_freq = Counter(y_test).most_common(1)[0][0]
 
 print("Extracting features from the training data using a sparse vectorizer")
 t0 = time()
@@ -207,7 +208,7 @@ def benchmark(clf):
     print("Training: ")
     print(clf)
     t0 = time()
-    if isinstance(clf, GensimFastText):
+    if isinstance(clf, (GensimFastText, FastText)):
         clf.fit(train_text, y_train)
         train_time = time() - t0
     else:
@@ -216,9 +217,11 @@ def benchmark(clf):
     print("train time: %0.3fs" % train_time)
 
     t0 = time()
-    if isinstance(clf, GensimFastText):
+    if isinstance(clf, (GensimFastText, FastText)):
         pred = clf.predict(test_text)
         test_time = time() - t0
+        # fix unknown predictions
+        pred = [most_freq if p is None else p for p in pred]
     else:
         pred = clf.predict(X_test)
         test_time = test_duration + (time() - t0)
@@ -302,32 +305,46 @@ results.append(benchmark(Pipeline([
 ])))
 
 print('=' * 80)
+print("fastText.py")
+results.append(benchmark(FastText(dim=300, min_count=0, thread=3, loss='hs')))
+
+print('=' * 80)
 print("Gensim fastText")
-results.append(benchmark(GensimFastText(size=300, min_count=0)))
+results.append(benchmark(GensimFastText(size=300, min_count=0, workers=3, loss='hs')))
 
 # make some plots
 
-indices = np.arange(len(results))
+try:
 
-results = [[x[i] for x in results] for i in range(4)]
+    import matplotlib.pyplot as plt
 
-clf_names, score, training_time, test_time = results
-training_time = np.array(training_time) / np.max(training_time)
-test_time = np.array(test_time) / np.max(test_time)
+    plt.style.use('ggplot')
 
-plt.figure(figsize=(12, 8))
-plt.title("Score")
-plt.barh(indices, score, .2, label="score", color='navy')
-plt.barh(indices + .3, training_time, .2, label="training time",
-         color='c')
-plt.barh(indices + .6, test_time, .2, label="test time", color='darkorange')
-plt.yticks(())
-plt.legend(loc='best')
-plt.subplots_adjust(left=.25)
-plt.subplots_adjust(top=.95)
-plt.subplots_adjust(bottom=.05)
+    indices = np.arange(len(results))
 
-for i, c in zip(indices, clf_names):
-    plt.text(-.3, i, c)
+    results = [[x[i] for x in results] for i in range(4)]
 
-plt.show()
+    clf_names, score, training_time, test_time = results
+    training_time = np.array(training_time) / np.max(training_time)
+    test_time = np.array(test_time) / np.max(test_time)
+
+    plt.figure(figsize=(12, 8))
+    plt.title("Score")
+    plt.barh(indices, score, .2, label="score", color='navy')
+    plt.barh(indices + .3, training_time, .2, label="training time",
+             color='c')
+    plt.barh(indices + .6, test_time, .2, label="test time", color='darkorange')
+    plt.yticks(())
+    plt.legend(loc='best')
+    plt.subplots_adjust(left=.25)
+    plt.subplots_adjust(top=.95)
+    plt.subplots_adjust(bottom=.05)
+
+    for i, c in zip(indices, clf_names):
+        plt.text(-.3, i, c)
+
+    plt.show()
+
+except ImportError:
+
+    print("WARNING: matplotlib not installed, no plots can be shown")

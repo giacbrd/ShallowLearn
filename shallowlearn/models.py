@@ -4,11 +4,15 @@
 # Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
+import io
 import logging
 import operator
+import tempfile
 from collections import Iterable
+from numbers import Number
 
-import numpy
+import fasttext
+from gensim.utils import to_unicode
 from six.moves import zip_longest
 
 try:
@@ -27,15 +31,11 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 logger = logging.getLogger(__name__)
 
 
-# TODO model based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
-# TODO model based on https://github.com/salestock/fastText.py
-
-
 class BaseClassifier(ClassifierMixin, BaseEstimator):
     def __init__(self):
         self._classifier = None
         self._label_set = None
-        self._label_type = None
+        self._label_is_num = None
 
     @classmethod
     def _target_list(cls, targets):
@@ -43,7 +43,21 @@ class BaseClassifier(ClassifierMixin, BaseEstimator):
 
     def _build_label_info(self, y):
         self._label_set = frozenset(target for targets in y for target in self._target_list(targets))
-        self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex))
+        self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
+
+    @classmethod
+    def _data_iter(cls, documents, y):
+        class DocIter(object):
+            def __init__(self, documents, y):
+                self.y = y
+                self.documents = documents
+
+            def __iter__(self):
+                for sample, targets in zip_longest(self.documents, self.y):
+                    targets = cls._target_list(targets)
+                    yield (sample, targets)
+
+        return DocIter(documents, y)
 
 
 class GensimFastText(BaseClassifier):
@@ -51,7 +65,8 @@ class GensimFastText(BaseClassifier):
     A supervised learning model based on the fastText algorithm [1]_ and written in Python.
     The core code, as this documentation, is copied from `Gensim <https://radimrehurek.com/gensim>`_,
     it takes advantage of its optimizations and support.
-    The parameter names are equivalent to the ones in the original fasText implementation (https://github.com/facebookresearch/fastText).
+    The parameter names are a mix of the ones in the original fasText implementation
+    (https://github.com/facebookresearch/fastText) and the Gensim ones.
 
     For now it only uses Hierarchical Softmax for output computation, and it is obviously limited to the CBOW method.
 
@@ -74,6 +89,14 @@ class GensimFastText(BaseClassifier):
 
     `sample` = threshold for configuring which higher-frequency words are randomly downsampled;
         default is 1e-3, useful range is (0, 1e-5).
+
+    `loss` = one value in {ns, hs, softmax}. If "ns" is selected negative sampling will be used
+    as loss function, together with the parameter `negative`. With "hs" hierarchical softmax will be used,
+    while with "softmax" (default) the sandard softmax function (the other two are "approximations")
+
+    `negative` = if > 0, negative sampling will be used, the int for negative
+    specifies how many "noise words" should be drawn (usually between 5-20).
+    Default is 5. If set to 0, no negative samping is used. It works only if `loss = ns`
 
     `workers` = use this many worker threads to train the model (=faster training with multicore machines).
 
@@ -106,10 +129,9 @@ class GensimFastText(BaseClassifier):
 
     """
 
-    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, workers=3,
-                 min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
+    def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5,
+                 workers=3, min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
-        # FIXME logging configuration must be project wise, rewrite this condition
         super(GensimFastText, self).__init__()
         self.set_params(
             size=size,
@@ -126,7 +148,9 @@ class GensimFastText(BaseClassifier):
             sorted_vocab=sorted_vocab,
             batch_words=batch_words,
             max_iter=max_iter,
-            random_state=random_state
+            random_state=random_state,
+            loss=loss,
+            negative=negative
         )
         params = self.get_params()
         # Convert name conventions from Scikit-learn to Gensim
@@ -138,21 +162,26 @@ class GensimFastText(BaseClassifier):
         self._classifier = LabeledWord2Vec(**params)
         if pre_trained is not None:
             self._classifier.reset_from(pre_trained)
-
-    @classmethod
-    def _data_iter(cls, documents, y):
-
-        class DocIter(object):
-            def __init__(self, documents, y):
-                self.y = y
-                self.documents = documents
-
-            def __iter__(self):
-                for sample, targets in zip_longest(self.documents, self.y):
-                    targets = cls._target_list(targets)
-                    yield (sample, targets)
-
-        return DocIter(documents, y)
+            if hasattr(pre_trained, 'lvocab'):
+                self._build_label_info(pre_trained.lvocab.keys())
+            self.set_params(
+                size=pre_trained.layer1_size,
+                alpha=pre_trained.alpha,
+                min_count=pre_trained.min_count,
+                max_vocab_size=pre_trained.max_vocab_size,
+                sample=pre_trained.sample,
+                workers=pre_trained.workers,
+                min_alpha=pre_trained.min_alpha,
+                cbow_mean=pre_trained.cbow_mean,
+                hashfxn=pre_trained.hashfxn,
+                null_word=pre_trained.null_word,
+                sorted_vocab=pre_trained.sorted_vocab,
+                batch_words=pre_trained.batch_words,
+                max_iter=pre_trained.iter,
+                random_state=pre_trained.seed,
+                loss='softmax' if pre_trained.softmax else ('hs' if pre_trained.hs else 'ns'),
+                negative=pre_trained.negative
+            )
 
     @property
     def classifier(self):
@@ -170,7 +199,7 @@ class GensimFastText(BaseClassifier):
         :param fit_params: Nothing for now
         :return:
         """
-        # TODO if y=None just learn the word vectors
+        # TODO if y=None learn a one-class classifier
         self._build_label_info(y)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
@@ -210,3 +239,120 @@ class GensimFastText(BaseClassifier):
         """
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
         return [predictions[0][0] for predictions in self._iter_predict(documents)]
+
+
+class FastText(BaseClassifier):
+    """
+    A wrapper class for Scikit-learn on the `supervised model of fastText.py
+    <https://github.com/salestock/fastText.py#supervised-model>`_ with the same parameter names.
+
+    `lr` = learning rate [0.1]
+
+    `lr_update_rate` = change the rate of updates for the learning rate [100]
+
+    `dim` = size of word vectors [100]
+
+    `ws` = size of the context window [5]
+
+    `epoch` = number of epochs [5]
+
+    `min_count` = minimal number of word occurences [1]
+
+    `neg` = number of negatives sampled [5]
+
+    `word_ngrams` = max length of word ngram [1]
+
+    `loss` = loss function {ns, hs, softmax} [softmax]
+
+    `bucket` = number of buckets [0]
+
+    `minn` = min length of char ngram [0]
+
+    `maxn` = max length of char ngram [0]
+
+    `thread` = number of threads [12]
+
+    `t` = sampling threshold [0.0001]
+
+    `silent` = disable the log output from the C++ extension [1]
+
+    `encoding` = specify input_file encoding [utf-8]
+    """
+
+    def __init__(self, lr=0.1, lr_update_rate=100, dim=100, ws=5, epoch=5, min_count=1, neg=5, word_ngrams=1,
+                 loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8'):
+        super(FastText, self).__init__()
+        self.set_params(
+            lr=lr, lr_update_rate=lr_update_rate, dim=dim, ws=ws, epoch=epoch, min_count=min_count, neg=neg,
+            word_ngrams=word_ngrams, loss=loss, bucket=bucket, minn=minn, maxn=maxn, thread=thread, t=t, silent=silent,
+            encoding=encoding
+        )
+        self.label_prefix = '__label__'
+        self._classifier = None
+
+    @property
+    def classifier(self):
+        """
+        The fastText.py supervised model
+        :return: An instance of ``fasttext.supervised``
+        """
+        return self._classifier
+
+    def fit(self, documents, y, **fit_params):
+        """
+        Train the supervised model with a labeled training set
+        :param documents: Iterator over lists of words
+        :param y: Iterator over lists or single labels, document target values
+        :param fit_params: Nothing for now
+        :return:
+        """
+        self._build_label_info(y)
+        with tempfile.NamedTemporaryFile() as train_temp:
+            with io.open(train_temp.name, 'w', encoding=self.encoding) as dataset:
+                for x, y in self._data_iter(documents, y):
+                    if x and y:
+                        targets = ' '.join('%s%s' % (self.label_prefix, label) for label in y)
+                        sample = ' '.join(x)
+                        dataset.write(to_unicode(targets + ' ' + sample + '\n'))
+            self.fit_file(train_temp.name)
+
+    def fit_file(self, train_path, output_path=None, label_prefix=None):
+        """
+        Train the model from a training set file
+        :param train_path: Txt file of documents, with one or more `label_prefix`+`category`
+            (default `label_prefix` value is "__label__") at the beginning of each line
+        followed by the document tokens
+        :param output_path: Path where to save the model, a `.bin` extension will be appended
+        :param label_prefix:
+        """
+
+        def train_classifier(output):
+            self._classifier = fasttext.supervised(input_file=train_path, output=output,
+                                                   label_prefix=label_prefix or self.label_prefix, **self.get_params())
+
+        if output_path is None:
+            with tempfile.NamedTemporaryFile(suffix='.bin') as model_temp:
+                train_classifier(model_temp.name[:-4])
+        else:
+            train_classifier(output_path)
+
+    def predict_proba(self, documents):
+        """
+        :param documents: Iterator over lists of words
+        :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
+        """
+        result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), len(self._label_set))
+        uniform = 1. / len(self._label_set)
+        result = [[(l, uniform) for l in self._label_set] if not any(r) else r for r in result]
+        return result
+
+    def decision_function(self, documents):
+        return self.predict_proba(documents)
+
+    def predict(self, documents):
+        """
+        :param documents: Iterator over lists of words
+        :return: For each document, the one most probable label (i.e. the classification)
+        """
+        return [((float(pred[0]) if self._label_is_num else pred[0])
+                 if pred else None) for pred in self._classifier.predict(iter(' '.join(d) for d in documents), 1)]

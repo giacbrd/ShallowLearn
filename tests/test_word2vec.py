@@ -20,11 +20,31 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 
 @pytest.fixture
 def small_model():
-    model = LabeledWord2Vec(iter=1, size=30, min_count=0)
+    model = LabeledWord2Vec(iter=1, size=30, min_count=0, loss='hs', negative=0)
     model.build_vocab(dataset_samples, frozenset(
         target for targets in dataset_targets for target in BaseClassifier._target_list(targets)))
     model.train(zip(dataset_samples, dataset_targets))
     return model
+
+
+@pytest.fixture(scope='module')
+def bunch_of_models():
+    models = []
+    for kwarg in ({'loss': 'hs', 'negative': 0}, {'loss': 'ns', 'negative': 5}, {'loss': 'softmax', 'negative': 0}):
+        models.extend([
+            LabeledWord2Vec(iter=1, size=30, min_count=0, **kwarg),
+            LabeledWord2Vec(iter=1, alpha=1.0, size=300, min_count=0, **kwarg),
+            LabeledWord2Vec(iter=1, size=100, min_count=1, **kwarg),
+            LabeledWord2Vec(iter=1, size=100, min_count=0, sample=0, **kwarg),
+            LabeledWord2Vec(iter=3, size=100, min_count=0, **kwarg),
+            LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0, **kwarg)
+        ])
+    targets = frozenset(
+        target for targets in dataset_targets for target in BaseClassifier._target_list(targets))
+    for model in models:
+        model.build_vocab(dataset_samples, targets)
+        model.train(zip(dataset_samples, dataset_targets))
+    return models
 
 
 def test_init():
@@ -37,7 +57,7 @@ def test_init():
 
 def test_vocabulary(small_model):
     assert 'to' in small_model.vocab
-    assert frozenset(('a', 'b', 'c')) == frozenset(small_model.lvocab.keys())
+    assert frozenset(('aa', 'b', 'cc')) == frozenset(small_model.lvocab.keys())
     assert max(v.index for v in small_model.lvocab.values()) == 2
 
 
@@ -58,8 +78,9 @@ def test_serializzation(small_model):
         assert numpy.array_equiv(loaded.syn0, small_model.syn0)
 
 
-def test_learning_functions(small_model):
-    a = score_document_labeled_cbow(small_model, ('study', 'to', 'learn'), 'a')
-    b = score_document_labeled_cbow(small_model, ('study', 'to', 'learn'), 'b')
-    c = score_document_labeled_cbow(small_model, ('study', 'to', 'learn'), 'c')
-    assert round(a + b + c) == 1.
+def test_learning_functions(bunch_of_models):
+    for model in bunch_of_models:
+        a = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'aa')
+        b = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'b')
+        c = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'cc')
+        assert round(a + b + c, 1) == 1.

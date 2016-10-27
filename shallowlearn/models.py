@@ -9,6 +9,7 @@ import logging
 import operator
 import tempfile
 from collections import Iterable
+from numbers import Number
 
 import fasttext
 from gensim.utils import to_unicode
@@ -42,7 +43,7 @@ class BaseClassifier(ClassifierMixin, BaseEstimator):
 
     def _build_label_info(self, y):
         self._label_set = frozenset(target for targets in y for target in self._target_list(targets))
-        self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex))
+        self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
 
     @classmethod
     def _data_iter(cls, documents, y):

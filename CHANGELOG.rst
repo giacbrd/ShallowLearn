@@ -1,7 +1,7 @@
 Changelog
 =========
 
-`0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_ (2016-xx-xx)
+`0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_ (2016-10-28)
 ----------------------------------------------------------------------------------
 
 * FastText classifier based on version 0.8.0 of https://github.com/salestock/fastText.py
@@ -11,13 +11,13 @@ Changelog
     - almost complete LabeledWord2Vec as subclass of Gensim's Word2Vec
 * More tests
 
-`0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_ (2016-14-10)
+`0.0.2 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.2>`_ (2016-10-14)
 ----------------------------------------------------------------------------------
 
 * Cython code for fastText in Gensim
 * Script for benchmarks
 
-`0.0.1 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.1>`_ (2016-11-10)
+`0.0.1 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.1>`_ (2016-10-11)
 ----------------------------------------------------------------------------------
 
 * First working model: GensimFastText

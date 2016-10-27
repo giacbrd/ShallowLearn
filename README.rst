@@ -37,7 +37,7 @@ Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trai
 passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (the latter is retrievable from a
 ``GensimFastText`` model by the attribute ``classifier``).
 
-Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see the class docstring).
+Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this class docstring).
 
 .. code:: python
 

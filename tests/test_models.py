@@ -41,6 +41,7 @@ def _predict(model):
     if pr[0][0][1] - pr[0][1][1] > .000001:
         assert p == ['aa'] or p == ['b']
 
+
 def test_gensim_predict(bunch_of_gensim_classifiers):
     for model in bunch_of_gensim_classifiers:
         _predict(model)

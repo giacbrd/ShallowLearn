@@ -34,7 +34,7 @@ class BaseClassifier(ClassifierMixin, BaseEstimator):
     def __init__(self):
         self._classifier = None
         self._label_set = None
-        self._label_type = None
+        self._label_is_num = None
 
     @classmethod
     def _target_list(cls, targets):
@@ -309,9 +309,10 @@ class FastText(BaseClassifier):
         with tempfile.NamedTemporaryFile() as train_temp:
             with io.open(train_temp.name, 'w', encoding=self.encoding) as dataset:
                 for x, y in self._data_iter(documents, y):
-                    targets = ' '.join('%s%s' % (self.label_prefix, label) for label in y)
-                    sample = ' '.join(x)
-                    dataset.write(to_unicode(targets + ' ' + sample + '\n'))
+                    if x and y:
+                        targets = ' '.join('%s%s' % (self.label_prefix, label) for label in y)
+                        sample = ' '.join(x)
+                        dataset.write(to_unicode(targets + ' ' + sample + '\n'))
             self.fit_file(train_temp.name)
 
     def fit_file(self, train_path, output_path=None, label_prefix=None):
@@ -340,7 +341,8 @@ class FastText(BaseClassifier):
         :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
         """
         result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), len(self._label_set))
-        result.sort(key=operator.itemgetter(1), reverse=True)
+        uniform = 1. / len(self._label_set)
+        result = [[(l, uniform) for l in self._label_set] if not any(r) else r for r in result]
         return result
 
     def decision_function(self, documents):
@@ -351,4 +353,5 @@ class FastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :return: For each document, the one most probable label (i.e. the classification)
         """
-        return [pred[0] for pred in self._classifier.predict(iter(' '.join(d) for d in documents), 1)]
+        return [((float(pred[0]) if self._label_is_num else pred[0])
+                 if pred else None) for pred in self._classifier.predict(iter(' '.join(d) for d in documents), 1)]

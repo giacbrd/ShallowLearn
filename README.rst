@@ -87,8 +87,8 @@ approaches, achieving the best performance in speed**.
 
 Results as of release `0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_,
 with *chi2_select* option set to 80%.
-The times take into account of *tf-idf* vectorization in the “classic” classifiers;
-the evaluation measure is *macro F1*.
+The times take into account of *tf-idf* vectorization in the “classic” classifiers, and the I/O operations for the
+training of fastText.py. The evaluation measure is *macro F1*.
 
 .. image:: https://rawgit.com/giacbrd/ShallowLearn/develop/benchmark.svg
     :alt: Text classifiers comparison

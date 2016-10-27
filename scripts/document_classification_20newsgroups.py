@@ -22,7 +22,7 @@ The bar plot indicates the macro F1, training time (normalized) and test time
 #         Lars Buitinck
 # License: BSD 3 clause
 #
-# Modifications by Giacomo Berardi <giacbrd.com> (2016)
+# Modifications by Giacomo Berardi <giacbrd.com> Copyright (C) 2016
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
 from __future__ import print_function

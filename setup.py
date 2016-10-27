@@ -44,7 +44,8 @@ setup(
     install_requires=[
         'cython>=0.24.1',
         'scikit-learn>=0.18',
-        'gensim==0.13.2'
+        'gensim==0.13.2',
+        'fasttext==0.8.0'
     ],
     setup_requires=['pytest-runner==2.9'],
     tests_require=['pytest==3.0.3'],

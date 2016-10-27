@@ -49,7 +49,12 @@ Constructor argument names are a mix between the ones of Gensim and the ones of 
 
 FastText
 ~~~~~~~~
-*TODO*: The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py
+The supervised algorithm of fastText implemented in https://github.com/salestock/fastText.py , which exposes an
+interface on the original C++ code. The constructor arguments are equivalent to
+https://github.com/salestock/fastText.py#supervised-model .
+
+**WARNING**: The only way of loading datasets in fastText.py is through the filesystem (as of version 0.8.0),
+so data passed to ``fit(X, y)`` will be written in temporary files on disk.
 
 DeepInverseRegression
 ~~~~~~~~~~~~~~~~~~~~~

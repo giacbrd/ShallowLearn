@@ -22,10 +22,9 @@ Install the latest version:
 
 Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in scikit-learn,
 e.g., ``fit(X, y)``, ``predict(X)``, etc.
-Where ``X`` is an iterable of documents, each document is a sequence of words. ``y`` is an iterable of document labels, of the same size of ``X``. For each document there is one or more labels (in an iterable).
 
-Data is raw text, each sample is a list of tokens (words of a document), while each target value in ``y`` can be a
-single label (or a list in case of multi-label training set) associated with the relative sample.
+Data is raw text, each sample in the iterable ``X`` is a list of tokens (words of a document), 
+while each element in the iterable ``y`` (corresponding to an element in ``X``) can be a single label or a list in case of a multi-label training set. Obviously, ``y`` must be of the same size of ``X``.
 
 Models
 ------

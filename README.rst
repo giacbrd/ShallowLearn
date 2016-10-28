@@ -4,6 +4,8 @@ A collection of supervised learning models based on shallow neural network appro
 with some additional exclusive features.
 Written in Python and fully compatible with `scikit-learn <http://scikit-learn.org>`_.
 
+Google group for users and developers: https://groups.google.com/d/forum/shallowlearn
+
 .. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
     :target: https://travis-ci.org/giacbrd/ShallowLearn
 .. image:: https://badge.fury.io/py/shallowlearn.svg
@@ -20,6 +22,7 @@ Install the latest version:
 
 Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in scikit-learn,
 e.g., ``fit(X, y)``, ``predict(X)``, etc.
+Where ``X`` is an iterable of documents, each document is a sequence of words. ``y`` is an iterable of document labels, of the same size of ``X``. For each document there is one or more labels (in an iterable).
 
 Data is raw text, each sample is a list of tokens (words of a document), while each target value in ``y`` can be a
 single label (or a list in case of multi-label training set) associated with the relative sample.

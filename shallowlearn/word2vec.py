@@ -42,7 +42,8 @@ try:
             work = ones(len(model.lvocab) if label is None else 1, dtype=REAL)
         if neu1 is None:
             neu1 = matutils.zeros_aligned(model.layer1_size, dtype=REAL)
-        return sdlc(model, document, label, work, neu1)
+        scores = sdlc(model, document, model.lvocab.keys() if label is None else [label], work, neu1)
+        return zip(model.lvocab.keys(), scores)
 
 except ImportError:
 

@@ -344,7 +344,7 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     return effective_words
 
 
-def score_document_labeled_cbow(model, document, label, _work, _neu1):
+def score_document_labeled_cbow(model, document, labels, _work, _neu1):
 
     cdef int hs = model.hs
     cdef int negative = model.negative
@@ -359,18 +359,17 @@ def score_document_labeled_cbow(model, document, label, _work, _neu1):
 
     cdef int label_count
 
-    cdef int codelens[1]
+    cdef int codelens[MAX_SENTENCE_LEN]
     cdef np.uint32_t indexes[MAX_SENTENCE_LEN]
     cdef int sentence_len
 
-    cdef int i, j, k
-    cdef long result = 0
+    cdef int i, k
 
     # For hierarchical softmax
     cdef REAL_t *syn1
-    cdef np.uint32_t *points[1]
-    cdef np.uint8_t *codes[1]
-    cdef int label_index
+    cdef np.uint32_t *points[MAX_SENTENCE_LEN]
+    cdef np.uint8_t *codes[MAX_SENTENCE_LEN]
+    cdef np.uint32_t label_indexes[MAX_SENTENCE_LEN]
 
     # For negative sampling
     cdef REAL_t *syn1neg
@@ -386,41 +385,53 @@ def score_document_labeled_cbow(model, document, label, _work, _neu1):
 
     vlookup = model.vocab
     llookup = model.lvocab
+
     i = 0
     for token in document:
         word = vlookup[token] if token in vlookup else None
         if word is None:
             continue  # for score, should this be a default negative value?
         indexes[i] = word.index
-        result += 1
         i += 1
         if i == MAX_SENTENCE_LEN:
             break  # TODO: log warning, tally overflow?
 
     sentence_len = i
 
-    label_count = len(llookup)
+    i = 0
+    for label in labels:
+        label_voc = llookup[label] if label in llookup else None
+        if label_voc is None:
+            continue
+        if hs:
+            codelens[i] = <int>len(label_voc.code)
+            codes[i] = <np.uint8_t *>np.PyArray_DATA(label_voc.code)
+            points[i] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
+        label_indexes[i] = label_voc.index
+        i += 1
+        if i == MAX_SENTENCE_LEN:
+            break  # TODO: log warning, tally overflow?
 
-    label_voc = llookup[label] if label in llookup else None
-    if hs:
-        codelens[0] = <int>len(label_voc.code)
-        codes[0] = <np.uint8_t *>np.PyArray_DATA(label_voc.code)
-        points[0] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
-    label_index = label_voc.index
+    label_count = i
 
     # release GIL & train on the sentence
-    work[0] = 1.0
+    for i in range(label_count):
+        work[i] = 1.0
     with nogil:
-        score_labeled_pair_cbow_hs(hs, label_index, label_count, points[0], codes[0], codelens, neu1, syn0, syn1, syn1neg, size, indexes, work, 0, 0, sentence_len, cbow_mean)
+        for i in range(label_count):
+            if codelens[i] == 0:
+                continue
+            score_labeled_pair_cbow_hs(hs, label_indexes[i], label_count, points[i], codes[i], codelens, neu1, syn0,
+                                       syn1, syn1neg, size, indexes, work, i, sentence_len, cbow_mean)
 
-    return work[0]
+    return [work[i] for i in range(label_count)]
 
 
 cdef void score_labeled_pair_cbow_hs(
     int hs, int label_index, int label_count, const np.uint32_t *word_point, const np.uint8_t *word_code, int codelens[MAX_SENTENCE_LEN],
     REAL_t *neu1, REAL_t *syn0, REAL_t *syn1, REAL_t *syn1neg, const int size,
     const np.uint32_t indexes[MAX_SENTENCE_LEN], REAL_t *work,
-    int i, int j, int k, int cbow_mean) nogil:
+    int i, int k, int cbow_mean) nogil:
 
     cdef long long a, b
     cdef long long row2
@@ -429,7 +440,7 @@ cdef void score_labeled_pair_cbow_hs(
 
     memset(neu1, 0, size * cython.sizeof(REAL_t))
     count = <REAL_t>0.0
-    for m in range(j, k):
+    for m in range(k):
         count += ONEF
         our_saxpy(&size, &ONEF, &syn0[indexes[m] * size], &ONE, neu1, &ONE)
     if count > (<REAL_t>0.5):
@@ -445,7 +456,7 @@ cdef void score_labeled_pair_cbow_hs(
             f = sgn*f
             if f <= -MAX_EXP or f >= MAX_EXP:
                 continue
-            work[0] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+            work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
     # Softmax
     else:
         row2 = label_index * size
@@ -454,7 +465,7 @@ cdef void score_labeled_pair_cbow_hs(
             f = TRUE_EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
             den = f
         else:
-            work[0] = 1.0
+            work[i] = 1.0
             return
         for b in range(label_count):
             if b == label_index:
@@ -464,10 +475,10 @@ cdef void score_labeled_pair_cbow_hs(
             if -MAX_EXP < temp_dot < MAX_EXP:
                 den += TRUE_EXP_TABLE[<int>((temp_dot + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
             else:
-                work[0] = 0.0
+                work[i] = 0.0
                 return
         if den != 0.0:
-            work[0] *= f / den
+            work[i] *= f / den
 
 
 def init():

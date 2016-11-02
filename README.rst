@@ -44,7 +44,7 @@ Constructor argument names are a mix between the ones of Gensim and the ones of 
 .. code:: python
 
     >>> from shallowlearn.models import GensimFastText
-    >>> clf = GensimFastText(size=100, min_count=0, loss='hs', max_iter=3, random_state=66)
+    >>> clf = GensimFastText(size=100, min_count=0, loss='hs', iter=3, seed=66)
     >>> clf.fit([('i', 'am', 'tall'), ('you', 'are', 'fat')], ['yes', 'no'])
     >>> clf.predict([('tall', 'am', 'i')])
     ['yes']

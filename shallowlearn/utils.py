@@ -9,6 +9,6 @@ def argument_alternatives(original_value, kwargs, alternative_names, logger):
     final_value = original_value
     for name in reversed(alternative_names):
         if name in kwargs and kwargs[name] != original_value:
-            logger.warn('{} parameter overwrites the already set value of {}'.format(name, final_value))
+            logger.warning('%s parameter overwrites the already set value of %s', name, final_value)
             final_value = kwargs[name]
     return final_value

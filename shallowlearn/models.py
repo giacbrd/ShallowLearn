@@ -175,8 +175,8 @@ class GensimFastText(BaseClassifier):
                 null_word=pre_trained.null_word,
                 sorted_vocab=pre_trained.sorted_vocab,
                 batch_words=pre_trained.batch_words,
-                max_iter=pre_trained.iter,
-                random_state=pre_trained.seed,
+                iter=pre_trained.iter,
+                seed=pre_trained.seed,
                 loss='softmax' if pre_trained.softmax else ('hs' if pre_trained.hs else 'ns'),
                 negative=pre_trained.negative
             )

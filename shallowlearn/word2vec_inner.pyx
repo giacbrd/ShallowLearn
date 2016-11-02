@@ -418,6 +418,7 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
     for i in range(label_count):
         work[i] = 1.0
     with nogil:
+        #FIXME this cycle should be moved inside the score function, do not recompute it for each label
         for i in range(label_count):
             if codelens[i] == 0:
                 continue

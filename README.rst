@@ -87,7 +87,7 @@ we added our models to the comparison.
 **The current results, even if still preliminary, are comparable with other
 approaches, achieving the best performance in speed**.
 
-Results as of release `0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_,
+Results as of release `0.0.4 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.4>`_,
 with *chi2_select* option set to 80%.
 The times take into account of *tf-idf* vectorization in the “classic” classifiers, and the I/O operations for the
 training of fastText.py. 

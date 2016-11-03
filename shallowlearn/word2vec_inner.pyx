@@ -369,7 +369,6 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
     cdef REAL_t *syn1
     cdef np.uint32_t *points[MAX_SENTENCE_LEN]
     cdef np.uint8_t *codes[MAX_SENTENCE_LEN]
-    cdef np.uint32_t label_indexes[MAX_SENTENCE_LEN]
 
     # For negative sampling
     cdef REAL_t *syn1neg
@@ -407,7 +406,6 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
             codelens[i] = <int>len(label_voc.code)
             codes[i] = <np.uint8_t *>np.PyArray_DATA(label_voc.code)
             points[i] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
-        label_indexes[i] = label_voc.index
         i += 1
         if i == MAX_SENTENCE_LEN:
             break  # TODO: log warning, tally overflow?
@@ -418,10 +416,10 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
     with nogil:
         #FIXME this cycle should be moved inside the score function, do not recompute it for each label
         for i in range(label_count):
-            if codelens[i] == 0:
-                work[label_indexes[i]] = 0.0
+            if hs and codelens[i] == 0:
+                work[i] = 0.0
                 continue
-            score_labeled_pair_cbow_hs(hs, label_indexes[i], label_count, points[i], codes[i], codelens, neu1, syn0,
+            score_labeled_pair_cbow_hs(hs, i, label_count, points[i], codes[i], codelens, neu1, syn0,
                                        syn1, syn1neg, size, indexes, work, sentence_len, cbow_mean)
 
     return [work[i] for i in range(label_count)]

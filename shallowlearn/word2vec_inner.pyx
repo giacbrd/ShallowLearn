@@ -414,19 +414,15 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
 
     # release GIL & train on the sentence
     with nogil:
-        #FIXME this cycle should be moved inside the score function, do not recompute it for each label
-        for i in range(label_count):
-            if hs and codelens[i] == 0:
-                work[i] = 0.0
-                continue
-            score_labeled_pair_cbow_hs(hs, i, label_count, points[i], codes[i], codelens, neu1, syn0,
+        score_labeled_pair_cbow_hs(hs, label_count, points, codes, codelens, neu1, syn0,
                                        syn1, syn1neg, size, indexes, work, sentence_len, cbow_mean)
 
     return [work[i] for i in range(label_count)]
 
 
 cdef void score_labeled_pair_cbow_hs(
-    int hs, int label_index, int label_count, const np.uint32_t *word_point, const np.uint8_t *word_code, int codelens[MAX_SENTENCE_LEN],
+    int hs, int label_count, const np.uint32_t *word_points[MAX_SENTENCE_LEN],
+    const np.uint8_t *word_codes[MAX_SENTENCE_LEN], int codelens[MAX_SENTENCE_LEN],
     REAL_t *neu1, REAL_t *syn0, REAL_t *syn1, REAL_t *syn1neg, const int size,
     const np.uint32_t indexes[MAX_SENTENCE_LEN], REAL_t *work,
     int k, int cbow_mean) nogil:
@@ -434,7 +430,9 @@ cdef void score_labeled_pair_cbow_hs(
     cdef long long a, b
     cdef long long row2
     cdef REAL_t f, g, count, inv_count, sgn, den, temp_dot
-    cdef int m
+    cdef int m, label_index
+    cdef np.uint32_t *word_point
+    cdef np.uint8_t *word_code
 
     memset(neu1, 0, size * cython.sizeof(REAL_t))
     count = <REAL_t>0.0
@@ -447,37 +445,44 @@ cdef void score_labeled_pair_cbow_hs(
         sscal(&size, &inv_count, neu1, &ONE)
 
     if hs:
-        work[label_index] = 1.0
-        for b in range(codelens[label_index]):
-            row2 = word_point[b] * size
-            f = our_dot(&size, neu1, &ONE, &syn1[row2], &ONE)
-            sgn = (-1)**word_code[b] # ch function: 0-> 1, 1 -> -1
-            f = sgn*f
-            if f <= -MAX_EXP or f >= MAX_EXP:
-                continue
-            work[label_index] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+        for label_index in range(label_count):
+            if codelens[label_index] == 0:
+                work[label_index] = 0.0
+            else:
+                work[label_index] = 1.0
+            word_point = word_points[label_index]
+            word_code = word_codes[label_index]
+            for b in range(codelens[label_index]):
+                row2 = word_point[b] * size
+                f = our_dot(&size, neu1, &ONE, &syn1[row2], &ONE)
+                sgn = (-1)**word_code[b] # ch function: 0-> 1, 1 -> -1
+                f = sgn*f
+                if f <= -MAX_EXP or f >= MAX_EXP:
+                    continue
+                work[label_index] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
     # Softmax
     else:
-        row2 = label_index * size
-        f = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-        if -MAX_EXP < f < MAX_EXP:
-            f = TRUE_EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
-            den = f
-        else:
-            work[label_index] = 1.0
-            return
-        for b in range(label_count):
-            if b == label_index:
-                continue
-            row2 = b * size
-            temp_dot = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-            if -MAX_EXP < temp_dot < MAX_EXP:
-                den += TRUE_EXP_TABLE[<int>((temp_dot + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+        for label_index in range(label_count):
+            row2 = label_index * size
+            f = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
+            if -MAX_EXP < f < MAX_EXP:
+                f = TRUE_EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+                den = f
             else:
-                work[label_index] = 0.0
+                work[label_index] = 1.0
                 return
-        if den != 0.0:
-            work[label_index] = f / den
+            for b in range(label_count):
+                if b == label_index:
+                    continue
+                row2 = b * size
+                temp_dot = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
+                if -MAX_EXP < temp_dot < MAX_EXP:
+                    den += TRUE_EXP_TABLE[<int>((temp_dot + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+                else:
+                    work[label_index] = 0.0
+                    return
+            if den != 0.0:
+                work[label_index] = f / den
 
 
 def init():

@@ -74,6 +74,10 @@ DeepInverseRegression
 ~~~~~~~~~~~~~~~~~~~~~
 *TODO*: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
 
+DeepAveragingNetworks
+~~~~~~~~~~~~~~~~~~~~~
+*TODO*: Based on https://github.com/miyyer/dan
+
 Exclusive Features
 ------------------
 *TODO: future features are going to be listed as Issues*

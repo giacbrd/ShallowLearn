@@ -363,7 +363,7 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
     cdef np.uint32_t indexes[MAX_SENTENCE_LEN]
     cdef int sentence_len
 
-    cdef int i, k
+    cdef int i
 
     # For hierarchical softmax
     cdef REAL_t *syn1
@@ -412,18 +412,17 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
         if i == MAX_SENTENCE_LEN:
             break  # TODO: log warning, tally overflow?
 
-    label_count = i
+    label_count = len(llookup)
 
     # release GIL & train on the sentence
-    for i in range(label_count):
-        work[i] = 1.0
     with nogil:
         #FIXME this cycle should be moved inside the score function, do not recompute it for each label
         for i in range(label_count):
             if codelens[i] == 0:
+                work[label_indexes[i]] = 0.0
                 continue
             score_labeled_pair_cbow_hs(hs, label_indexes[i], label_count, points[i], codes[i], codelens, neu1, syn0,
-                                       syn1, syn1neg, size, indexes, work, i, sentence_len, cbow_mean)
+                                       syn1, syn1neg, size, indexes, work, sentence_len, cbow_mean)
 
     return [work[i] for i in range(label_count)]
 
@@ -432,7 +431,7 @@ cdef void score_labeled_pair_cbow_hs(
     int hs, int label_index, int label_count, const np.uint32_t *word_point, const np.uint8_t *word_code, int codelens[MAX_SENTENCE_LEN],
     REAL_t *neu1, REAL_t *syn0, REAL_t *syn1, REAL_t *syn1neg, const int size,
     const np.uint32_t indexes[MAX_SENTENCE_LEN], REAL_t *work,
-    int i, int k, int cbow_mean) nogil:
+    int k, int cbow_mean) nogil:
 
     cdef long long a, b
     cdef long long row2
@@ -450,14 +449,15 @@ cdef void score_labeled_pair_cbow_hs(
         sscal(&size, &inv_count, neu1, &ONE)
 
     if hs:
-        for b in range(codelens[i]):
+        work[label_index] = 1.0
+        for b in range(codelens[label_index]):
             row2 = word_point[b] * size
             f = our_dot(&size, neu1, &ONE, &syn1[row2], &ONE)
             sgn = (-1)**word_code[b] # ch function: 0-> 1, 1 -> -1
             f = sgn*f
             if f <= -MAX_EXP or f >= MAX_EXP:
                 continue
-            work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+            work[label_index] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
     # Softmax
     else:
         row2 = label_index * size
@@ -466,7 +466,7 @@ cdef void score_labeled_pair_cbow_hs(
             f = TRUE_EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
             den = f
         else:
-            work[i] = 1.0
+            work[label_index] = 1.0
             return
         for b in range(label_count):
             if b == label_index:
@@ -476,10 +476,10 @@ cdef void score_labeled_pair_cbow_hs(
             if -MAX_EXP < temp_dot < MAX_EXP:
                 den += TRUE_EXP_TABLE[<int>((temp_dot + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
             else:
-                work[i] = 0.0
+                work[label_index] = 0.0
                 return
         if den != 0.0:
-            work[i] *= f / den
+            work[label_index] = f / den
 
 
 def init():

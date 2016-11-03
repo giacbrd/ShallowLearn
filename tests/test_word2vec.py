@@ -80,7 +80,7 @@ def test_serializzation(small_model):
 
 def test_learning_functions(bunch_of_models):
     for model in bunch_of_models:
-        a = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'aa')[0][1]
-        b = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'b')[0][1]
-        c = score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'cc')[0][1]
+        a = list(score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'aa'))[0][1]
+        b = list(score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'b'))[0][1]
+        c = list(score_document_labeled_cbow(model, ('study', 'to', 'learn'), 'cc'))[0][1]
         assert round(a + b + c, 1) == 1.

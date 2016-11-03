@@ -22,7 +22,7 @@ package_dir = os.path.join(os.path.dirname(__file__), 'shallowlearn')
 
 setup(
     name='ShallowLearn',
-    version='0.0.3',
+    version='0.0.4',
     description='A collection of supervised learning models based on shallow neural network approaches '
                 '(e.g., word2vec and fastText) with some additional exclusive features',
     long_description=readfile('README.rst'),

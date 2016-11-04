@@ -94,12 +94,10 @@ approaches, achieving the best performance in speed**.
 Results as of release `0.0.4 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.4>`_,
 with *chi2_select* option set to 80%.
 The times take into account of *tf-idf* vectorization in the “classic” classifiers, and the I/O operations for the
-training of fastText.py. 
-Test time of ``GensimFastText`` is the sum of the single predictions for each test sample, 
-it must be optimized in a unique, monolithic prediction.
+training of fastText.py.
 The evaluation measure is *macro F1*.
 
-.. image:: https://rawgit.com/giacbrd/ShallowLearn/develop/benchmark.svg
+.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/benchmark.svg
     :alt: Text classifiers comparison
     :align: center
     :width: 888 px

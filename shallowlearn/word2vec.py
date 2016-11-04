@@ -22,8 +22,8 @@ except ImportError:
     from Queue import Queue, Empty
 
 from numpy import copy, prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, \
-    apply_along_axis
-from six.moves import range
+    apply_along_axis, array
+from six.moves import range, zip
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
@@ -36,11 +36,14 @@ try:
 
     logger.debug('Fast version of {0} is being used'.format(__name__))
 
-
-    def score_document_labeled_cbow(model, document, label, work=ones(1, dtype=REAL), neu1=None):
+    def score_document_labeled_cbow(model, document, labels=None, work=None, neu1=None):
+        if work is None:
+            work = ones(len(model.lvocab) if labels is None else len(labels), dtype=REAL)
         if neu1 is None:
             neu1 = matutils.zeros_aligned(model.layer1_size, dtype=REAL)
-        return sdlc(model, document, label, work, neu1)
+        labels = labels or model.lvocab.keys()
+        scores = sdlc(model, document, labels, work, neu1)
+        return zip(labels, scores)
 
 except ImportError:
 
@@ -92,36 +95,40 @@ except ImportError:
         return result
 
 
-    def score_document_labeled_cbow(model, document, label, work=None, neu1=None):
+    def score_document_labeled_cbow(model, document, labels=None, work=None, neu1=None):
 
         word_vocabs = [model.vocab[w] for w in document if w in model.vocab]
 
-        if label in model.lvocab:
-            target = model.lvocab[label]
+        if labels is not None:
+            targets = [model.lvocab[label] for label in labels]
         else:
-            raise KeyError('Class label "%s" not found in the vocabulary' % label)
+            targets = model.lvocab.values()
+            labels = model.lvocab.keys()
 
         word2_indices = [word2.index for word2 in word_vocabs]
         l1 = np_sum(model.syn0[word2_indices], axis=0)  # 1 x layer1_size
         if word2_indices and model.cbow_mean:
             l1 /= len(word2_indices)
-        return score_cbow_labeled_pair(model, target, word2_indices, l1)
+        return zip(labels, score_cbow_labeled_pair(model, targets, l1))
 
 
-    def score_cbow_labeled_pair(model, target, word2_indices, l1):
+    def score_cbow_labeled_pair(model, targets, l1):
         if model.hs:
-            l2a = model.syn1[target.point]  # 2d matrix, codelen x layer1_size
-            sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
-            prob = 1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))
+            prob = []
+            # FIXME this cycle should be executed internally in numpy
+            for target in targets:
+                l2a = model.syn1[target.point]
+                sgn = (-1.0) ** target.code # ch function, 0-> 1, 1 -> -1
+                prob.append(prod(1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))))
         # Softmax
         else:
             def exp_dot(x):
                 return exp(dot(l1, x.T))
 
-            prob_num = exp_dot(model.syn1neg[target.index])
+            prob_num = exp_dot(model.syn1neg[[t.index for t in targets]])
             prob_den = np_sum(apply_along_axis(exp_dot, 1, model.syn1neg))
             prob = prob_num / prob_den
-        return prod(prob)
+        return prob
 
 
 class LabeledWord2Vec(Word2Vec):

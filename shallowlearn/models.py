@@ -213,10 +213,8 @@ class GensimFastText(BaseClassifier):
         self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
     def _iter_predict(self, documents):
-        # FIXME instead of iterate on documents, it would be ideal to compute a single operation with the sub-matrix of documents
         for doc in documents:
-            result = [(label, score_document_labeled_cbow(self._classifier, document=doc, label=label)) for
-                      label in self._label_set]
+            result = list(score_document_labeled_cbow(self._classifier, document=doc))
             result.sort(key=operator.itemgetter(1), reverse=True)
             yield result
 

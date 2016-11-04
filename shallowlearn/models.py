@@ -15,6 +15,8 @@ import fasttext
 from gensim.utils import to_unicode
 from six.moves import zip_longest
 
+from .utils import argument_alternatives
+
 try:
     basestring = basestring
 except NameError:
@@ -70,11 +72,11 @@ class GensimFastText(BaseClassifier):
 
     For now it only uses Hierarchical Softmax for output computation, and it is obviously limited to the CBOW method.
 
-    `size` is the dimensionality of the feature vectors.
+    `size` or `dim` is the dimensionality of the feature vectors.
 
-    `alpha` is the initial learning rate (will linearly drop to `min_alpha` as training progresses).
+    `alpha` or `lr` is the initial learning rate (will linearly drop to `min_alpha` as training progresses).
 
-    `random_state` = for the random number generator. Initial vectors for each
+    `seed` or `random_state` = for the random number generator. Initial vectors for each
     word are seeded with a hash of the concatenation of word + str(seed).
     Note that for a fully deterministically-reproducible run, you must also limit the model to
     a single worker thread, to eliminate ordering jitter from OS thread scheduling. (In Python
@@ -87,18 +89,18 @@ class GensimFastText(BaseClassifier):
     words than this, then prune the infrequent ones. Every 10 million word types
     need about 1GB of RAM. Set to `None` for no limit (default).
 
-    `sample` = threshold for configuring which higher-frequency words are randomly downsampled;
+    `sample` or `t` = threshold for configuring which higher-frequency words are randomly downsampled;
         default is 1e-3, useful range is (0, 1e-5).
 
     `loss` = one value in {ns, hs, softmax}. If "ns" is selected negative sampling will be used
     as loss function, together with the parameter `negative`. With "hs" hierarchical softmax will be used,
     while with "softmax" (default) the sandard softmax function (the other two are "approximations")
 
-    `negative` = if > 0, negative sampling will be used, the int for negative
+    `negative` or `neg` = if > 0, negative sampling will be used, the int for negative
     specifies how many "noise words" should be drawn (usually between 5-20).
     Default is 5. If set to 0, no negative samping is used. It works only if `loss = ns`
 
-    `workers` = use this many worker threads to train the model (=faster training with multicore machines).
+    `workers` or `thread` = use this many worker threads to train the model (=faster training with multicore machines).
 
     `cbow_mean` = if 0, use the sum of the context word vectors. If 1 (default), use the mean.
     Only applies when cbow is used.
@@ -106,7 +108,7 @@ class GensimFastText(BaseClassifier):
     `hashfxn` = hash function to use to randomly initialize weights, for increased
     training reproducibility. Default is Python's rudimentary built in hash function.
 
-    `max_iter` = number of iterations (epochs) over the corpus. Default is 5.
+    `iter` or `epoch` or `max_iter` = number of iterations (epochs) over the corpus. Default is 5.
 
     `trim_rule` = vocabulary trimming rule, specifies whether certain words should remain
     in the vocabulary, be trimmed away, or handled using the default (discard if word count < min_count).
@@ -131,15 +133,15 @@ class GensimFastText(BaseClassifier):
 
     def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5,
                  workers=3, min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
-                 batch_words=MAX_WORDS_IN_BATCH, max_iter=5, random_state=1, pre_trained=None):
+                 batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, pre_trained=None, **kwargs):
         super(GensimFastText, self).__init__()
         self.set_params(
-            size=size,
-            alpha=alpha,
+            size=argument_alternatives(size, kwargs, ('dim',), logger),
+            alpha=argument_alternatives(alpha, kwargs, ('lr',), logger),
             min_count=min_count,
             max_vocab_size=max_vocab_size,
-            sample=sample,
-            workers=workers,
+            sample=argument_alternatives(sample, kwargs, ('t',), logger),
+            workers=argument_alternatives(workers, kwargs, ('thread',), logger),
             min_alpha=min_alpha,
             cbow_mean=cbow_mean,
             hashfxn=hashfxn,
@@ -147,17 +149,13 @@ class GensimFastText(BaseClassifier):
             trim_rule=trim_rule,
             sorted_vocab=sorted_vocab,
             batch_words=batch_words,
-            max_iter=max_iter,
-            random_state=random_state,
+            iter=argument_alternatives(iter, kwargs, ('epoch', 'max_iter'), logger),
+            seed=argument_alternatives(seed, kwargs, ('random_state',), logger),
             loss=loss,
-            negative=negative
+            negative=argument_alternatives(negative, kwargs, ('neg',), logger)
         )
         params = self.get_params()
         # Convert name conventions from Scikit-learn to Gensim
-        params['iter'] = params['max_iter']
-        del params['max_iter']
-        params['seed'] = params['random_state']
-        del params['random_state']
         del params['pre_trained']
         self._classifier = LabeledWord2Vec(**params)
         if pre_trained is not None:
@@ -177,8 +175,8 @@ class GensimFastText(BaseClassifier):
                 null_word=pre_trained.null_word,
                 sorted_vocab=pre_trained.sorted_vocab,
                 batch_words=pre_trained.batch_words,
-                max_iter=pre_trained.iter,
-                random_state=pre_trained.seed,
+                iter=pre_trained.iter,
+                seed=pre_trained.seed,
                 loss='softmax' if pre_trained.softmax else ('hs' if pre_trained.hs else 'ns'),
                 negative=pre_trained.negative
             )

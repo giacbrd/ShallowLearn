@@ -59,3 +59,11 @@ def test_gensim_fit(bunch_of_gensim_classifiers):
 def test_fasttext_predict(bunch_of_fasttext_classifiers):
     for model in bunch_of_fasttext_classifiers:
         _predict(model)
+
+
+def duplicate_arguments():
+    clf = GensimFastText(seed=9, random_state=10, neg=20, epoch=25, negative=11)
+    params = clf.get_params()
+    assert params['seed'] == clf.seed == 10
+    assert params['negative'] == clf.negative == 20
+    assert params['iter'] == clf.iter == 25

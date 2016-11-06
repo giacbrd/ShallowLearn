@@ -344,7 +344,7 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     return effective_words
 
 
-def score_document_labeled_cbow(model, document, label, _work, _neu1):
+def score_document_labeled_cbow(model, document, labels, _work, _neu1):
 
     cdef int hs = model.hs
     cdef int negative = model.negative
@@ -357,20 +357,19 @@ def score_document_labeled_cbow(model, document, label, _work, _neu1):
     cdef REAL_t *neu1
     cdef int size = model.layer1_size
 
-    cdef int label_count
+    cdef int label_count, total_labels
 
-    cdef int codelens[1]
+    cdef int codelens[MAX_SENTENCE_LEN]
     cdef np.uint32_t indexes[MAX_SENTENCE_LEN]
+    cdef np.uint32_t label_indexes[MAX_SENTENCE_LEN]
     cdef int sentence_len
 
-    cdef int i, j, k
-    cdef long result = 0
+    cdef int i
 
     # For hierarchical softmax
     cdef REAL_t *syn1
-    cdef np.uint32_t *points[1]
-    cdef np.uint8_t *codes[1]
-    cdef int label_index
+    cdef np.uint32_t *points[MAX_SENTENCE_LEN]
+    cdef np.uint8_t *codes[MAX_SENTENCE_LEN]
 
     # For negative sampling
     cdef REAL_t *syn1neg
@@ -386,50 +385,62 @@ def score_document_labeled_cbow(model, document, label, _work, _neu1):
 
     vlookup = model.vocab
     llookup = model.lvocab
+
     i = 0
     for token in document:
         word = vlookup[token] if token in vlookup else None
         if word is None:
             continue  # for score, should this be a default negative value?
         indexes[i] = word.index
-        result += 1
         i += 1
         if i == MAX_SENTENCE_LEN:
             break  # TODO: log warning, tally overflow?
 
     sentence_len = i
 
-    label_count = len(llookup)
+    i = 0
+    for label in labels:
+        label_voc = llookup[label] if label in llookup else None
+        if label_voc is None:
+            continue
+        if hs:
+            codelens[i] = <int>len(label_voc.code)
+            codes[i] = <np.uint8_t *>np.PyArray_DATA(label_voc.code)
+            points[i] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
+        label_indexes[i] = <np.uint32_t>label_voc.index
+        i += 1
+        if i == MAX_SENTENCE_LEN:
+            break  # TODO: log warning, tally overflow?
 
-    label_voc = llookup[label] if label in llookup else None
-    if hs:
-        codelens[0] = <int>len(label_voc.code)
-        codes[0] = <np.uint8_t *>np.PyArray_DATA(label_voc.code)
-        points[0] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
-    label_index = label_voc.index
+    label_count = i
+    total_labels = len(llookup)
 
     # release GIL & train on the sentence
-    work[0] = 1.0
     with nogil:
-        score_labeled_pair_cbow_hs(hs, label_index, label_count, points[0], codes[0], codelens, neu1, syn0, syn1, syn1neg, size, indexes, work, 0, 0, sentence_len, cbow_mean)
+        score_labeled_pair_cbow_hs(hs, label_count, total_labels, label_indexes, points, codes, codelens, neu1, syn0,
+                                       syn1, syn1neg, size, indexes, work, sentence_len, cbow_mean)
 
-    return work[0]
+    return [work[i] for i in range(label_count)]
 
 
 cdef void score_labeled_pair_cbow_hs(
-    int hs, int label_index, int label_count, const np.uint32_t *word_point, const np.uint8_t *word_code, int codelens[MAX_SENTENCE_LEN],
+    int hs, int label_count, int total_labels, const np.uint32_t label_indexes[MAX_SENTENCE_LEN],
+        const np.uint32_t *word_points[MAX_SENTENCE_LEN],
+    const np.uint8_t *word_codes[MAX_SENTENCE_LEN], int codelens[MAX_SENTENCE_LEN],
     REAL_t *neu1, REAL_t *syn0, REAL_t *syn1, REAL_t *syn1neg, const int size,
     const np.uint32_t indexes[MAX_SENTENCE_LEN], REAL_t *work,
-    int i, int j, int k, int cbow_mean) nogil:
+    int k, int cbow_mean) nogil:
 
-    cdef long long a, b
     cdef long long row2
-    cdef REAL_t f, g, count, inv_count, sgn, den, temp_dot
-    cdef int m
+    cdef REAL_t f, count, inv_count, sgn, den, temp_dot
+    cdef int label_index, i , b
+    cdef np.uint32_t *word_point
+    cdef np.uint8_t *word_code
+    cdef REAL_t out[MAX_SENTENCE_LEN]
 
     memset(neu1, 0, size * cython.sizeof(REAL_t))
     count = <REAL_t>0.0
-    for m in range(j, k):
+    for m in range(k):
         count += ONEF
         our_saxpy(&size, &ONEF, &syn0[indexes[m] * size], &ONE, neu1, &ONE)
     if count > (<REAL_t>0.5):
@@ -438,36 +449,35 @@ cdef void score_labeled_pair_cbow_hs(
         sscal(&size, &inv_count, neu1, &ONE)
 
     if hs:
-        for b in range(codelens[i]):
-            row2 = word_point[b] * size
-            f = our_dot(&size, neu1, &ONE, &syn1[row2], &ONE)
-            sgn = (-1)**word_code[b] # ch function: 0-> 1, 1 -> -1
-            f = sgn*f
-            if f <= -MAX_EXP or f >= MAX_EXP:
-                continue
-            work[0] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+        for i in range(label_count):
+            if codelens[i] == 0:
+                work[i] = 0.0
+            else:
+                work[i] = 1.0
+            word_point = word_points[i]
+            word_code = word_codes[i]
+            for b in range(codelens[i]):
+                row2 = word_point[b] * size
+                f = our_dot(&size, neu1, &ONE, &syn1[row2], &ONE)
+                sgn = (-1)**word_code[b] # ch function: 0-> 1, 1 -> -1
+                f = sgn*f
+                if f <= -MAX_EXP or f >= MAX_EXP:
+                    continue
+                work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
     # Softmax
     else:
-        row2 = label_index * size
-        f = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-        if -MAX_EXP < f < MAX_EXP:
-            f = TRUE_EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
-            den = f
-        else:
-            work[0] = 1.0
-            return
-        for b in range(label_count):
-            if b == label_index:
-                continue
-            row2 = b * size
-            temp_dot = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-            if -MAX_EXP < temp_dot < MAX_EXP:
-                den += TRUE_EXP_TABLE[<int>((temp_dot + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
-            else:
-                work[0] = 0.0
-                return
+        den = 0.0
+        for label_index in range(total_labels):
+            row2 = label_index * size
+            out[label_index] = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
+            if -MAX_EXP < out[label_index] < MAX_EXP:
+                out[label_index] = TRUE_EXP_TABLE[<int>((out[label_index] + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+                den += out[label_index]
         if den != 0.0:
-            work[0] *= f / den
+            for i in range(label_count):
+                label_index = label_indexes[i]
+                if out[label_index] != 0.0:
+                    work[i] = out[label_index] / den
 
 
 def init():

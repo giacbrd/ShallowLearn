@@ -44,7 +44,7 @@ Constructor argument names are a mix between the ones of Gensim and the ones of 
 .. code:: python
 
     >>> from shallowlearn.models import GensimFastText
-    >>> clf = GensimFastText(size=100, min_count=0, loss='hs', max_iter=3, random_state=66)
+    >>> clf = GensimFastText(size=100, min_count=0, loss='hs', iter=3, seed=66)
     >>> clf.fit([('i', 'am', 'tall'), ('you', 'are', 'fat')], ['yes', 'no'])
     >>> clf.predict([('tall', 'am', 'i')])
     ['yes']
@@ -74,9 +74,24 @@ DeepInverseRegression
 ~~~~~~~~~~~~~~~~~~~~~
 *TODO*: Based on https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec.score
 
+DeepAveragingNetworks
+~~~~~~~~~~~~~~~~~~~~~
+*TODO*: Based on https://github.com/miyyer/dan
+
 Exclusive Features
 ------------------
-*TODO: future features are going to be listed as Issues*
+Persistence
+~~~~~~~~~~~
+Any model can be serialized and de-serialized with the two methods ``save`` and ``load``.
+They overload the `SaveLoad <https://radimrehurek.com/gensim/utils.html#gensim.utils.SaveLoad>`_ interface of Gensim,
+so it is possible to control the cost on disk usage of the models, instead of simply *pickling* the objects.
+
+.. code:: python
+
+    >>> from shallowlearn.models import GensimFastText
+    >>> clf = GensimFastText(size=100, min_count=0, loss='hs', iter=3, seed=66)
+    >>> clf.save('./model')
+    >>> loaded = GensimFastText.load('./model')
 
 Benchmarks
 ----------
@@ -87,15 +102,13 @@ we added our models to the comparison.
 **The current results, even if still preliminary, are comparable with other
 approaches, achieving the best performance in speed**.
 
-Results as of release `0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_,
+Results as of release `0.0.4 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.4>`_,
 with *chi2_select* option set to 80%.
 The times take into account of *tf-idf* vectorization in the “classic” classifiers, and the I/O operations for the
-training of fastText.py. 
-Test time of ``GensimFastText`` is the sum of the single predictions for each test sample, 
-it must be optimized in a unique, monolithic prediction.
+training of fastText.py.
 The evaluation measure is *macro F1*.
 
-.. image:: https://rawgit.com/giacbrd/ShallowLearn/develop/benchmark.svg
+.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/benchmark.svg
     :alt: Text classifiers comparison
     :align: center
     :width: 888 px

@@ -1,6 +1,13 @@
 Changelog
 =========
 
+`0.0.4 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.4>`_ (2016-11-05)
+----------------------------------------------------------------------------------
+
+* Faster prediction for multiple labels with one ``predict`` call
+* Better persistence with ``save`` and ``load`` methods
+* Fixed parameter names convention
+
 `0.0.3 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.3>`_ (2016-10-28)
 ----------------------------------------------------------------------------------
 

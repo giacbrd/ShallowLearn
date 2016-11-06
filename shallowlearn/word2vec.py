@@ -136,6 +136,7 @@ class LabeledWord2Vec(Word2Vec):
         """
         Exactly as the parent class `Word2Vec <https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec>`_.
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
+        Argument names must be explicit!
 
         `loss` = one value in {ns, hs, softmax}. If "ns" is selected negative sampling will be used
         as loss function, together with the parameter `negative`. With "hs" hierarchical softmax will be used,

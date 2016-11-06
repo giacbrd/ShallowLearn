@@ -3,7 +3,11 @@
 #
 # Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
+import io
+import tempfile
+
 import pytest
+
 from shallowlearn.models import GensimFastText, FastText
 from tests.resources import dataset_targets, dataset_samples
 from tests.test_word2vec import bunch_of_models
@@ -59,6 +63,22 @@ def test_gensim_fit(bunch_of_gensim_classifiers):
 def test_fasttext_predict(bunch_of_fasttext_classifiers):
     for model in bunch_of_fasttext_classifiers:
         _predict(model)
+
+
+def test_persistence(bunch_of_gensim_classifiers, bunch_of_fasttext_classifiers):
+    example = [('supervised', 'faster', 'is', 'machine', 'important')]
+    for model in bunch_of_gensim_classifiers + bunch_of_fasttext_classifiers:
+        with tempfile.NamedTemporaryFile() as temp:
+            model.save(temp.name)
+            loaded = model.load(temp.name)
+            assert model.get_params() == loaded.get_params()
+            assert model.predict(example) == loaded.predict(example)
+        with tempfile.NamedTemporaryFile() as temp:
+            with io.open(temp.name, 'wb') as temp_out:
+                model.save(temp_out)
+            loaded = model.load(temp.name)
+            assert model.get_params() == loaded.get_params()
+            assert model.predict(example) == loaded.predict(example)
 
 
 def duplicate_arguments():

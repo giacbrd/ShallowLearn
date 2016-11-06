@@ -7,11 +7,13 @@
 import io
 import logging
 import operator
+import shutil
 import tempfile
 from collections import Iterable
 from numbers import Number
 
 import fasttext
+import gensim
 from gensim.utils import to_unicode
 from six.moves import zip_longest
 
@@ -33,7 +35,10 @@ __author__ = 'Giacomo Berardi <giacbrd.com>'
 logger = logging.getLogger(__name__)
 
 
-class BaseClassifier(ClassifierMixin, BaseEstimator):
+CLASSIFIER_FILE_SUFFIX = '.CLF'
+
+
+class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def __init__(self):
         self._classifier = None
         self._label_set = None
@@ -236,6 +241,34 @@ class GensimFastText(BaseClassifier):
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
         return [predictions[0][0] for predictions in self._iter_predict(documents)]
 
+    def save(self, *args, **kwargs):
+        kwargs['ignore'] = kwargs.get('ignore', ['_classifier'])
+        super(GensimFastText, self).save(*args, **kwargs)
+        # Get the file name of this object serialization
+        if any(args) and 'fname_or_handle' not in kwargs:
+            fname = args[0]
+            args = args[1:]
+        else:
+            fname = kwargs['fname_or_handle']
+        if not isinstance(fname, basestring):
+            fname = fname.name
+        fname += CLASSIFIER_FILE_SUFFIX
+        kwargs['fname_or_handle'] = fname
+        self._classifier.save(*args, **kwargs)
+
+    save.__doc__ = gensim.utils.SaveLoad.save.__doc__
+
+    @classmethod
+    def load(cls, *args, **kwargs):
+        model = super(GensimFastText, cls).load(*args, **kwargs)
+        # Get the file name of this object serialization
+        if any(args) and 'fname' not in kwargs:
+            kwargs['fname'] = args[0]
+            args = args[1:]
+        kwargs['fname'] += CLASSIFIER_FILE_SUFFIX
+        model._classifier = LabeledWord2Vec.load(*args, **kwargs)
+        return model
+
 
 class FastText(BaseClassifier):
     """
@@ -275,16 +308,30 @@ class FastText(BaseClassifier):
     `encoding` = specify input_file encoding [utf-8]
     """
 
+    LABEL_PREFIX = '__label__'
+
     def __init__(self, lr=0.1, lr_update_rate=100, dim=100, ws=5, epoch=5, min_count=1, neg=5, word_ngrams=1,
                  loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8'):
         super(FastText, self).__init__()
-        self.set_params(
-            lr=lr, lr_update_rate=lr_update_rate, dim=dim, ws=ws, epoch=epoch, min_count=min_count, neg=neg,
-            word_ngrams=word_ngrams, loss=loss, bucket=bucket, minn=minn, maxn=maxn, thread=thread, t=t, silent=silent,
-            encoding=encoding
-        )
-        self.label_prefix = '__label__'
+        self.lr = lr
+        self.lr_update_rate = lr_update_rate
+        self.dim = dim
+        self.ws = ws
+        self.epoch = epoch
+        self.min_count = min_count
+        self.neg = neg
+        self.word_ngrams = word_ngrams
+        self.loss = loss
+        self.bucket = bucket
+        self.minn = minn
+        self.maxn = maxn
+        self.thread = thread
+        self.t = t
+        self.silent = silent
+        self.encoding = encoding
         self._classifier = None
+        self._temp_file = None
+        self._temp_fname = None
 
     @property
     def classifier(self):
@@ -307,7 +354,7 @@ class FastText(BaseClassifier):
             with io.open(train_temp.name, 'w', encoding=self.encoding) as dataset:
                 for x, y in self._data_iter(documents, y):
                     if x and y:
-                        targets = ' '.join('%s%s' % (self.label_prefix, label) for label in y)
+                        targets = ' '.join('%s%s' % (self.LABEL_PREFIX, label) for label in y)
                         sample = ' '.join(x)
                         dataset.write(to_unicode(targets + ' ' + sample + '\n'))
             self.fit_file(train_temp.name)
@@ -315,8 +362,8 @@ class FastText(BaseClassifier):
     def fit_file(self, train_path, output_path=None, label_prefix=None):
         """
         Train the model from a training set file
-        :param train_path: Txt file of documents, with one or more `label_prefix`+`category`
-            (default `label_prefix` value is "__label__") at the beginning of each line
+        :param train_path: Txt file of documents, with one or more `LABEL_PREFIX`+`category`
+            (default `LABEL_PREFIX` value is "__label__") at the beginning of each line
         followed by the document tokens
         :param output_path: Path where to save the model, a `.bin` extension will be appended
         :param label_prefix:
@@ -324,12 +371,14 @@ class FastText(BaseClassifier):
 
         def train_classifier(output):
             self._classifier = fasttext.supervised(input_file=train_path, output=output,
-                                                   label_prefix=label_prefix or self.label_prefix, **self.get_params())
+                                                   label_prefix=label_prefix or self.LABEL_PREFIX, **self.get_params())
 
         if output_path is None:
-            with tempfile.NamedTemporaryFile(suffix='.bin') as model_temp:
-                train_classifier(model_temp.name[:-4])
+            self._temp_file = tempfile.NamedTemporaryFile(suffix='.bin')
+            self._temp_fname = self._temp_file.name
+            train_classifier(self._temp_fname[:-4])
         else:
+            self._temp_fname = output_path
             train_classifier(output_path)
 
     def predict_proba(self, documents):
@@ -352,3 +401,50 @@ class FastText(BaseClassifier):
         """
         return [((float(pred[0]) if self._label_is_num else pred[0])
                  if pred else None) for pred in self._classifier.predict(iter(' '.join(d) for d in documents), 1)]
+
+    def __enter__(self):
+        return self
+
+    def close(self):
+        if hasattr(self, 'temp_file') and self._temp_file is not None:
+            self._temp_file.close()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self.close()
+
+    def __del__(self):
+        return self.close()
+
+    def save(self, *args, **kwargs):
+        _temp_file = self._temp_file
+        self._temp_file = None
+        _classifier = self._classifier
+        self._classifier = None
+        kwargs['ignore'] = kwargs.get('ignore', ['_classifier', '_temp_file', '_temp_fname'])
+        super(FastText, self).save(*args, **kwargs)
+        self._temp_file = _temp_file
+        self._classifier = _classifier
+        if self._temp_fname is not None and self._temp_file:
+            # Get the file name of this object serialization
+            if any(args) and 'fname_or_handle' not in kwargs:
+                fname = args[0]
+            else:
+                fname = kwargs['fname_or_handle']
+            if not isinstance(fname, basestring):
+                fname = fname.name
+            fname += CLASSIFIER_FILE_SUFFIX + '.bin'
+            shutil.copyfile(self._temp_fname, fname)
+
+    save.__doc__ = gensim.utils.SaveLoad.save.__doc__
+
+    @classmethod
+    def load(cls, *args, **kwargs):
+        model = super(FastText, cls).load(*args, **kwargs)
+        # Get the file name of this object serialization
+        if any(args) and 'fname' not in kwargs:
+            kwargs['fname'] = args[0]
+        kwargs['fname'] += CLASSIFIER_FILE_SUFFIX + '.bin'
+        model._temp_fname = kwargs['fname']
+        model._temp_file = None
+        model._classifier = fasttext.load_model(kwargs['fname'], label_prefix=cls.LABEL_PREFIX)
+        return model

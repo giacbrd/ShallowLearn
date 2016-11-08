@@ -88,13 +88,14 @@ Persistence
 Any model can be serialized and de-serialized with the two methods ``save`` and ``load``.
 They overload the `SaveLoad <https://radimrehurek.com/gensim/utils.html#gensim.utils.SaveLoad>`_ interface of Gensim,
 so it is possible to control the cost on disk usage of the models, instead of simply *pickling* the objects.
+``save`` can create multiple files with names prefixed by the name given to the serialized model.
 
 .. code:: python
 
     >>> from shallowlearn.models import GensimFastText
     >>> clf = GensimFastText(size=100, min_count=0, loss='hs', iter=3, seed=66)
     >>> clf.save('./model')
-    >>> loaded = GensimFastText.load('./model')
+    >>> loaded = GensimFastText.load('./model') # it also creates ./model.CLF
 
 Benchmarks
 ----------

@@ -28,6 +28,7 @@ while each element in the iterable ``y`` (corresponding to an element in ``X``) 
 
 Models
 ------
+
 GensimFastText
 ~~~~~~~~~~~~~~
 A supervised learning model based on the fastText algorithm [1]_.
@@ -80,6 +81,7 @@ DeepAveragingNetworks
 
 Exclusive Features
 ------------------
+
 Persistence
 ~~~~~~~~~~~
 Any model can be serialized and de-serialized with the two methods ``save`` and ``load``.

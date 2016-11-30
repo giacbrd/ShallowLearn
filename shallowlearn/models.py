@@ -164,26 +164,25 @@ class GensimFastText(BaseClassifier):
         del params['pre_trained']
         self._classifier = LabeledWord2Vec(**params)
         if pre_trained is not None:
-            self._classifier.reset_from(pre_trained)
-            if hasattr(pre_trained, 'lvocab'):
-                self._build_label_info(pre_trained.lvocab.keys())
+            self._classifier.load_from(pre_trained)
+            self._build_label_info(self._classifier.lvocab.keys())
             self.set_params(
-                size=pre_trained.layer1_size,
-                alpha=pre_trained.alpha,
-                min_count=pre_trained.min_count,
-                max_vocab_size=pre_trained.max_vocab_size,
-                sample=pre_trained.sample,
-                workers=pre_trained.workers,
-                min_alpha=pre_trained.min_alpha,
-                cbow_mean=pre_trained.cbow_mean,
-                hashfxn=pre_trained.hashfxn,
-                null_word=pre_trained.null_word,
-                sorted_vocab=pre_trained.sorted_vocab,
-                batch_words=pre_trained.batch_words,
-                iter=pre_trained.iter,
-                seed=pre_trained.seed,
-                loss='softmax' if pre_trained.softmax else ('hs' if pre_trained.hs else 'ns'),
-                negative=pre_trained.negative
+                size=self._classifier.layer1_size,
+                alpha=self._classifier.alpha,
+                min_count=self._classifier.min_count,
+                max_vocab_size=self._classifier.max_vocab_size,
+                sample=self._classifier.sample,
+                workers=self._classifier.workers,
+                min_alpha=self._classifier.min_alpha,
+                cbow_mean=self._classifier.cbow_mean,
+                hashfxn=self._classifier.hashfxn,
+                null_word=self._classifier.null_word,
+                sorted_vocab=self._classifier.sorted_vocab,
+                batch_words=self._classifier.batch_words,
+                iter=self._classifier.iter,
+                seed=self._classifier.seed,
+                loss='softmax' if self._classifier.softmax else ('hs' if self._classifier.hs else 'ns'),
+                negative=self._classifier.negative
             )
 
     @property
@@ -193,6 +192,15 @@ class GensimFastText(BaseClassifier):
         :return: An instance of ``LabeledWord2Vec``, a CBOW model in wich input vectors are words, output vectors are labels.
         """
         return self._classifier
+
+    def fit_embeddings(self, documents):
+        """
+        Train word embeddings of the classification model, using the same parameter values for classification.
+        Similar to use a pre-trained model.
+        :param documents:
+        """
+        #FIXME
+        pass
 
     def fit(self, documents, y=None, **fit_params):
         """

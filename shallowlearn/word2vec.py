@@ -318,6 +318,11 @@ class LabeledWord2Vec(Word2Vec):
         return super(LabeledWord2Vec, self).train(sentences, total_words, word_count,
                                                   total_examples, queue_factor, report_delay)
 
+    @classmethod
+    def load_from(cls, other_model):
+        #FIXME
+        pass
+
     def score(self, **kwargs):
         raise NotImplementedError('This method has no reason to exist in this class (for now)')
 

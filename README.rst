@@ -31,6 +31,7 @@ Models
 
 GensimFastText
 ~~~~~~~~~~~~~~
+**Choose this model if your goal is classification with fastText!** (it is going to be the most stable and rich feature-wise)
 A supervised learning model based on the fastText algorithm [1]_.
 The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
 it takes advantage of its optimizations (e.g. Cython) and support.
@@ -54,7 +55,7 @@ FastText
 ~~~~~~~~
 The supervised algorithm of fastText implemented in `fastText.py <https://github.com/salestock/fastText.py>`_ ,
 which exposes an interface on the original C++ code.
-The current advantages of this class over ``GensimFastText`` are the *subwords* ant the *n-gram features* implemented
+The current advantages of this class over ``GensimFastText`` are the *subwords* and the *n-gram features* implemented
 via the *hashing trick*.
 The constructor arguments are equivalent to the original `supervised model
 <https://github.com/salestock/fastText.py#supervised-model>`_, except for ``input_file``, ``output`` and

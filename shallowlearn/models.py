@@ -129,7 +129,9 @@ class GensimFastText(BaseClassifier):
     thus cython routines). Default is 10000. (Larger batches will be passed if individual
     texts are longer than 10000 words, but the standard cython code truncates to that maximum.)
 
-    `pre_trained` can be set with a ``Word2Vec`` object in order to set pre-trained word vectors and vocabularies.
+    `pre_trained` can be set with a ``LabeledWord2Vec`` object,
+    or a ``Word2Vec`` or ``KeyedVectors'' object (from ``gensim.models``)
+    in order to set pre-trained word vectors and vocabularies.
     Use ``partial_fit`` method to learn a supervised model starting from the pre-trained one.
 
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
@@ -159,12 +161,13 @@ class GensimFastText(BaseClassifier):
             loss=loss,
             negative=argument_alternatives(negative, kwargs, ('neg',), logger)
         )
-        params = self.get_params()
-        # Convert name conventions from Scikit-learn to Gensim
-        del params['pre_trained']
-        self._classifier = LabeledWord2Vec(**params)
-        if pre_trained is not None:
-            self._classifier.load_from(pre_trained)
+        if pre_trained is None:
+            params = self.get_params()
+            # Convert name conventions from Scikit-learn to Gensim
+            del params['pre_trained']
+            self._classifier = LabeledWord2Vec(**params)
+        else:
+            self._classifier = LabeledWord2Vec.load_from(pre_trained)
             self._build_label_info(self._classifier.lvocab.keys())
             self.set_params(
                 size=self._classifier.layer1_size,

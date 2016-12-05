@@ -24,7 +24,8 @@ Import models from ``shallowlearn.models``, they implement the standard methods 
 e.g., ``fit(X, y)``, ``predict(X)``, etc.
 
 Data is raw text, each sample in the iterable ``X`` is a list of tokens (words of a document), 
-while each element in the iterable ``y`` (corresponding to an element in ``X``) can be a single label or a list in case of a multi-label training set. Obviously, ``y`` must be of the same size of ``X``.
+while each element in the iterable ``y`` (corresponding to an element in ``X``) can be a single label or a list in case
+of a multi-label training set. Obviously, ``y`` must be of the same size of ``X``.
 
 Models
 ------
@@ -49,6 +50,8 @@ Constructor argument names are a mix between the ones of Gensim and the ones of 
     >>> clf.fit([('i', 'am', 'tall'), ('you', 'are', 'fat')], ['yes', 'no'])
     >>> clf.predict([('tall', 'am', 'i')])
     ['yes']
+
+With method ``fit_embeddings(X)'' it is possible to pre-train word vectors, using the current parameter values of the model.
 
 FastText
 ~~~~~~~~

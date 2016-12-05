@@ -321,6 +321,10 @@ class LabeledWord2Vec(Word2Vec):
     @classmethod
     def load_from(cls, other_model):
         #FIXME
+        """
+        Import data and parameter values from other model
+        :param other_model: A ``LabeledWord2Vec`` object, or a ``Word2Vec`` or ``KeyedVectors`` object of Gensim
+        """
         pass
 
     def score(self, **kwargs):

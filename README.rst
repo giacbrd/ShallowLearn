@@ -51,7 +51,7 @@ Constructor argument names are a mix between the ones of Gensim and the ones of 
     >>> clf.predict([('tall', 'am', 'i')])
     ['yes']
 
-With method ``fit_embeddings(X)'' it is possible to pre-train word vectors, using the current parameter values of the model.
+With method ``fit_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
 
 FastText
 ~~~~~~~~

@@ -14,6 +14,7 @@ from numbers import Number
 
 import fasttext
 import gensim
+from gensim.models import Word2Vec
 from gensim.utils import to_unicode
 from six.moves import zip_longest
 
@@ -198,12 +199,15 @@ class GensimFastText(BaseClassifier):
 
     def fit_embeddings(self, documents):
         """
-        Train word embeddings of the classification model, using the same parameter values for classification.
+        Train word embeddings of the classification model, using the same parameter values for classification on Gensim ``Word2Vec``.
         Similar to use a pre-trained model.
         :param documents:
         """
-        #FIXME
-        pass
+        params = self.get_params()
+        del params['pre_trained']
+        del params['loss']
+        w2v = Word2Vec(sentences=documents, **params)
+        self._classifier = LabeledWord2Vec.load_from(w2v)
 
     def fit(self, documents, y=None, **fit_params):
         """

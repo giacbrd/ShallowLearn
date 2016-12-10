@@ -152,6 +152,10 @@ class LabeledWord2Vec(Word2Vec):
         kwargs['sg'] = 0
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
+        self.init_loss(kwargs, loss)
+        super(LabeledWord2Vec, self).__init__(**kwargs)
+
+    def init_loss(self, kwargs, loss):
         self.softmax = False
         if loss == 'hs':
             kwargs['hs'] = 1
@@ -165,7 +169,6 @@ class LabeledWord2Vec(Word2Vec):
             self.softmax = True
         else:
             raise ValueError('loss argument must be set with "ns", "hs" or "softmax"')
-        super(LabeledWord2Vec, self).__init__(**kwargs)
 
     def _raw_word_count(self, job):
         """Return the number of words in a given job."""
@@ -320,12 +323,23 @@ class LabeledWord2Vec(Word2Vec):
 
     @classmethod
     def load_from(cls, other_model):
-        #FIXME
         """
         Import data and parameter values from other model
         :param other_model: A ``LabeledWord2Vec`` object, or a ``Word2Vec`` or ``KeyedVectors`` object of Gensim
         """
-        pass
+        softmax = getattr(other_model, 'softmax', False)
+        if softmax:
+            loss = 'softmax'
+        elif other_model.negative:
+            loss = 'ns'
+        else:
+            loss = 'hs'
+        new_model = LabeledWord2Vec(loss=loss)
+        for attr in vars(other_model):
+            setattr(new_model, attr, getattr(other_model, attr, getattr(new_model, attr)))
+        new_model.lvocab = getattr(other_model, 'lvocab', other_model.vocab)
+        new_model.index2label = getattr(other_model, 'index2label', other_model.index2word)
+        return new_model
 
     def score(self, **kwargs):
         raise NotImplementedError('This method has no reason to exist in this class (for now)')

@@ -205,6 +205,7 @@ class GensimFastText(BaseClassifier):
         """
         params = self.get_params()
         del params['pre_trained']
+        # Word2Vec has not softmax
         if params['loss'] == 'softmax':
             params['loss'] = 'hs'
         LabeledWord2Vec.init_loss(LabeledWord2Vec(), params, params['loss'])
@@ -236,6 +237,8 @@ class GensimFastText(BaseClassifier):
         :param y: Iterator over lists or single labels, document target values
         """
         size = sum(1 for _ in self._data_iter(documents, y))
+        if not self._classifier.vocab or not self._classifier.lvocab:
+            raise ValueError('The classifier has not been previously trained')
         self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
     def _iter_predict(self, documents):

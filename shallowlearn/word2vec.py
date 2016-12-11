@@ -190,17 +190,16 @@ class LabeledWord2Vec(Word2Vec):
 
     # TODO use TaggedDocument from Gensim?
     # FIXME pass just an iterator over (doc, label) like for train
-    def build_vocab(self, sentences, labels, keep_raw_vocab=False, trim_rule=None, progress_per=10000, only_labels=False):
+    def build_vocab(self, sentences, labels, keep_raw_vocab=False, trim_rule=None, progress_per=10000):
         """
         Build vocabularies from a sequence of sentences/documents (can be a once-only generator stream) and the set of labels.
         Each sentence must be a list of unicode strings. `labels` is an iterable over the label names.
 
         """
         # Build words and labels vocabularies in two different objects
-        if not only_labels:
-            self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
-            self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
-            self.finalize_vocab()  # build tables & arrays
+        self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
+        self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
+        self.finalize_vocab()  # build tables & arrays
         self.build_lvocab(labels, progress_per=progress_per)
 
     def build_lvocab(self, labels, progress_per=10000):

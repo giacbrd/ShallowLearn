@@ -205,6 +205,9 @@ class GensimFastText(BaseClassifier):
         """
         params = self.get_params()
         del params['pre_trained']
+        if params['loss'] == 'softmax':
+            params['loss'] = 'hs'
+        LabeledWord2Vec.init_loss(LabeledWord2Vec(), params, params['loss'])
         del params['loss']
         w2v = Word2Vec(sentences=documents, **params)
         self._classifier = LabeledWord2Vec.load_from(w2v)
@@ -219,8 +222,11 @@ class GensimFastText(BaseClassifier):
         """
         # TODO if y=None learn a one-class classifier
         self._build_label_info(y)
+        #FIXME the vocab of a pre-trained model is definitive, it should be updated instead (see Gensim 0.13.3)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
+        elif not self._classifier.lvocab:
+            self._classifier.build_lvocab(self._label_set)
         self._classifier.train(self._data_iter(documents, y))
 
     def partial_fit(self, documents, y):

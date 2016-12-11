@@ -40,7 +40,8 @@ def bunch_of_models():
             LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0, **kwarg)
         ])
     targets = frozenset(
-        target for targets in dataset_targets for target in BaseClassifier._target_list(targets))
+        target for targets in dataset_targets for target in BaseClassifier._target_list(targets)
+    )
     for model in models:
         model.build_vocab(dataset_samples, targets)
         model.train(zip(dataset_samples, dataset_targets))

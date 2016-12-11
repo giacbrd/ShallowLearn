@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 try:
 
     from .word2vec_inner import train_batch_labeled_cbow, score_document_labeled_cbow as sdlc
-    from .word2vec_inner import FAST_VERSION, MAX_WORDS_IN_BATCH, ciao
+    from .word2vec_inner import FAST_VERSION, MAX_WORDS_IN_BATCH
 
     logger.debug('Fast version of {0} is being used'.format(__name__))
 
@@ -203,6 +203,7 @@ class LabeledWord2Vec(Word2Vec):
         self.build_lvocab(labels, progress_per=progress_per)
 
     def build_lvocab(self, labels, progress_per=10000):
+        """Only build data structures for labels. `labels` is an iterable over the label names."""
         class FakeSelf(LabeledWord2Vec):
             def __init__(self, max_vocab_size, min_count, sample, estimate_memory):
                 self.max_vocab_size = max_vocab_size
@@ -226,7 +227,7 @@ class LabeledWord2Vec(Word2Vec):
         self.finalize_lvocab()
 
     def finalize_vocab(self):
-        """Build tables and model weights based on final vocabulary settings."""
+        """Build tables and model weights based on final word vocabulary settings."""
         if not self.index2word:
             self.scale_vocab()
         if self.sorted_vocab:
@@ -242,6 +243,7 @@ class LabeledWord2Vec(Word2Vec):
         self.reset_weights(outputs=False)
 
     def finalize_lvocab(self):
+        """Build tables and model weights based on final label vocabulary settings."""
         if self.hs:
             class FakeSelf(LabeledWord2Vec):
                 def __init__(self, vocab):

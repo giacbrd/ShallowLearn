@@ -6,6 +6,11 @@
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
+pre_docs = (
+    ('i', 'study', 'machine', 'learning', 'to', 'drive', 'a', 'car'),
+    ('important', 'topics', 'of', 'this', 'week', 'are', 'today', 'cheers'),
+    ('like', 'my', 'faster', 'bike', 'supervised', 'is', 'dedicated', 'to', 'me'),
+)
 dataset_samples = (
     ('i', 'like', 'to', 'study', 'machine', 'learning'),
     ('machine', 'learning', 'is', 'important'),

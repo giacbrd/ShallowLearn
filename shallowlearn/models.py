@@ -14,6 +14,7 @@ from numbers import Number
 
 import fasttext
 import gensim
+from gensim.models import Word2Vec
 from gensim.utils import to_unicode
 from six.moves import zip_longest
 
@@ -129,7 +130,9 @@ class GensimFastText(BaseClassifier):
     thus cython routines). Default is 10000. (Larger batches will be passed if individual
     texts are longer than 10000 words, but the standard cython code truncates to that maximum.)
 
-    `pre_trained` can be set with a ``Word2Vec`` object in order to set pre-trained word vectors and vocabularies.
+    `pre_trained` can be set with a ``LabeledWord2Vec`` object,
+    or a ``Word2Vec`` or ``KeyedVectors'' object (from ``gensim.models``)
+    in order to set pre-trained word vectors and vocabularies.
     Use ``partial_fit`` method to learn a supervised model starting from the pre-trained one.
 
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
@@ -159,31 +162,31 @@ class GensimFastText(BaseClassifier):
             loss=loss,
             negative=argument_alternatives(negative, kwargs, ('neg',), logger)
         )
-        params = self.get_params()
-        # Convert name conventions from Scikit-learn to Gensim
-        del params['pre_trained']
-        self._classifier = LabeledWord2Vec(**params)
-        if pre_trained is not None:
-            self._classifier.reset_from(pre_trained)
-            if hasattr(pre_trained, 'lvocab'):
-                self._build_label_info(pre_trained.lvocab.keys())
+        if pre_trained is None:
+            params = self.get_params()
+            # Convert name conventions from Scikit-learn to Gensim
+            del params['pre_trained']
+            self._classifier = LabeledWord2Vec(**params)
+        else:
+            self._classifier = LabeledWord2Vec.load_from(pre_trained)
+            self._build_label_info(self._classifier.lvocab.keys())
             self.set_params(
-                size=pre_trained.layer1_size,
-                alpha=pre_trained.alpha,
-                min_count=pre_trained.min_count,
-                max_vocab_size=pre_trained.max_vocab_size,
-                sample=pre_trained.sample,
-                workers=pre_trained.workers,
-                min_alpha=pre_trained.min_alpha,
-                cbow_mean=pre_trained.cbow_mean,
-                hashfxn=pre_trained.hashfxn,
-                null_word=pre_trained.null_word,
-                sorted_vocab=pre_trained.sorted_vocab,
-                batch_words=pre_trained.batch_words,
-                iter=pre_trained.iter,
-                seed=pre_trained.seed,
-                loss='softmax' if pre_trained.softmax else ('hs' if pre_trained.hs else 'ns'),
-                negative=pre_trained.negative
+                size=self._classifier.layer1_size,
+                alpha=self._classifier.alpha,
+                min_count=self._classifier.min_count,
+                max_vocab_size=self._classifier.max_vocab_size,
+                sample=self._classifier.sample,
+                workers=self._classifier.workers,
+                min_alpha=self._classifier.min_alpha,
+                cbow_mean=self._classifier.cbow_mean,
+                hashfxn=self._classifier.hashfxn,
+                null_word=self._classifier.null_word,
+                sorted_vocab=self._classifier.sorted_vocab,
+                batch_words=self._classifier.batch_words,
+                iter=self._classifier.iter,
+                seed=self._classifier.seed,
+                loss='softmax' if self._classifier.softmax else ('hs' if self._classifier.hs else 'ns'),
+                negative=self._classifier.negative
             )
 
     @property
@@ -193,6 +196,22 @@ class GensimFastText(BaseClassifier):
         :return: An instance of ``LabeledWord2Vec``, a CBOW model in wich input vectors are words, output vectors are labels.
         """
         return self._classifier
+
+    def fit_embeddings(self, documents):
+        """
+        Train word embeddings of the classification model, using the same parameter values for classification on Gensim ``Word2Vec``.
+        Similar to use a pre-trained model.
+        :param documents:
+        """
+        params = self.get_params()
+        del params['pre_trained']
+        # Word2Vec has not softmax
+        if params['loss'] == 'softmax':
+            params['loss'] = 'hs'
+        LabeledWord2Vec.init_loss(LabeledWord2Vec(), params, params['loss'])
+        del params['loss']
+        w2v = Word2Vec(sentences=documents, **params)
+        self._classifier = LabeledWord2Vec.load_from(w2v)
 
     def fit(self, documents, y=None, **fit_params):
         """
@@ -204,8 +223,11 @@ class GensimFastText(BaseClassifier):
         """
         # TODO if y=None learn a one-class classifier
         self._build_label_info(y)
+        #FIXME the vocab of a pre-trained model is definitive, it should be updated instead (see Gensim 0.13.3)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
+        elif not self._classifier.lvocab:
+            self._classifier.build_lvocab(self._label_set)
         self._classifier.train(self._data_iter(documents, y))
 
     def partial_fit(self, documents, y):
@@ -215,6 +237,8 @@ class GensimFastText(BaseClassifier):
         :param y: Iterator over lists or single labels, document target values
         """
         size = sum(1 for _ in self._data_iter(documents, y))
+        if not self._classifier.vocab or not self._classifier.lvocab:
+            raise ValueError('The classifier has not been previously trained')
         self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
     def _iter_predict(self, documents):

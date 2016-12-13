@@ -33,6 +33,7 @@ Models
 GensimFastText
 ~~~~~~~~~~~~~~
 **Choose this model if your goal is classification with fastText!** (it is going to be the most stable and rich feature-wise)
+
 A supervised learning model based on the fastText algorithm [1]_.
 The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
 it takes advantage of its optimizations (e.g. Cython) and support.

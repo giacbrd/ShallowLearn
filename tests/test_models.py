@@ -9,7 +9,7 @@ import tempfile
 import pytest
 
 from shallowlearn.models import GensimFastText, FastText
-from tests.resources import dataset_targets, dataset_samples
+from tests.resources import dataset_targets, dataset_samples, pre_docs
 from tests.test_word2vec import bunch_of_models
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -57,7 +57,7 @@ def test_gensim_fit(bunch_of_gensim_classifiers):
         params['pre_trained'] = None
         clf = GensimFastText(**params)
         clf.fit(dataset_samples, dataset_targets)
-        _predict(model)
+        _predict(clf)
 
 
 def test_fasttext_predict(bunch_of_fasttext_classifiers):
@@ -81,9 +81,16 @@ def test_persistence(bunch_of_gensim_classifiers, bunch_of_fasttext_classifiers)
             assert model.predict(example) == loaded.predict(example)
 
 
-def duplicate_arguments():
+def test_duplicate_arguments():
     clf = GensimFastText(seed=9, random_state=10, neg=20, epoch=25, negative=11)
     params = clf.get_params()
     assert params['seed'] == clf.seed == 10
     assert params['negative'] == clf.negative == 20
     assert params['iter'] == clf.iter == 25
+
+
+def test_fit_embeddings(bunch_of_gensim_classifiers):
+    for model in bunch_of_gensim_classifiers:
+        model.fit_embeddings(pre_docs)
+        model.fit(dataset_samples, dataset_targets)
+        _predict(model)

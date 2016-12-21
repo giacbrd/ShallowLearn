@@ -24,13 +24,16 @@ Import models from ``shallowlearn.models``, they implement the standard methods 
 e.g., ``fit(X, y)``, ``predict(X)``, etc.
 
 Data is raw text, each sample in the iterable ``X`` is a list of tokens (words of a document), 
-while each element in the iterable ``y`` (corresponding to an element in ``X``) can be a single label or a list in case of a multi-label training set. Obviously, ``y`` must be of the same size of ``X``.
+while each element in the iterable ``y`` (corresponding to an element in ``X``) can be a single label or a list in case
+of a multi-label training set. Obviously, ``y`` must be of the same size of ``X``.
 
 Models
 ------
 
 GensimFastText
 ~~~~~~~~~~~~~~
+**Choose this model if your goal is classification with fastText!** (it is going to be the most stable and rich feature-wise)
+
 A supervised learning model based on the fastText algorithm [1]_.
 The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/gensim>`_,
 it takes advantage of its optimizations (e.g. Cython) and support.
@@ -53,11 +56,13 @@ In this example document features are word unigrams and bigrams, limiting the fe
     >>> clf.predict([('tall', 'am', 'i')])
     ['yes']
 
+With method ``fit_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
+
 FastText
 ~~~~~~~~
 The supervised algorithm of fastText implemented in `fastText.py <https://github.com/salestock/fastText.py>`_ ,
 which exposes an interface on the original C++ code.
-The current advantages of this class over ``GensimFastText`` are the *subwords* ant the *n-gram features* implemented
+The current advantages of this class over ``GensimFastText`` are the *subwords* and the *n-gram features* implemented
 via the *hashing trick*.
 The constructor arguments are equivalent to the original `supervised model
 <https://github.com/salestock/fastText.py#supervised-model>`_, except for ``input_file``, ``output`` and
@@ -91,7 +96,9 @@ Persistence
 Any model can be serialized and de-serialized with the two methods ``save`` and ``load``.
 They overload the `SaveLoad <https://radimrehurek.com/gensim/utils.html#gensim.utils.SaveLoad>`_ interface of Gensim,
 so it is possible to control the cost on disk usage of the models, instead of simply *pickling* the objects.
-``save`` can create multiple files with names prefixed by the name given to the serialized model.
+The original interface also allows to use compression on the serialization outputs.
+
+``save`` may create multiple files with names prefixed by the name given to the serialized model.
 
 .. code:: python
 

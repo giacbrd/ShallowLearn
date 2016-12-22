@@ -16,13 +16,21 @@ def argument_alternatives(original_value, kwargs, alternative_names, logger):
 
 
 class HashIter(object):
-    def __init__(self, documents, bucket):
+    def __init__(self, documents, bucket, with_labels=False):
+        self.with_labels = with_labels
         self.bucket = bucket
         self.documents = documents
 
     def __iter__(self):
         for doc in self.documents:
-            yield [self.ft_hash(word) % self.bucket for word in doc]
+            if self.with_labels:
+                yield (self.hash_doc(doc[0], self.bucket), doc[1])
+            else:
+                yield self.hash_doc(doc, self.bucket)
+
+    @classmethod
+    def hash_doc(cls, document, bucket):
+        return [cls.ft_hash(word) % bucket for word in document]
 
     @classmethod
     def ft_hash(cls, string):

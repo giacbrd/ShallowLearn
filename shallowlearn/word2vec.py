@@ -16,6 +16,8 @@ from gensim import matutils
 from gensim.models import Word2Vec
 from gensim.models.word2vec import train_cbow_pair, Vocab
 
+from .utils import HashIter
+
 try:
     from queue import Queue, Empty
 except ImportError:
@@ -37,6 +39,8 @@ try:
     logger.debug('Fast version of {0} is being used'.format(__name__))
 
     def score_document_labeled_cbow(model, document, labels=None, work=None, neu1=None):
+        if model.bucket > 0:
+            document = HashIter.hash_doc(document, model.bucket)
         if work is None:
             work = ones(len(model.lvocab) if labels is None else len(labels), dtype=REAL)
         if neu1 is None:
@@ -97,6 +101,9 @@ except ImportError:
 
     def score_document_labeled_cbow(model, document, labels=None, work=None, neu1=None):
 
+        if model.bucket > 0:
+            document = HashIter.hash_doc(document, model.bucket)
+
         word_vocabs = [model.vocab[w] for w in document if w in model.vocab]
 
         if labels is not None:
@@ -132,7 +139,7 @@ except ImportError:
 
 
 class LabeledWord2Vec(Word2Vec):
-    def __init__(self, loss='softmax', **kwargs):
+    def __init__(self, loss='softmax', bucket=0, **kwargs):
         """
         Exactly as the parent class `Word2Vec <https://radimrehurek.com/gensim/models/word2vec.html#gensim.models.word2vec.Word2Vec>`_.
         Some parameter values are overwritten (e.g. sg=0 because we never use skip-gram here), look at the code for details.
@@ -142,6 +149,9 @@ class LabeledWord2Vec(Word2Vec):
         as loss function, together with the parameter `negative`. With "hs" hierarchical softmax will be used,
         while with "softmax" (default) the sandard softmax function (the other two are "approximations").
          The `hs` argument does not exist anymore.
+
+        `bucket` is the maximum number of hashed words, i.e., we limit the feature space to this number,
+        ergo we use the hashing trick in the word vocabulary. Default to 0, NO hashing trick
 
         It basically builds two vocabularies, one for the sample words and one for the labels,
         so that the input layer is only made of words, while the output layer is only made of labels.
@@ -153,6 +163,7 @@ class LabeledWord2Vec(Word2Vec):
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
         self.softmax = self.init_loss(kwargs, loss)
+        self.bucket = bucket
         super(LabeledWord2Vec, self).__init__(**kwargs)
 
     def init_loss(self, kwargs, loss):
@@ -196,6 +207,8 @@ class LabeledWord2Vec(Word2Vec):
         Each sentence must be a list of unicode strings. `labels` is an iterable over the label names.
 
         """
+        if self.bucket > 0:
+            sentences = HashIter(sentences, self.bucket, with_labels=False)
         # Build words and labels vocabularies in two different objects
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
         self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
@@ -317,6 +330,8 @@ class LabeledWord2Vec(Word2Vec):
         sentences are the same as those that were used to initially build the vocabulary.
 
         """
+        if self.bucket > 0:
+            sentences = HashIter(sentences, self.bucket, with_labels=True)
         if FAST_VERSION < 0:
             import warnings
             warnings.warn("C extension not loaded for Word2Vec, training will be slow. "

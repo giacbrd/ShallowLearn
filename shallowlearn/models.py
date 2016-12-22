@@ -135,13 +135,16 @@ class GensimFastText(BaseClassifier):
     in order to set pre-trained word vectors and vocabularies.
     Use ``partial_fit`` method to learn a supervised model starting from the pre-trained one.
 
+    `bucket` is the maximum number of hashed words, i.e., we limit the feature space to this number,
+    ergo we use the hashing trick in the word vocabulary. Default to 0, NO hashing trick
+
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
 
     """
 
     def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5,
                  workers=3, min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
-                 batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, pre_trained=None, bucket=0, **kwargs):
+                 batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, bucket=0, pre_trained=None, **kwargs):
         super(GensimFastText, self).__init__()
         self.set_params(
             size=argument_alternatives(size, kwargs, ('dim',), logger),
@@ -167,7 +170,6 @@ class GensimFastText(BaseClassifier):
             params = self.get_params()
             # Convert name conventions from Scikit-learn to Gensim
             del params['pre_trained']
-            del params['bucket']
             self._classifier = LabeledWord2Vec(**params)
         else:
             self._classifier = LabeledWord2Vec.load_from(pre_trained)
@@ -189,21 +191,8 @@ class GensimFastText(BaseClassifier):
                 seed=self._classifier.seed,
                 loss='softmax' if self._classifier.softmax else ('hs' if self._classifier.hs else 'ns'),
                 negative=self._classifier.negative,
-                bucket=0
+                bucket=self._classifier.bucket,
             )
-
-    def _hash_words(func):
-        def docs_fun(obj, *args, **kwargs):
-            if obj.bucket > 0:
-                documents = HashIter(kwargs.get('documents', args[0]), obj.bucket)
-                if len(args) > 1:
-                    args = list(args)
-                    args[0] = documents
-                else:
-                    kwargs['documents'] = documents
-            return func(obj, *args, **kwargs)
-
-        return docs_fun
 
     @property
     def classifier(self):
@@ -230,7 +219,6 @@ class GensimFastText(BaseClassifier):
         w2v = Word2Vec(sentences=documents, **params)
         self._classifier = LabeledWord2Vec.load_from(w2v)
 
-    @_hash_words
     def fit(self, documents, y=None, **fit_params):
         """
         Train the supervised model with a labeled training set
@@ -265,7 +253,6 @@ class GensimFastText(BaseClassifier):
             result.sort(key=operator.itemgetter(1), reverse=True)
             yield result
 
-    @_hash_words
     def predict_proba(self, documents):
         """
         :param documents: Iterator over lists of words
@@ -273,11 +260,9 @@ class GensimFastText(BaseClassifier):
         """
         return list(self._iter_predict(documents))
 
-    @_hash_words
     def decision_function(self, documents):
         return self.predict_proba(documents)
 
-    @_hash_words
     def predict(self, documents):
         """
         :param documents: Iterator over lists of words
@@ -313,8 +298,6 @@ class GensimFastText(BaseClassifier):
         kwargs['fname'] += CLASSIFIER_FILE_SUFFIX
         model._classifier = LabeledWord2Vec.load(*args, **kwargs)
         return model
-
-    _hash_words = staticmethod(_hash_words)
 
 
 class FastText(BaseClassifier):

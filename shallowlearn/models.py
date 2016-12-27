@@ -18,7 +18,7 @@ from gensim.models import Word2Vec
 from gensim.utils import to_unicode
 from six.moves import zip_longest
 
-from .utils import argument_alternatives
+from .utils import argument_alternatives, HashIter
 
 try:
     basestring = basestring
@@ -135,13 +135,16 @@ class GensimFastText(BaseClassifier):
     in order to set pre-trained word vectors and vocabularies.
     Use ``partial_fit`` method to learn a supervised model starting from the pre-trained one.
 
+    `bucket` is the maximum number of hashed words, i.e., we limit the feature space to this number,
+    ergo we use the hashing trick in the word vocabulary. Default to 0, NO hashing trick
+
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
 
     """
 
     def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5,
                  workers=3, min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
-                 batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, pre_trained=None, **kwargs):
+                 batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, bucket=0, pre_trained=None, **kwargs):
         super(GensimFastText, self).__init__()
         self.set_params(
             size=argument_alternatives(size, kwargs, ('dim',), logger),
@@ -160,7 +163,8 @@ class GensimFastText(BaseClassifier):
             iter=argument_alternatives(iter, kwargs, ('epoch', 'max_iter'), logger),
             seed=argument_alternatives(seed, kwargs, ('random_state',), logger),
             loss=loss,
-            negative=argument_alternatives(negative, kwargs, ('neg',), logger)
+            negative=argument_alternatives(negative, kwargs, ('neg',), logger),
+            bucket=bucket
         )
         if pre_trained is None:
             params = self.get_params()
@@ -186,7 +190,8 @@ class GensimFastText(BaseClassifier):
                 iter=self._classifier.iter,
                 seed=self._classifier.seed,
                 loss='softmax' if self._classifier.softmax else ('hs' if self._classifier.hs else 'ns'),
-                negative=self._classifier.negative
+                negative=self._classifier.negative,
+                bucket=self._classifier.bucket,
             )
 
     @property
@@ -205,6 +210,7 @@ class GensimFastText(BaseClassifier):
         """
         params = self.get_params()
         del params['pre_trained']
+        del params['bucket']
         # Word2Vec has not softmax
         if params['loss'] == 'softmax':
             params['loss'] = 'hs'
@@ -236,10 +242,11 @@ class GensimFastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :param y: Iterator over lists or single labels, document target values
         """
-        size = sum(1 for _ in self._data_iter(documents, y))
         if not self._classifier.vocab or not self._classifier.lvocab:
-            raise ValueError('The classifier has not been previously trained')
-        self._classifier.train(self._data_iter(documents, y), total_examples=size)
+            self.fit(documents, y)
+        else:
+            size = sum(1 for _ in self._data_iter(documents, y))
+            self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
     def _iter_predict(self, documents):
         for doc in documents:

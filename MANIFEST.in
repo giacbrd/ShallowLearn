@@ -7,3 +7,4 @@ include shallowlearn/word2vec_inner.c
 include shallowlearn/word2vec_inner.pyx
 include shallowlearn/word2vec_inner.pxd
 include scripts/document_classification_20newsgroups.py
+include scripts/plot_out_of_core_classification.py

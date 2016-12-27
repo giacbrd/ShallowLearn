@@ -43,7 +43,10 @@ Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trai
 passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (the latter is retrievable from a
 ``GensimFastText`` model by the attribute ``classifier``).
 
+Using the hashing trick together with ``partial_fit(X, y)`` yield a powerful *online* text classifier.
+
 Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this class docstring).
+In this example document features are word unigrams and bigrams, limiting the feature space to XXX with feature hashing.
 
 .. code:: python
 

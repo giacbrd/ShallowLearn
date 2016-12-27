@@ -23,7 +23,7 @@ def bunch_of_gensim_classifiers():
 @pytest.fixture
 def bunch_of_fasttext_classifiers():
     models = []
-    for kwarg in ({'loss': 'softmax'},):
+    for kwarg in ({'loss': 'softmax'}, {'loss': 'softmax', 'bucket': 5}, {'loss': 'softmax', 'bucket': 100}):
         models.extend([
             FastText(epoch=1, dim=30, min_count=0, **kwarg),
             FastText(epoch=1, lr=1.0, dim=300, min_count=0, **kwarg),

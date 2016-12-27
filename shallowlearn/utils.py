@@ -4,6 +4,7 @@
 # Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 import numpy
+import zlib
 
 
 def argument_alternatives(original_value, kwargs, alternative_names, logger):
@@ -30,13 +31,9 @@ class HashIter(object):
 
     @classmethod
     def hash_doc(cls, document, bucket):
-        return [cls.ft_hash(word) % bucket for word in document]
+        return [cls.hash(word) % bucket for word in document]
 
     @classmethod
-    def ft_hash(cls, string):
-        # Reproduces hash method used in fastText
-        h = numpy.uint32(2166136261)
-        for c in string:
-            h ^= numpy.uint32(ord(c))
-            h *= numpy.uint32(16777619)
-        return h
+    def hash(cls, string):
+        # the same used in ``HashDictionary`` in Gensim
+        return zlib.adler32(string)

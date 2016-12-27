@@ -40,9 +40,11 @@ def bunch_of_fasttext_classifiers():
 def _predict(model):
     example = [('study', 'to', 'learn', 'me', 'study', 'to', 'learn', 'me', 'machine', 'learning')]
     pr = model.predict_proba(example)
-    assert pr[0][0][1] > .33
+    pr = list(pr[0])
+    pr.sort(reverse=True)
+    assert pr[0] > .33
     p = model.predict(example)
-    if pr[0][0][1] - pr[0][1][1] > .000001:
+    if pr[0] - pr[1] > .000001:
         assert p == ['aa'] or p == ['b']
 
 

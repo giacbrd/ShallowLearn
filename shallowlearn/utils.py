@@ -4,7 +4,6 @@
 # Copyright (C) 2016 Giacomo Berardi <giacbrd.com>
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 import numpy
-from gensim.utils import to_utf8
 
 
 def argument_alternatives(original_value, kwargs, alternative_names, logger):
@@ -37,7 +36,7 @@ class HashIter(object):
     def hash(cls, string):
         # Reproduces hash method used in fastText
         h = numpy.uint32(2166136261)
-        for c in to_utf8(string):
+        for c in str(string).encode():
             h ^= numpy.uint32(ord(c))
             h *= numpy.uint32(16777619)
         return h

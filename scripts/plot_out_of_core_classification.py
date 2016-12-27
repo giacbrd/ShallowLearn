@@ -58,6 +58,8 @@ from sklearn.naive_bayes import MultinomialNB
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 
+logger = logging.getLogger(__name__)
+
 
 def _not_in_sphinx():
     # Hack to detect whether we are running by the sphinx builder
@@ -273,7 +275,7 @@ X_test_tokenized = [list(tokenize(doc)) for doc in X_test_text]
 vectorizing_time = time.time() - tick
 test_stats['n_test'] += len(y_test)
 test_stats['n_test_pos'] += sum(y_test)
-print("Test set is %d documents (%d positive)" % (len(y_test), sum(y_test)))
+logger.info("Test set is %d documents (%d positive)" % (len(y_test), sum(y_test)))
 
 
 def progress(cls_name, stats):
@@ -342,9 +344,9 @@ for i, (X_train_text, y_train) in enumerate(minibatch_iterators):
         cls_stats[cls_name]['runtime_history'].append(run_history)
 
         if i % 3 == 0:
-            print(progress(cls_name, cls_stats[cls_name]))
+            logger.info(progress(cls_name, cls_stats[cls_name]))
     if i % 3 == 0:
-        print('\n')
+        logger.info('\n')
 
 
 ###############################################################################
@@ -451,4 +453,4 @@ try:
 
 except ImportError:
 
-    print("WARNING: matplotlib not installed, no plots can be shown")
+    logger.warn("WARNING: matplotlib not installed, no plots can be shown")

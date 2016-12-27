@@ -43,7 +43,9 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def __init__(self):
         self._classifier = None
         self._label_set = None
+        self._label_count = None
         self._label_is_num = None
+        self.classes_ = None
 
     @classmethod
     def _target_list(cls, targets):
@@ -51,7 +53,13 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
 
     def _build_label_info(self, y):
         self._label_set = frozenset(target for targets in y for target in self._target_list(targets))
+        self.classes_ = list(self._label_set)
+        self._label_count = len(self._label_set)
         self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
+
+    def _extract_prediction(self, prediction):
+        pred_map = dict(prediction)
+        return tuple(pred_map[label] for label in self.classes_)
 
     @classmethod
     def _data_iter(cls, documents, y):
@@ -251,7 +259,6 @@ class GensimFastText(BaseClassifier):
     def _iter_predict(self, documents):
         for doc in documents:
             result = list(score_document_labeled_cbow(self._classifier, document=doc))
-            result.sort(key=operator.itemgetter(1), reverse=True)
             yield result
 
     def predict_proba(self, documents):
@@ -259,7 +266,7 @@ class GensimFastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
         """
-        return list(self._iter_predict(documents))
+        return [self._extract_prediction(prediction) for prediction in self._iter_predict(documents)]
 
     def decision_function(self, documents):
         return self.predict_proba(documents)
@@ -270,7 +277,7 @@ class GensimFastText(BaseClassifier):
         :return: For each document, the one most probable label (i.e. the classification)
         """
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
-        return [predictions[0][0] for predictions in self._iter_predict(documents)]
+        return [max(predictions, key=operator.itemgetter(1))[0] for predictions in self._iter_predict(documents)]
 
     def save(self, *args, **kwargs):
         kwargs['ignore'] = kwargs.get('ignore', ['_classifier'])
@@ -421,9 +428,8 @@ class FastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
         """
-        result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), len(self._label_set))
-        uniform = 1. / len(self._label_set)
-        result = [[(l, uniform) for l in self._label_set] if not any(r) else r for r in result]
+        result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), self._label_count)
+        result = [[1. / self._label_count] * self._label_count if not any(r) else self._extract_prediction(r) for r in result]
         return result
 
     def decision_function(self, documents):

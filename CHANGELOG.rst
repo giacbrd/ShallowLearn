@@ -10,6 +10,7 @@ Changelog
     - True online earning with partial_fit(), the vocabulary is incrementally updated
 * New version of fastText.py: 0.8.2
 * New version of Gensim: 0.13.3
+* Fixed ``predict_proba`` output format
 
 `0.0.4 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.4>`_ (2016-11-05)
 ----------------------------------------------------------------------------------

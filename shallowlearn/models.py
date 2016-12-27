@@ -337,12 +337,15 @@ class FastText(BaseClassifier):
     `silent` = disable the log output from the C++ extension [1]
 
     `encoding` = specify input_file encoding [utf-8]
+
+    `pretrained_vectors` = pretrained word vectors (.vec file) for supervised learning [None]
     """
 
     LABEL_PREFIX = '__label__'
 
     def __init__(self, lr=0.1, lr_update_rate=100, dim=100, ws=5, epoch=5, min_count=1, neg=5, word_ngrams=1,
-                 loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8'):
+                 loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8',
+                 pretrained_vectors=None):
         super(FastText, self).__init__()
         self.lr = lr
         self.lr_update_rate = lr_update_rate
@@ -360,6 +363,7 @@ class FastText(BaseClassifier):
         self.t = t
         self.silent = silent
         self.encoding = encoding
+        self.pretrained_vectors = pretrained_vectors or ''
         self._classifier = None
         self._temp_file = None
         self._temp_fname = None

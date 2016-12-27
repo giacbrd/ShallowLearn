@@ -1381,6 +1381,7 @@ static const char __pyx_k_y[] = "y";
 static const char __pyx_k__9[] = "*";
 static const char __pyx_k_hs[] = "hs";
 static const char __pyx_k_np[] = "np";
+static const char __pyx_k_wv[] = "wv";
 static const char __pyx_k_doc[] = "doc";
 static const char __pyx_k_REAL[] = "REAL";
 static const char __pyx_k_code[] = "code";
@@ -1587,6 +1588,7 @@ static PyObject *__pyx_n_s_word;
 static PyObject *__pyx_n_s_word_locks;
 static PyObject *__pyx_n_s_work;
 static PyObject *__pyx_n_s_work_2;
+static PyObject *__pyx_n_s_wv;
 static PyObject *__pyx_n_s_x;
 static PyObject *__pyx_n_s_y;
 static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cbow(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_model, PyObject *__pyx_v_sentences, PyObject *__pyx_v_alpha, PyObject *__pyx_v__work, PyObject *__pyx_v__neu1); /* proto */
@@ -3217,7 +3219,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *     cdef int sample = (model.sample != 0)
  *     cdef int cbow_mean = model.cbow_mean             # <<<<<<<<<<<<<<
  * 
- *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.syn0))
+ *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.wv.syn0))
  */
   __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_cbow_mean); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
@@ -3228,28 +3230,31 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
   /* "shallowlearn/word2vec_inner.pyx":236
  *     cdef int cbow_mean = model.cbow_mean
  * 
- *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.syn0))             # <<<<<<<<<<<<<<
+ *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.wv.syn0))             # <<<<<<<<<<<<<<
  *     cdef REAL_t *word_locks = <REAL_t *>(np.PyArray_DATA(model.syn0_lockf))
  *     cdef REAL_t *work
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_wv); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 236, __pyx_L1_error)
-  __pyx_v_syn0 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_syn0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_v_syn0 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":237
  * 
- *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.syn0))
+ *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.wv.syn0))
  *     cdef REAL_t *word_locks = <REAL_t *>(np.PyArray_DATA(model.syn0_lockf))             # <<<<<<<<<<<<<<
  *     cdef REAL_t *work
  *     cdef REAL_t _alpha = alpha
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn0_lockf); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 237, __pyx_L1_error)
-  __pyx_v_word_locks = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn0_lockf); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_v_word_locks = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":239
  *     cdef REAL_t *word_locks = <REAL_t *>(np.PyArray_DATA(model.syn0_lockf))
@@ -3268,10 +3273,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *     cdef int label_count
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_layer1_size); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 240, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 240, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_layer1_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 240, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 240, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_size = __pyx_t_2;
 
   /* "shallowlearn/word2vec_inner.pyx":249
@@ -3302,11 +3307,11 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  * 
  *     if negative or softmax:
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 267, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 267, __pyx_L1_error)
-    __pyx_v_syn1 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 267, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 267, __pyx_L1_error)
+    __pyx_v_syn1 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":266
  *     cdef unsigned long long next_random
@@ -3342,11 +3347,11 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *         label_count = model.syn1neg.shape[0]
  *     if negative:
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1neg); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 270, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 270, __pyx_L1_error)
-    __pyx_v_syn1neg = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1neg); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 270, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 270, __pyx_L1_error)
+    __pyx_v_syn1neg = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":271
  *     if negative or softmax:
@@ -3355,16 +3360,16 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *     if negative:
  *         cum_table = <np.uint32_t *>(np.PyArray_DATA(model.cum_table))
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1neg); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 271, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 271, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1neg); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 271, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 271, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 271, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 271, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 271, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 271, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_label_count = __pyx_t_2;
 
     /* "shallowlearn/word2vec_inner.pyx":269
@@ -3393,11 +3398,11 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *         cum_table_len = len(model.cum_table)
  *     if negative or sample:
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_cum_table); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 273, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 273, __pyx_L1_error)
-    __pyx_v_cum_table = ((__pyx_t_5numpy_uint32_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_cum_table); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 273, __pyx_L1_error)
+    __pyx_v_cum_table = ((__pyx_t_5numpy_uint32_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":274
  *     if negative:
@@ -3406,10 +3411,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *     if negative or sample:
  *         next_random = (2**24) * model.random.randint(0, 2**24) + model.random.randint(0, 2**24)
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_cum_table); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 274, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 274, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_cum_table); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 274, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 274, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_cum_table_len = __pyx_t_7;
 
     /* "shallowlearn/word2vec_inner.pyx":272
@@ -3446,29 +3451,29 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  * 
  *     # convert Python structures to primitive types, so we can release the GIL
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_random); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_randint); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_random); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_randint); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = PyNumber_Multiply(__pyx_int_16777216, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_random); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Multiply(__pyx_int_16777216, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_randint); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_random); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_randint); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 276, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = PyNumber_Add(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __pyx_t_8 = PyNumber_Add(__pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_9 = __Pyx_PyInt_As_unsigned_PY_LONG_LONG(__pyx_t_8); if (unlikely((__pyx_t_9 == (unsigned PY_LONG_LONG)-1) && PyErr_Occurred())) __PYX_ERR(0, 276, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __pyx_v_next_random = __pyx_t_9;
@@ -3505,30 +3510,36 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
   /* "shallowlearn/word2vec_inner.pyx":283
  * 
  *     # prepare C structures so we can go "full C" and release the Python GIL
- *     vlookup = model.vocab             # <<<<<<<<<<<<<<
- *     llookup = model.lvocab
+ *     vlookup = model.wv.vocab             # <<<<<<<<<<<<<<
+ *     llookup = model.wv.lvocab
  *     sentence_idx[0] = 0  # indices of the first sentence always start at 0
  */
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_vocab); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 283, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_wv); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 283, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_v_vlookup = __pyx_t_8;
-  __pyx_t_8 = 0;
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_vocab); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 283, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __pyx_v_vlookup = __pyx_t_1;
+  __pyx_t_1 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":284
  *     # prepare C structures so we can go "full C" and release the Python GIL
- *     vlookup = model.vocab
- *     llookup = model.lvocab             # <<<<<<<<<<<<<<
+ *     vlookup = model.wv.vocab
+ *     llookup = model.wv.lvocab             # <<<<<<<<<<<<<<
  *     sentence_idx[0] = 0  # indices of the first sentence always start at 0
  *     sentence_labels[0] = 0
  */
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_lvocab); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 284, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_wv); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 284, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_lvocab); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 284, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_llookup = __pyx_t_8;
   __pyx_t_8 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":285
- *     vlookup = model.vocab
- *     llookup = model.lvocab
+ *     vlookup = model.wv.vocab
+ *     llookup = model.wv.lvocab
  *     sentence_idx[0] = 0  # indices of the first sentence always start at 0             # <<<<<<<<<<<<<<
  *     sentence_labels[0] = 0
  * 
@@ -3536,7 +3547,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
   (__pyx_v_sentence_idx[0]) = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":286
- *     llookup = model.lvocab
+ *     llookup = model.wv.lvocab
  *     sentence_idx[0] = 0  # indices of the first sentence always start at 0
  *     sentence_labels[0] = 0             # <<<<<<<<<<<<<<
  * 
@@ -3564,23 +3575,23 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
       if (likely(PyList_CheckExact(__pyx_t_8))) {
         if (__pyx_t_7 >= PyList_GET_SIZE(__pyx_t_8)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_8, __pyx_t_7); __Pyx_INCREF(__pyx_t_4); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 288, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_8, __pyx_t_7); __Pyx_INCREF(__pyx_t_1); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 288, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_8, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 288, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_8, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 288, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
         if (__pyx_t_7 >= PyTuple_GET_SIZE(__pyx_t_8)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_8, __pyx_t_7); __Pyx_INCREF(__pyx_t_4); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 288, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_8, __pyx_t_7); __Pyx_INCREF(__pyx_t_1); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 288, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_8, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 288, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_8, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 288, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
     } else {
-      __pyx_t_4 = __pyx_t_10(__pyx_t_8);
-      if (unlikely(!__pyx_t_4)) {
+      __pyx_t_1 = __pyx_t_10(__pyx_t_8);
+      if (unlikely(!__pyx_t_1)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
@@ -3588,10 +3599,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
         }
         break;
       }
-      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_GOTREF(__pyx_t_1);
     }
-    __Pyx_XDECREF_SET(__pyx_v_sent, __pyx_t_4);
-    __pyx_t_4 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_sent, __pyx_t_1);
+    __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":289
  * 
@@ -3600,10 +3611,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *         doc = sent[0]
  * 
  */
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_sent, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 289, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_XDECREF_SET(__pyx_v_targets, __pyx_t_4);
-    __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_sent, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 289, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_XDECREF_SET(__pyx_v_targets, __pyx_t_1);
+    __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":290
  *     for sent in sentences:
@@ -3612,10 +3623,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  * 
  *         if not doc or not targets:
  */
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_sent, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 290, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_XDECREF_SET(__pyx_v_doc, __pyx_t_4);
-    __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_sent, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 290, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_XDECREF_SET(__pyx_v_doc, __pyx_t_1);
+    __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":292
  *         doc = sent[0]
@@ -3663,35 +3674,35 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *             if word is None:
  */
     if (likely(PyList_CheckExact(__pyx_v_doc)) || PyTuple_CheckExact(__pyx_v_doc)) {
-      __pyx_t_4 = __pyx_v_doc; __Pyx_INCREF(__pyx_t_4); __pyx_t_12 = 0;
+      __pyx_t_1 = __pyx_v_doc; __Pyx_INCREF(__pyx_t_1); __pyx_t_12 = 0;
       __pyx_t_13 = NULL;
     } else {
-      __pyx_t_12 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_doc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 295, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_13 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 295, __pyx_L1_error)
+      __pyx_t_12 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_doc); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_13 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 295, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_13)) {
-        if (likely(PyList_CheckExact(__pyx_t_4))) {
-          if (__pyx_t_12 >= PyList_GET_SIZE(__pyx_t_4)) break;
+        if (likely(PyList_CheckExact(__pyx_t_1))) {
+          if (__pyx_t_12 >= PyList_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_12); __Pyx_INCREF(__pyx_t_1); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 295, __pyx_L1_error)
+          __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_4); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 295, __pyx_L1_error)
           #else
-          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_1);
+          __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 295, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_4);
           #endif
         } else {
-          if (__pyx_t_12 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
+          if (__pyx_t_12 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_12); __Pyx_INCREF(__pyx_t_1); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 295, __pyx_L1_error)
+          __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_4); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 295, __pyx_L1_error)
           #else
-          __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_1);
+          __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 295, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_4);
           #endif
         }
       } else {
-        __pyx_t_1 = __pyx_t_13(__pyx_t_4);
-        if (unlikely(!__pyx_t_1)) {
+        __pyx_t_4 = __pyx_t_13(__pyx_t_1);
+        if (unlikely(!__pyx_t_4)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
@@ -3699,10 +3710,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
           }
           break;
         }
-        __Pyx_GOTREF(__pyx_t_1);
+        __Pyx_GOTREF(__pyx_t_4);
       }
-      __Pyx_XDECREF_SET(__pyx_v_token, __pyx_t_1);
-      __pyx_t_1 = 0;
+      __Pyx_XDECREF_SET(__pyx_v_token, __pyx_t_4);
+      __pyx_t_4 = 0;
 
       /* "shallowlearn/word2vec_inner.pyx":296
  * 
@@ -3715,14 +3726,14 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
       if ((__pyx_t_3 != 0)) {
         __pyx_t_14 = PyObject_GetItem(__pyx_v_vlookup, __pyx_v_token); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 296, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_14);
-        __pyx_t_1 = __pyx_t_14;
+        __pyx_t_4 = __pyx_t_14;
         __pyx_t_14 = 0;
       } else {
         __Pyx_INCREF(Py_None);
-        __pyx_t_1 = Py_None;
+        __pyx_t_4 = Py_None;
       }
-      __Pyx_XDECREF_SET(__pyx_v_word, __pyx_t_1);
-      __pyx_t_1 = 0;
+      __Pyx_XDECREF_SET(__pyx_v_word, __pyx_t_4);
+      __pyx_t_4 = 0;
 
       /* "shallowlearn/word2vec_inner.pyx":297
  *         for token in doc:
@@ -3766,12 +3777,12 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
         __pyx_t_6 = __pyx_t_3;
         goto __pyx_L20_bool_binop_done;
       }
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_word, __pyx_n_s_sample_int); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 299, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_word, __pyx_n_s_sample_int); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 299, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_14 = __Pyx_PyInt_From_unsigned_PY_LONG_LONG(__pyx_f_12shallowlearn_14word2vec_inner_random_int32((&__pyx_v_next_random))); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 299, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_14);
-      __pyx_t_15 = PyObject_RichCompare(__pyx_t_1, __pyx_t_14, Py_LT); __Pyx_XGOTREF(__pyx_t_15); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 299, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __pyx_t_15 = PyObject_RichCompare(__pyx_t_4, __pyx_t_14, Py_LT); __Pyx_XGOTREF(__pyx_t_15); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 299, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
       __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_15); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 299, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -3857,7 +3868,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
       __pyx_L16_continue:;
     }
     __pyx_L17_break:;
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":306
  *                 break  # TODO: log warning, tally overflow?
@@ -3867,34 +3878,34 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
  *             if label is None:
  */
     if (likely(PyList_CheckExact(__pyx_v_targets)) || PyTuple_CheckExact(__pyx_v_targets)) {
-      __pyx_t_4 = __pyx_v_targets; __Pyx_INCREF(__pyx_t_4); __pyx_t_12 = 0;
+      __pyx_t_1 = __pyx_v_targets; __Pyx_INCREF(__pyx_t_1); __pyx_t_12 = 0;
       __pyx_t_13 = NULL;
     } else {
-      __pyx_t_12 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_targets); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 306, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_13 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 306, __pyx_L1_error)
+      __pyx_t_12 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_targets); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 306, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_13 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 306, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_13)) {
-        if (likely(PyList_CheckExact(__pyx_t_4))) {
-          if (__pyx_t_12 >= PyList_GET_SIZE(__pyx_t_4)) break;
+        if (likely(PyList_CheckExact(__pyx_t_1))) {
+          if (__pyx_t_12 >= PyList_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_15 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_12); __Pyx_INCREF(__pyx_t_15); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 306, __pyx_L1_error)
+          __pyx_t_15 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_15); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 306, __pyx_L1_error)
           #else
-          __pyx_t_15 = PySequence_ITEM(__pyx_t_4, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 306, __pyx_L1_error)
+          __pyx_t_15 = PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 306, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_15);
           #endif
         } else {
-          if (__pyx_t_12 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
+          if (__pyx_t_12 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_15 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_12); __Pyx_INCREF(__pyx_t_15); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 306, __pyx_L1_error)
+          __pyx_t_15 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_12); __Pyx_INCREF(__pyx_t_15); __pyx_t_12++; if (unlikely(0 < 0)) __PYX_ERR(0, 306, __pyx_L1_error)
           #else
-          __pyx_t_15 = PySequence_ITEM(__pyx_t_4, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 306, __pyx_L1_error)
+          __pyx_t_15 = PySequence_ITEM(__pyx_t_1, __pyx_t_12); __pyx_t_12++; if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 306, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_15);
           #endif
         }
       } else {
-        __pyx_t_15 = __pyx_t_13(__pyx_t_4);
+        __pyx_t_15 = __pyx_t_13(__pyx_t_1);
         if (unlikely(!__pyx_t_15)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
@@ -4075,7 +4086,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_train_batch_labeled_cb
       __pyx_L23_continue:;
     }
     __pyx_L24_break:;
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":322
  *         # across sentence boundaries.
@@ -4492,10 +4503,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
   PyObject *__pyx_t_1 = NULL;
   int __pyx_t_2;
   int __pyx_t_3;
-  int __pyx_t_4;
-  Py_ssize_t __pyx_t_5;
-  PyObject *(*__pyx_t_6)(PyObject *);
-  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  int __pyx_t_5;
+  Py_ssize_t __pyx_t_6;
+  PyObject *(*__pyx_t_7)(PyObject *);
   PyObject *__pyx_t_8 = NULL;
   __pyx_t_5numpy_uint32_t __pyx_t_9;
   Py_ssize_t __pyx_t_10;
@@ -4551,7 +4562,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  * 
  *     cdef int cbow_mean = model.cbow_mean             # <<<<<<<<<<<<<<
  * 
- *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.syn0))
+ *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.wv.syn0))
  */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_cbow_mean); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 353, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -4562,15 +4573,18 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
   /* "shallowlearn/word2vec_inner.pyx":355
  *     cdef int cbow_mean = model.cbow_mean
  * 
- *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.syn0))             # <<<<<<<<<<<<<<
+ *     cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.wv.syn0))             # <<<<<<<<<<<<<<
  *     cdef REAL_t *work
  *     cdef REAL_t *neu1
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 355, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_wv); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 355, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 355, __pyx_L1_error)
-  __pyx_v_syn0 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_syn0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 355, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 355, __pyx_L1_error)
+  __pyx_v_syn0 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":358
  *     cdef REAL_t *work
@@ -4579,10 +4593,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  * 
  *     cdef int label_count, total_labels
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_layer1_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 358, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 358, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_layer1_size); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 358, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 358, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_size = __pyx_t_2;
 
   /* "shallowlearn/word2vec_inner.pyx":377
@@ -4602,11 +4616,11 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *     if negative or softmax:
  *         syn1neg = <REAL_t *>(np.PyArray_DATA(model.syn1neg))
  */
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 378, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 378, __pyx_L1_error)
-    __pyx_v_syn1 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 378, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 378, __pyx_L1_error)
+    __pyx_v_syn1 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":377
  *     cdef REAL_t *syn1neg
@@ -4624,14 +4638,14 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         syn1neg = <REAL_t *>(np.PyArray_DATA(model.syn1neg))
  * 
  */
-  __pyx_t_4 = (__pyx_v_negative != 0);
-  if (!__pyx_t_4) {
+  __pyx_t_5 = (__pyx_v_negative != 0);
+  if (!__pyx_t_5) {
   } else {
-    __pyx_t_3 = __pyx_t_4;
+    __pyx_t_3 = __pyx_t_5;
     goto __pyx_L5_bool_binop_done;
   }
-  __pyx_t_4 = (__pyx_v_softmax != 0);
-  __pyx_t_3 = __pyx_t_4;
+  __pyx_t_5 = (__pyx_v_softmax != 0);
+  __pyx_t_3 = __pyx_t_5;
   __pyx_L5_bool_binop_done:;
   if (__pyx_t_3) {
 
@@ -4642,11 +4656,11 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  * 
  *     # convert Python structures to primitive types, so we can release the GIL
  */
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1neg); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 380, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 380, __pyx_L1_error)
-    __pyx_v_syn1neg = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_syn1neg); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 380, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 380, __pyx_L1_error)
+    __pyx_v_syn1neg = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_4)));
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":379
  *     if hs:
@@ -4672,7 +4686,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *     work = <REAL_t *>np.PyArray_DATA(_work)
  *     neu1 = <REAL_t *>np.PyArray_DATA(_neu1)             # <<<<<<<<<<<<<<
  * 
- *     vlookup = model.vocab
+ *     vlookup = model.wv.vocab
  */
   if (!(likely(((__pyx_v__neu1) == Py_None) || likely(__Pyx_TypeTest(__pyx_v__neu1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 384, __pyx_L1_error)
   __pyx_v_neu1 = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t *)PyArray_DATA(((PyArrayObject *)__pyx_v__neu1)));
@@ -4680,29 +4694,35 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
   /* "shallowlearn/word2vec_inner.pyx":386
  *     neu1 = <REAL_t *>np.PyArray_DATA(_neu1)
  * 
- *     vlookup = model.vocab             # <<<<<<<<<<<<<<
- *     llookup = model.lvocab
+ *     vlookup = model.wv.vocab             # <<<<<<<<<<<<<<
+ *     llookup = model.wv.lvocab
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_vocab); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 386, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_wv); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 386, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_vocab); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 386, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_vlookup = __pyx_t_1;
   __pyx_t_1 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":387
  * 
- *     vlookup = model.vocab
- *     llookup = model.lvocab             # <<<<<<<<<<<<<<
+ *     vlookup = model.wv.vocab
+ *     llookup = model.wv.lvocab             # <<<<<<<<<<<<<<
  * 
  *     i = 0
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_lvocab); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 387, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_wv); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 387, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_llookup = __pyx_t_1;
-  __pyx_t_1 = 0;
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_lvocab); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 387, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_llookup = __pyx_t_4;
+  __pyx_t_4 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":389
- *     llookup = model.lvocab
+ *     llookup = model.wv.lvocab
  * 
  *     i = 0             # <<<<<<<<<<<<<<
  *     for token in document:
@@ -4718,35 +4738,35 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         if word is None:
  */
   if (likely(PyList_CheckExact(__pyx_v_document)) || PyTuple_CheckExact(__pyx_v_document)) {
-    __pyx_t_1 = __pyx_v_document; __Pyx_INCREF(__pyx_t_1); __pyx_t_5 = 0;
-    __pyx_t_6 = NULL;
+    __pyx_t_4 = __pyx_v_document; __Pyx_INCREF(__pyx_t_4); __pyx_t_6 = 0;
+    __pyx_t_7 = NULL;
   } else {
-    __pyx_t_5 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_document); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 390, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 390, __pyx_L1_error)
+    __pyx_t_6 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_document); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 390, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_7 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 390, __pyx_L1_error)
   }
   for (;;) {
-    if (likely(!__pyx_t_6)) {
-      if (likely(PyList_CheckExact(__pyx_t_1))) {
-        if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_1)) break;
+    if (likely(!__pyx_t_7)) {
+      if (likely(PyList_CheckExact(__pyx_t_4))) {
+        if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_7 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_7); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 390, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 390, __pyx_L1_error)
         #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 390, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 390, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
-        if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_7 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_7); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 390, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 390, __pyx_L1_error)
         #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 390, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 390, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
     } else {
-      __pyx_t_7 = __pyx_t_6(__pyx_t_1);
-      if (unlikely(!__pyx_t_7)) {
+      __pyx_t_1 = __pyx_t_7(__pyx_t_4);
+      if (unlikely(!__pyx_t_1)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
@@ -4754,10 +4774,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
         }
         break;
       }
-      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_1);
     }
-    __Pyx_XDECREF_SET(__pyx_v_token, __pyx_t_7);
-    __pyx_t_7 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_token, __pyx_t_1);
+    __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":391
  *     i = 0
@@ -4770,14 +4790,14 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
     if ((__pyx_t_3 != 0)) {
       __pyx_t_8 = PyObject_GetItem(__pyx_v_vlookup, __pyx_v_token); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 391, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_7 = __pyx_t_8;
+      __pyx_t_1 = __pyx_t_8;
       __pyx_t_8 = 0;
     } else {
       __Pyx_INCREF(Py_None);
-      __pyx_t_7 = Py_None;
+      __pyx_t_1 = Py_None;
     }
-    __Pyx_XDECREF_SET(__pyx_v_word, __pyx_t_7);
-    __pyx_t_7 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_word, __pyx_t_1);
+    __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":392
  *     for token in document:
@@ -4787,8 +4807,8 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         indexes[i] = word.index
  */
     __pyx_t_3 = (__pyx_v_word == Py_None);
-    __pyx_t_4 = (__pyx_t_3 != 0);
-    if (__pyx_t_4) {
+    __pyx_t_5 = (__pyx_t_3 != 0);
+    if (__pyx_t_5) {
 
       /* "shallowlearn/word2vec_inner.pyx":393
  *         word = vlookup[token] if token in vlookup else None
@@ -4815,10 +4835,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         i += 1
  *         if i == MAX_SENTENCE_LEN:
  */
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_word, __pyx_n_s_index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 394, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_9 = __Pyx_PyInt_As_npy_uint32(__pyx_t_7); if (unlikely((__pyx_t_9 == (npy_uint32)-1) && PyErr_Occurred())) __PYX_ERR(0, 394, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_word, __pyx_n_s_index); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 394, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_9 = __Pyx_PyInt_As_npy_uint32(__pyx_t_1); if (unlikely((__pyx_t_9 == (npy_uint32)-1) && PyErr_Occurred())) __PYX_ERR(0, 394, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     (__pyx_v_indexes[__pyx_v_i]) = __pyx_t_9;
 
     /* "shallowlearn/word2vec_inner.pyx":395
@@ -4837,8 +4857,8 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *             break  # TODO: log warning, tally overflow?
  * 
  */
-    __pyx_t_4 = ((__pyx_v_i == 0x2710) != 0);
-    if (__pyx_t_4) {
+    __pyx_t_5 = ((__pyx_v_i == 0x2710) != 0);
+    if (__pyx_t_5) {
 
       /* "shallowlearn/word2vec_inner.pyx":397
  *         i += 1
@@ -4868,7 +4888,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
     __pyx_L7_continue:;
   }
   __pyx_L8_break:;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":399
  *             break  # TODO: log warning, tally overflow?
@@ -4896,35 +4916,35 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         if label_voc is None:
  */
   if (likely(PyList_CheckExact(__pyx_v_labels)) || PyTuple_CheckExact(__pyx_v_labels)) {
-    __pyx_t_1 = __pyx_v_labels; __Pyx_INCREF(__pyx_t_1); __pyx_t_5 = 0;
-    __pyx_t_6 = NULL;
+    __pyx_t_4 = __pyx_v_labels; __Pyx_INCREF(__pyx_t_4); __pyx_t_6 = 0;
+    __pyx_t_7 = NULL;
   } else {
-    __pyx_t_5 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_labels); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 402, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 402, __pyx_L1_error)
+    __pyx_t_6 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_labels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 402, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_7 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 402, __pyx_L1_error)
   }
   for (;;) {
-    if (likely(!__pyx_t_6)) {
-      if (likely(PyList_CheckExact(__pyx_t_1))) {
-        if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_1)) break;
+    if (likely(!__pyx_t_7)) {
+      if (likely(PyList_CheckExact(__pyx_t_4))) {
+        if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_7 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_7); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 402, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 402, __pyx_L1_error)
         #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 402, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 402, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
-        if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_7 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_7); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 402, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_1); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 402, __pyx_L1_error)
         #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 402, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 402, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
     } else {
-      __pyx_t_7 = __pyx_t_6(__pyx_t_1);
-      if (unlikely(!__pyx_t_7)) {
+      __pyx_t_1 = __pyx_t_7(__pyx_t_4);
+      if (unlikely(!__pyx_t_1)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
@@ -4932,10 +4952,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
         }
         break;
       }
-      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_1);
     }
-    __Pyx_XDECREF_SET(__pyx_v_label, __pyx_t_7);
-    __pyx_t_7 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_label, __pyx_t_1);
+    __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":403
  *     i = 0
@@ -4944,18 +4964,18 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         if label_voc is None:
  *             continue
  */
-    __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_label, __pyx_v_llookup, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 403, __pyx_L1_error)
-    if ((__pyx_t_4 != 0)) {
+    __pyx_t_5 = (__Pyx_PySequence_ContainsTF(__pyx_v_label, __pyx_v_llookup, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 403, __pyx_L1_error)
+    if ((__pyx_t_5 != 0)) {
       __pyx_t_8 = PyObject_GetItem(__pyx_v_llookup, __pyx_v_label); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 403, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_7 = __pyx_t_8;
+      __pyx_t_1 = __pyx_t_8;
       __pyx_t_8 = 0;
     } else {
       __Pyx_INCREF(Py_None);
-      __pyx_t_7 = Py_None;
+      __pyx_t_1 = Py_None;
     }
-    __Pyx_XDECREF_SET(__pyx_v_label_voc, __pyx_t_7);
-    __pyx_t_7 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_label_voc, __pyx_t_1);
+    __pyx_t_1 = 0;
 
     /* "shallowlearn/word2vec_inner.pyx":404
  *     for label in labels:
@@ -4964,8 +4984,8 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *             continue
  *         if hs:
  */
-    __pyx_t_4 = (__pyx_v_label_voc == Py_None);
-    __pyx_t_3 = (__pyx_t_4 != 0);
+    __pyx_t_5 = (__pyx_v_label_voc == Py_None);
+    __pyx_t_3 = (__pyx_t_5 != 0);
     if (__pyx_t_3) {
 
       /* "shallowlearn/word2vec_inner.pyx":405
@@ -5003,10 +5023,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *             codes[i] = <np.uint8_t *>np.PyArray_DATA(label_voc.code)
  *             points[i] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
  */
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_code); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 407, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_10 = PyObject_Length(__pyx_t_7); if (unlikely(__pyx_t_10 == -1)) __PYX_ERR(0, 407, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_code); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 407, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_10 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_10 == -1)) __PYX_ERR(0, 407, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       (__pyx_v_codelens[__pyx_v_i]) = ((int)__pyx_t_10);
 
       /* "shallowlearn/word2vec_inner.pyx":408
@@ -5016,11 +5036,11 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *             points[i] = <np.uint32_t *>np.PyArray_DATA(label_voc.point)
  *         label_indexes[i] = <np.uint32_t>label_voc.index
  */
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_code); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 408, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 408, __pyx_L1_error)
-      (__pyx_v_codes[__pyx_v_i]) = ((__pyx_t_5numpy_uint8_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_7)));
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_code); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 408, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 408, __pyx_L1_error)
+      (__pyx_v_codes[__pyx_v_i]) = ((__pyx_t_5numpy_uint8_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
       /* "shallowlearn/word2vec_inner.pyx":409
  *             codelens[i] = <int>len(label_voc.code)
@@ -5029,11 +5049,11 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         label_indexes[i] = <np.uint32_t>label_voc.index
  *         i += 1
  */
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_point); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 409, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 409, __pyx_L1_error)
-      (__pyx_v_points[__pyx_v_i]) = ((__pyx_t_5numpy_uint32_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_7)));
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_point); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 409, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 409, __pyx_L1_error)
+      (__pyx_v_points[__pyx_v_i]) = ((__pyx_t_5numpy_uint32_t *)PyArray_DATA(((PyArrayObject *)__pyx_t_1)));
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
       /* "shallowlearn/word2vec_inner.pyx":406
  *         if label_voc is None:
@@ -5051,10 +5071,10 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  *         i += 1
  *         if i == MAX_SENTENCE_LEN:
  */
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_index); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 410, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_9 = __Pyx_PyInt_As_npy_uint32(__pyx_t_7); if (unlikely((__pyx_t_9 == (npy_uint32)-1) && PyErr_Occurred())) __PYX_ERR(0, 410, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_label_voc, __pyx_n_s_index); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 410, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_9 = __Pyx_PyInt_As_npy_uint32(__pyx_t_1); if (unlikely((__pyx_t_9 == (npy_uint32)-1) && PyErr_Occurred())) __PYX_ERR(0, 410, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     (__pyx_v_label_indexes[__pyx_v_i]) = ((__pyx_t_5numpy_uint32_t)__pyx_t_9);
 
     /* "shallowlearn/word2vec_inner.pyx":411
@@ -5104,7 +5124,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
     __pyx_L11_continue:;
   }
   __pyx_L12_break:;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /* "shallowlearn/word2vec_inner.pyx":415
  *             break  # TODO: log warning, tally overflow?
@@ -5122,8 +5142,8 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  * 
  *     # release GIL & train on the sentence
  */
-  __pyx_t_5 = PyObject_Length(__pyx_v_llookup); if (unlikely(__pyx_t_5 == -1)) __PYX_ERR(0, 416, __pyx_L1_error)
-  __pyx_v_total_labels = __pyx_t_5;
+  __pyx_t_6 = PyObject_Length(__pyx_v_llookup); if (unlikely(__pyx_t_6 == -1)) __PYX_ERR(0, 416, __pyx_L1_error)
+  __pyx_v_total_labels = __pyx_t_6;
 
   /* "shallowlearn/word2vec_inner.pyx":419
  * 
@@ -5175,18 +5195,18 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 423, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 423, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_2 = __pyx_v_label_count;
   for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_2; __pyx_t_11+=1) {
     __pyx_v_i = __pyx_t_11;
-    __pyx_t_7 = PyFloat_FromDouble((__pyx_v_work[__pyx_v_i])); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 423, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_7))) __PYX_ERR(0, 423, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __pyx_t_1 = PyFloat_FromDouble((__pyx_v_work[__pyx_v_i])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 423, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_1))) __PYX_ERR(0, 423, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
   goto __pyx_L0;
 
   /* "shallowlearn/word2vec_inner.pyx":347
@@ -5200,7 +5220,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_2score_document_labele
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_AddTraceback("shallowlearn.word2vec_inner.score_document_labeled_cbow", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
@@ -8227,6 +8247,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_word_locks, __pyx_k_word_locks, sizeof(__pyx_k_word_locks), 0, 0, 1, 1},
   {&__pyx_n_s_work, __pyx_k_work, sizeof(__pyx_k_work), 0, 0, 1, 1},
   {&__pyx_n_s_work_2, __pyx_k_work_2, sizeof(__pyx_k_work_2), 0, 0, 1, 1},
+  {&__pyx_n_s_wv, __pyx_k_wv, sizeof(__pyx_k_wv), 0, 0, 1, 1},
   {&__pyx_n_s_x, __pyx_k_x, sizeof(__pyx_k_x), 0, 0, 1, 1},
   {&__pyx_n_s_y, __pyx_k_y, sizeof(__pyx_k_y), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}

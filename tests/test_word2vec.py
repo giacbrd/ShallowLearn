@@ -60,8 +60,8 @@ def test_init():
 
 def test_vocabulary(small_model):
     assert 'to' in small_model.vocab
-    assert frozenset(('aa', 'b', 'cc')) == frozenset(small_model.lvocab.keys())
-    assert max(v.index for v in small_model.lvocab.values()) == 2
+    assert frozenset(('aa', 'b', 'cc')) == frozenset(small_model.wv.lvocab.keys())
+    assert max(v.index for v in small_model.wv.lvocab.values()) == 2
 
 
 def test_matrices(small_model):
@@ -75,10 +75,10 @@ def test_serializzation(small_model):
         pickle.dump(small_model, fileobj)
         fileobj.seek(0)
         loaded = pickle.load(fileobj)
-        assert all(str(loaded.vocab[w]) == str(small_model.vocab[w]) for w in small_model.vocab)
-        assert all(str(loaded.lvocab[w]) == str(small_model.lvocab[w]) for w in small_model.lvocab)
+        assert all(str(loaded.wv.vocab[w]) == str(small_model.wv.vocab[w]) for w in small_model.wv.vocab)
+        assert all(str(loaded.wv.lvocab[w]) == str(small_model.wv.lvocab[w]) for w in small_model.wv.lvocab)
         assert numpy.array_equiv(loaded.syn1, small_model.syn1)
-        assert numpy.array_equiv(loaded.syn0, small_model.syn0)
+        assert numpy.array_equiv(loaded.wv.syn0, small_model.wv.syn0)
 
 
 def test_learning_functions(bunch_of_models):

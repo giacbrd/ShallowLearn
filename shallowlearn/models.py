@@ -181,7 +181,7 @@ class GensimFastText(BaseClassifier):
             self._classifier = LabeledWord2Vec(**params)
         else:
             self._classifier = LabeledWord2Vec.load_from(pre_trained)
-            self._build_label_info(self._classifier.lvocab.keys())
+            self._build_label_info(self._classifier.wv.lvocab.keys())
             self.set_params(
                 size=self._classifier.layer1_size,
                 alpha=self._classifier.alpha,

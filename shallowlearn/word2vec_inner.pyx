@@ -233,7 +233,7 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     cdef int sample = (model.sample != 0)
     cdef int cbow_mean = model.cbow_mean
 
-    cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.syn0))
+    cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.wv.syn0))
     cdef REAL_t *word_locks = <REAL_t *>(np.PyArray_DATA(model.syn0_lockf))
     cdef REAL_t *work
     cdef REAL_t _alpha = alpha
@@ -280,8 +280,8 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
     neu1 = <REAL_t *>np.PyArray_DATA(_neu1)
 
     # prepare C structures so we can go "full C" and release the Python GIL
-    vlookup = model.vocab
-    llookup = model.lvocab
+    vlookup = model.wv.vocab
+    llookup = model.wv.lvocab
     sentence_idx[0] = 0  # indices of the first sentence always start at 0
     sentence_labels[0] = 0
 
@@ -352,7 +352,7 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
 
     cdef int cbow_mean = model.cbow_mean
 
-    cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.syn0))
+    cdef REAL_t *syn0 = <REAL_t *>(np.PyArray_DATA(model.wv.syn0))
     cdef REAL_t *work
     cdef REAL_t *neu1
     cdef int size = model.layer1_size
@@ -383,8 +383,8 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
     work = <REAL_t *>np.PyArray_DATA(_work)
     neu1 = <REAL_t *>np.PyArray_DATA(_neu1)
 
-    vlookup = model.vocab
-    llookup = model.lvocab
+    vlookup = model.wv.vocab
+    llookup = model.wv.lvocab
 
     i = 0
     for token in document:

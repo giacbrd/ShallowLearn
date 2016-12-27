@@ -15,6 +15,7 @@ import sys
 from gensim import matutils
 from gensim.models import Word2Vec
 from gensim.models.word2vec import train_cbow_pair, Vocab
+from gensim.utils import to_utf8
 
 from .utils import HashIter
 
@@ -276,7 +277,7 @@ class LabeledWord2Vec(Word2Vec):
             # randomize weights vector by vector, rather than materializing a huge random matrix in RAM at once
             for i in range(len(self.vocab)):
                 # construct deterministic seed from word AND seed argument
-                self.syn0[i] = self.seeded_vector(str(self.index2word[i]) + str(self.seed))
+                self.syn0[i] = self.seeded_vector(to_utf8(self.index2word[i]) + str(self.seed))
             self.syn0norm = None
             self.syn0_lockf = ones(len(self.vocab), dtype=REAL)  # zeros suppress learning
         if outputs:

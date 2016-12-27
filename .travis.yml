@@ -23,3 +23,4 @@ install:
 script:
   - ./scripts/test.sh
   - python scripts/document_classification_20newsgroups.py --chi2_select 80
+  - python scripts/plot_out_of_core_classification.py

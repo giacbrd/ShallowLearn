@@ -242,10 +242,11 @@ class GensimFastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :param y: Iterator over lists or single labels, document target values
         """
-        size = sum(1 for _ in self._data_iter(documents, y))
         if not self._classifier.vocab or not self._classifier.lvocab:
-            raise ValueError('The classifier has not been previously trained')
-        self._classifier.train(self._data_iter(documents, y), total_examples=size)
+            self.fit(documents, y)
+        else:
+            size = sum(1 for _ in self._data_iter(documents, y))
+            self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
     def _iter_predict(self, documents):
         for doc in documents:

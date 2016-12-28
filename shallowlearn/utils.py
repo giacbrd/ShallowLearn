@@ -33,10 +33,10 @@ class HashIter(object):
         return [cls.hash(word) % bucket for word in document]
 
     @classmethod
-    def hash(cls, string):
+    def hash(cls, word):
         # Reproduces hash method used in fastText
         h = numpy.uint32(2166136261)
-        for c in bytearray(str(string).encode('utf-8')):
+        for c in bytearray(str(word), 'utf8'):
             h ^= numpy.uint32(c)
             h *= numpy.uint32(16777619)
         return h

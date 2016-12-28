@@ -36,7 +36,7 @@ class HashIter(object):
     def hash(cls, string):
         # Reproduces hash method used in fastText
         h = numpy.uint32(2166136261)
-        for c in bytearray(string):
+        for c in bytearray(str(string).encode('utf-8')):
             h ^= numpy.uint32(c)
             h *= numpy.uint32(16777619)
         return h

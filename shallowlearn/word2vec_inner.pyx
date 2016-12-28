@@ -281,7 +281,7 @@ def train_batch_labeled_cbow(model, sentences, alpha, _work, _neu1):
 
     # prepare C structures so we can go "full C" and release the Python GIL
     vlookup = model.wv.vocab
-    llookup = model.wv.lvocab
+    llookup = model.lvocab
     sentence_idx[0] = 0  # indices of the first sentence always start at 0
     sentence_labels[0] = 0
 
@@ -384,7 +384,7 @@ def score_document_labeled_cbow(model, document, labels, _work, _neu1):
     neu1 = <REAL_t *>np.PyArray_DATA(_neu1)
 
     vlookup = model.wv.vocab
-    llookup = model.wv.lvocab
+    llookup = model.lvocab
 
     i = 0
     for token in document:

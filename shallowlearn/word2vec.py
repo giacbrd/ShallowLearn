@@ -38,10 +38,10 @@ try:
         if model.bucket > 0:
             document = HashIter.hash_doc(document, model.bucket)
         if work is None:
-            work = ones(len(model.wv.lvocab) if labels is None else len(labels), dtype=REAL)
+            work = ones(len(model.lvocab) if labels is None else len(labels), dtype=REAL)
         if neu1 is None:
             neu1 = matutils.zeros_aligned(model.layer1_size, dtype=REAL)
-        labels = labels or model.wv.lvocab.keys()
+        labels = labels or model.lvocab.keys()
         scores = sdlc(model, document, labels, work, neu1)
         return zip(labels, scores)
 
@@ -81,7 +81,7 @@ except ImportError:
             document, target = sentence
             word_vocabs = [model.wv.vocab[w] for w in document if w in model.wv.vocab and
                            model.wv.vocab[w].sample_int > model.random.rand() * 2 ** 32]
-            target_vocabs = [model.wv.lvocab[t] for t in target if t in model.wv.lvocab]
+            target_vocabs = [model.lvocab[t] for t in target if t in model.lvocab]
             for target in target_vocabs:
                 word2_indices = [w.index for w in word_vocabs]
                 l1 = np_sum(model.wv.syn0[word2_indices], axis=0)  # 1 x vector_size
@@ -103,10 +103,10 @@ except ImportError:
         word_vocabs = [model.wv.vocab[w] for w in document if w in model.wv.vocab]
 
         if labels is not None:
-            targets = [model.wv.lvocab[label] for label in labels]
+            targets = [model.lvocab[label] for label in labels]
         else:
-            targets = model.wv.lvocab.values()
-            labels = model.wv.lvocab.keys()
+            targets = model.lvocab.values()
+            labels = model.lvocab.keys()
 
         word2_indices = [word2.index for word2 in word_vocabs]
         l1 = np_sum(model.wv.syn0[word2_indices], axis=0)  # 1 x layer1_size
@@ -134,13 +134,6 @@ except ImportError:
         return prob
 
 
-class KeyedLabeledVectors(KeyedVectors):
-    def __init__(self):
-        super(KeyedLabeledVectors, self).__init__()
-        self.lvocab = {}  # Vocabulary of labels only
-        self.index2label = []
-
-
 class LabeledWord2Vec(Word2Vec):
     def __init__(self, loss='softmax', bucket=0, **kwargs):
         """
@@ -160,13 +153,14 @@ class LabeledWord2Vec(Word2Vec):
         so that the input layer is only made of words, while the output layer is only made of labels.
         **Parent class methods that are not overridden here are not tested and not safe to use**.
         """
+        self.lvocab = {}
+        self.index2label = []
         kwargs['sg'] = 0
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
         self.softmax = self.init_loss(kwargs, loss)
         self.bucket = bucket
         super(LabeledWord2Vec, self).__init__(**kwargs)
-        self.wv = KeyedLabeledVectors()
 
     def init_loss(self, kwargs, loss):
         if loss == 'hs':
@@ -233,11 +227,11 @@ class LabeledWord2Vec(Word2Vec):
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.__class__.scan_vocab(labels_vocab, [labels], progress_per=progress_per, trim_rule=None)
         self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None)
-        self.wv.lvocab = labels_vocab.wv.vocab
-        self.wv.index2label = labels_vocab.wv.index2word
+        self.lvocab = labels_vocab.wv.vocab
+        self.index2label = labels_vocab.wv.index2word
         # If we want to sample more negative labels that their count
-        if self.negative and self.negative >= len(self.wv.index2label) > 0:
-            self.negative = len(self.wv.index2label) - 1
+        if self.negative and self.negative >= len(self.index2label) > 0:
+            self.negative = len(self.index2label) - 1
         self.finalize_lvocab()
 
     def finalize_vocab(self):
@@ -265,7 +259,7 @@ class LabeledWord2Vec(Word2Vec):
             # add info about each word's Huffman encoding
             local_wv = KeyedVectors()
             self.__class__.create_binary_tree(FakeSelf(local_wv))
-            self.wv.lvocab = local_wv.vocab
+            self.lvocab = local_wv.vocab
         if self.negative:
             # build the table for drawing random words (for negative sampling)
             self.make_cum_table()
@@ -285,18 +279,18 @@ class LabeledWord2Vec(Word2Vec):
         if outputs:
             # Output layer is only made of labels
             if self.hs:
-                self.syn1 = zeros((len(self.wv.lvocab), self.layer1_size), dtype=REAL)
+                self.syn1 = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
             # Use syn1neg also for softmax outputs
             if self.negative or self.softmax:
-                self.syn1neg = zeros((len(self.wv.lvocab), self.layer1_size), dtype=REAL)
+                self.syn1neg = zeros((len(self.lvocab), self.layer1_size), dtype=REAL)
 
     def reset_from(self, other_model):
         """
         Borrow shareable pre-built structures (like vocab) from the other_model. Useful
         if testing multiple models in parallel on the same corpus.
         """
-        self.wv.lvocab = getattr(other_model.wv, 'lvocab', getattr(other_model, 'lvocab', {}))
-        self.wv.index2label = getattr(other_model.wv, 'index2label', getattr(other_model, 'index2label', []))
+        self.lvocab = getattr(other_model, 'lvocab', {})
+        self.index2label = getattr(other_model, 'index2label', [])
         super(LabeledWord2Vec, self).reset_from(other_model)
 
     def make_cum_table(self, power=0.75, domain=2 ** 31 - 1):
@@ -311,13 +305,13 @@ class LabeledWord2Vec(Word2Vec):
 
         Called internally from 'build_vocab()'.
         """
-        vocab_size = len(self.wv.index2label)
+        vocab_size = len(self.index2label)
         self.cum_table = zeros(vocab_size, dtype=uint32)
         # compute sum of all power (Z in paper)
-        train_words_pow = float(sum([self.wv.lvocab[word].count ** power for word in self.wv.lvocab]))
+        train_words_pow = float(sum([self.lvocab[word].count ** power for word in self.lvocab]))
         cumulative = 0.0
         for word_index in range(vocab_size):
-            cumulative += self.wv.lvocab[self.wv.index2label[word_index]].count ** power / train_words_pow
+            cumulative += self.lvocab[self.index2label[word_index]].count ** power / train_words_pow
             self.cum_table[word_index] = round(cumulative * domain)
         if len(self.cum_table) > 0:
             assert self.cum_table[-1] == domain
@@ -371,7 +365,7 @@ class LabeledWord2Vec(Word2Vec):
                 if not isinstance(other_model, LabeledWord2Vec) and (attr == 'syn1' or attr == 'syn1neg'):
                     continue
                 value = getattr(other_model, attr, getattr(new_model, attr))
-                if isinstance(value, KeyedVectors) or isinstance(value, KeyedLabeledVectors):
+                if isinstance(value, KeyedVectors):
                     new_model.wv.syn0 = value.syn0
                     new_model.wv.syn0norm = value.syn0norm
                 else:

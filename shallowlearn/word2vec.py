@@ -264,14 +264,12 @@ class LabeledWord2Vec(Word2Vec):
         """Build tables and model weights based on final label vocabulary settings."""
         if self.hs:
             class FakeSelf(LabeledWord2Vec):
-                def __init__(self):
+                def __init__(self, vocab):
                     self.wv = KeyedVectors()
+                    self.wv.vocab = vocab
 
             # add info about each word's Huffman encoding
-            fake_obj = FakeSelf()
-            fake_obj.wv.vocab = self.lvocab
-            self.__class__.create_binary_tree(fake_obj)
-            self.lvocab = fake_obj.wv.vocab
+            self.__class__.create_binary_tree(FakeSelf(self.lvocab))
         if self.negative:
             # build the table for drawing random words (for negative sampling)
             self.make_cum_table()

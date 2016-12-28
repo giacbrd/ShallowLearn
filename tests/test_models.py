@@ -26,11 +26,11 @@ def bunch_of_fasttext_classifiers():
     for kwarg in ({'loss': 'softmax'}, {'loss': 'softmax', 'bucket': 5}, {'loss': 'softmax', 'bucket': 100}):
         models.extend([
             FastText(epoch=1, dim=30, min_count=0, **kwarg),
-            FastText(epoch=1, lr=1.0, dim=300, min_count=0, **kwarg),
-            FastText(epoch=1, dim=100, min_count=1, **kwarg),
-            FastText(epoch=1, dim=100, min_count=0, t=0, **kwarg),
-            FastText(epoch=3, dim=100, min_count=0, **kwarg),
-            FastText(epoch=5, thread=1, dim=100, min_count=0, **kwarg)
+            FastText(epoch=1, lr=1.0, dim=100, min_count=0, **kwarg),
+            FastText(epoch=1, dim=50, min_count=1, **kwarg),
+            FastText(epoch=1, dim=50, min_count=0, t=0, **kwarg),
+            FastText(epoch=3, dim=10, min_count=0, **kwarg),
+            FastText(epoch=5, thread=1, dim=50, min_count=0, **kwarg)
         ])
     for model in models:
         model.fit(dataset_samples, dataset_targets)
@@ -44,7 +44,7 @@ def _predict(model):
     pr.sort(reverse=True)
     assert pr[0] > .33
     p = model.predict(example)
-    if pr[0] - pr[1] > .000001:
+    if pr[0] - pr[1] > .01:
         assert p == ['aa'] or p == ['b']
 
 

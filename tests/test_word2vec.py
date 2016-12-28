@@ -34,12 +34,12 @@ def bunch_of_models():
         for bucket in (0, 5, 100):
             kwarg['bucket'] = bucket
             models.extend([
-                LabeledWord2Vec(iter=1, size=30, min_count=0, **kwarg),
-                LabeledWord2Vec(iter=1, alpha=1.0, size=300, min_count=0, **kwarg),
-                LabeledWord2Vec(iter=1, size=100, min_count=1, **kwarg),
-                LabeledWord2Vec(iter=1, size=100, min_count=0, sample=0, **kwarg),
-                LabeledWord2Vec(iter=3, size=100, min_count=0, **kwarg),
-                LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0, **kwarg)
+                LabeledWord2Vec(iter=5, size=30, min_count=0, sample=0, min_alpha=0.0, **kwarg),
+                LabeledWord2Vec(iter=1, alpha=1.0, size=100, min_count=0, **kwarg),
+                LabeledWord2Vec(iter=3, size=50, min_count=1, **kwarg),
+                LabeledWord2Vec(iter=2, size=50, min_count=1, sample=0, **kwarg),
+                LabeledWord2Vec(iter=10, size=10, min_count=0, **kwarg),
+                LabeledWord2Vec(iter=5, workers=1, size=50, min_count=0, **kwarg)
             ])
     targets = frozenset(
         target for targets in dataset_targets for target in BaseClassifier._target_list(targets)

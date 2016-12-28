@@ -8,12 +8,15 @@
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 
 from __future__ import division  # py3 "true division"
+
 import logging
 import sys
+import zlib
+
 from gensim import matutils
 from gensim.models import Word2Vec
-from gensim.models.keyedvectors import KeyedVectors
 from gensim.models.word2vec import train_cbow_pair, Vocab
+
 from .utils import HashIter
 
 try:
@@ -22,7 +25,7 @@ except ImportError:
     from Queue import Queue, Empty
 
 from numpy import copy, prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, \
-    apply_along_axis, array
+    apply_along_axis
 from six.moves import range, zip
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -121,7 +124,7 @@ except ImportError:
             # FIXME this cycle should be executed internally in numpy
             for target in targets:
                 l2a = model.syn1[target.point]
-                sgn = (-1.0) ** target.code # ch function, 0-> 1, 1 -> -1
+                sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
                 prob.append(prod(1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))))
         # Softmax
         else:
@@ -132,6 +135,10 @@ except ImportError:
             prob_den = np_sum(apply_along_axis(exp_dot, 1, model.syn1neg))
             prob = prob_num / prob_den
         return prob
+
+
+def custom_hash(value):
+    return zlib.adler32(value if isinstance(value, bytes) else value.encode())
 
 
 class LabeledWord2Vec(Word2Vec):
@@ -153,11 +160,12 @@ class LabeledWord2Vec(Word2Vec):
         so that the input layer is only made of words, while the output layer is only made of labels.
         **Parent class methods that are not overridden here are not tested and not safe to use**.
         """
-        self.lvocab = {}
+        self.lvocab = {}  # Vocabulary of labels only
         self.index2label = []
         kwargs['sg'] = 0
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
+        kwargs['hashfxn'] = custom_hash  # Same function through different Python versions
         self.softmax = self.init_loss(kwargs, loss)
         self.bucket = bucket
         super(LabeledWord2Vec, self).__init__(**kwargs)
@@ -213,6 +221,7 @@ class LabeledWord2Vec(Word2Vec):
 
     def build_lvocab(self, labels, progress_per=10000):
         """Only build data structures for labels. `labels` is an iterable over the label names."""
+
         class FakeSelf(LabeledWord2Vec):
             def __init__(self, max_vocab_size, min_count, sample, estimate_memory):
                 self.max_vocab_size = max_vocab_size
@@ -256,6 +265,7 @@ class LabeledWord2Vec(Word2Vec):
             class FakeSelf(LabeledWord2Vec):
                 def __init__(self, wv):
                     self.wv = wv
+
             # add info about each word's Huffman encoding
             local_wv = KeyedVectors()
             self.__class__.create_binary_tree(FakeSelf(local_wv))
@@ -273,7 +283,7 @@ class LabeledWord2Vec(Word2Vec):
             # randomize weights vector by vector, rather than materializing a huge random matrix in RAM at once
             for i in range(len(self.wv.vocab)):
                 # construct deterministic seed from word AND seed argument
-                self.wv.syn0[i] = self.seeded_vector(str(self.wv.index2word[i]).encode('utf-8') + str(self.seed).encode('utf-8'))
+                self.wv.syn0[i] = self.seeded_vector(str(self.wv.index2word[i]) + str(self.seed))
             self.wv.syn0norm = None
             self.syn0_lockf = ones(len(self.wv.vocab), dtype=REAL)  # zeros suppress learning
         if outputs:
@@ -357,7 +367,8 @@ class LabeledWord2Vec(Word2Vec):
         new_model = LabeledWord2Vec(
             loss=loss,
             negative=other_model.negative if loss == 'ns' else 0,
-            size=other_model.vector_size
+            size=other_model.vector_size,
+            seed=other_model.seed
         )
         new_model.reset_from(other_model)
         for attr in vars(other_model):

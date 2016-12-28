@@ -15,7 +15,8 @@ dataset_samples = (
     ('i', 'like', 'to', 'study', 'machine', 'learning'),
     ('machine', 'learning', 'is', 'important'),
     ('my', 'car', 'is', 'faster', 'than', 'your', 'bike'),
+    ('nothing', 'is', 'faster', 'than', 'my', 'truck'),
     ('supervised', 'machine', 'learning', 'is', 'the', 'topic', 'of', 'today'),
     ('my', 'study', 'is', 'dedicated', 'to', 'me')
 )
-dataset_targets = (('aa', 'b'), 'b', 'cc', 'b', 'aa')
+dataset_targets = (('aa', 'b'), 'b', 'cc', 'cc', 'b', 'aa')

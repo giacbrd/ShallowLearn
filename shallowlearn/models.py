@@ -51,8 +51,12 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def _target_list(cls, targets):
         return targets if isinstance(targets, Iterable) and not isinstance(targets, basestring) else [targets]
 
-    def _build_label_info(self, y):
-        self._label_set = frozenset(target for targets in y for target in self._target_list(targets))
+    def _build_label_info(self, y, overwrite=False):
+        label_set = set(target for targets in y for target in self._target_list(targets))
+        if self._label_set is None or overwrite:
+            self._label_set = label_set
+        else:
+            self._label_set.update(label_set)
         self.classes_ = list(self._label_set)
         self._label_count = len(self._label_set)
         self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
@@ -236,7 +240,7 @@ class GensimFastText(BaseClassifier):
         :return:
         """
         # TODO if y=None learn a one-class classifier
-        self._build_label_info(y)
+        self._build_label_info(y, overwrite=True)
         #FIXME the vocab of a pre-trained model is definitive, it should be updated instead (see Gensim 0.13.3)
         if not self._classifier.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
@@ -253,6 +257,7 @@ class GensimFastText(BaseClassifier):
         if not self._classifier.vocab or not self._classifier.lvocab:
             self.fit(documents, y)
         else:
+            self._build_label_info(y)
             size = sum(1 for _ in self._data_iter(documents, y))
             self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
@@ -264,7 +269,7 @@ class GensimFastText(BaseClassifier):
     def predict_proba(self, documents):
         """
         :param documents: Iterator over lists of words
-        :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
+        :return: For each document, a list of label probabilities, which should sum to one for each prediction
         """
         return [self._extract_prediction(prediction) for prediction in self._iter_predict(documents)]
 
@@ -426,7 +431,7 @@ class FastText(BaseClassifier):
     def predict_proba(self, documents):
         """
         :param documents: Iterator over lists of words
-        :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
+        :return: For each document, a list of label probabilities, which should sum to one for each prediction
         """
         result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), self._label_count)
         result = [[1. / self._label_count] * self._label_count if not any(r) else self._extract_prediction(r) for r in result]

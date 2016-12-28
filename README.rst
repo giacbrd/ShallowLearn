@@ -21,7 +21,7 @@ Install the latest version:
     pip install shallowlearn
 
 Import models from ``shallowlearn.models``, they implement the standard methods for supervised learning in scikit-learn,
-e.g., ``fit(X, y)``, ``predict(X)``, etc.
+e.g., ``fit(X, y)``, ``predict(X)``, ``predict_proba(X)``, etc.
 
 Data is raw text, each sample in the iterable ``X`` is a list of tokens (words of a document), 
 while each element in the iterable ``y`` (corresponding to an element in ``X``) can be a single label or a list in case
@@ -68,7 +68,7 @@ The constructor arguments are equivalent to the original `supervised model
 <https://github.com/salestock/fastText.py#supervised-model>`_, except for ``input_file``, ``output`` and
 ``label_prefix``.
 
-**WARNING**: The only way of loading datasets in fastText.py is through the filesystem (as of version 0.8.0),
+**WARNING**: The only way of loading datasets in fastText.py is through the filesystem (as of version 0.8.2),
 so data passed to ``fit(X, y)`` will be written in temporary files on disk.
 
 .. code:: python

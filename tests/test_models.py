@@ -44,7 +44,7 @@ def _predict(model):
     pr.sort(reverse=True)
     assert pr[0] > .33
     p = model.predict(example)
-    if pr[0] - pr[1] > .0001:
+    if pr[0] - pr[1] > .01:
         assert p == ['aa'] or p == ['b']
 
 

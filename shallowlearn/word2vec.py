@@ -15,6 +15,7 @@ import zlib
 
 from gensim import matutils
 from gensim.models import Word2Vec
+from gensim.models.keyedvectors import KeyedVectors
 from gensim.models.word2vec import train_cbow_pair, Vocab
 
 from .utils import HashIter
@@ -263,13 +264,14 @@ class LabeledWord2Vec(Word2Vec):
         """Build tables and model weights based on final label vocabulary settings."""
         if self.hs:
             class FakeSelf(LabeledWord2Vec):
-                def __init__(self, wv):
-                    self.wv = wv
+                def __init__(self):
+                    self.wv = KeyedVectors()
 
             # add info about each word's Huffman encoding
-            local_wv = KeyedVectors()
-            self.__class__.create_binary_tree(FakeSelf(local_wv))
-            self.lvocab = local_wv.vocab
+            fake_obj = FakeSelf()
+            fake_obj.wv.vocab = self.lvocab
+            self.__class__.create_binary_tree(fake_obj)
+            self.lvocab = fake_obj.wv.vocab
         if self.negative:
             # build the table for drawing random words (for negative sampling)
             self.make_cum_table()

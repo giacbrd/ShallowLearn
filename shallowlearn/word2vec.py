@@ -17,6 +17,7 @@ from gensim import matutils
 from gensim.models import Word2Vec
 from gensim.models.keyedvectors import KeyedVectors
 from gensim.models.word2vec import train_cbow_pair, Vocab
+from scipy.special import expit
 
 from .utils import HashIter
 
@@ -26,7 +27,7 @@ except ImportError:
     from Queue import Queue, Empty
 
 from numpy import copy, prod, exp, outer, empty, zeros, ones, uint32, float32 as REAL, dot, sum as np_sum, \
-    apply_along_axis
+    apply_along_axis, vstack
 from six.moves import range, zip
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -63,7 +64,7 @@ except ImportError:
         target_vect = zeros(model.syn1neg.shape[0])
         target_vect[target.index] = 1.
         l2 = copy(model.syn1neg)
-        fa = 1. / (1. + exp(-dot(l1, l2.T)))  # propagate hidden -> output
+        fa = expit(dot(l1, l2.T))  # propagate hidden -> output
         ga = (target_vect - fa) * alpha  # vector of error gradients multiplied by the learning rate
         if learn_hidden:
             model.syn1neg += outer(ga, l1)  # learn hidden -> output
@@ -126,7 +127,7 @@ except ImportError:
             for target in targets:
                 l2a = model.syn1[target.point]
                 sgn = (-1.0) ** target.code  # ch function, 0-> 1, 1 -> -1
-                prob.append(prod(1.0 / (1.0 + exp(-sgn * dot(l1, l2a.T)))))
+                prob.append(prod(expit(sgn * dot(l1, l2a.T))))
         # Softmax
         else:
             def exp_dot(x):
@@ -206,7 +207,7 @@ class LabeledWord2Vec(Word2Vec):
 
     # TODO use TaggedDocument from Gensim?
     # FIXME pass just an iterator over (doc, label) like for train
-    def build_vocab(self, sentences, labels, keep_raw_vocab=False, trim_rule=None, progress_per=10000):
+    def build_vocab(self, sentences, labels, keep_raw_vocab=False, trim_rule=None, progress_per=10000, update=False):
         """
         Build vocabularies from a sequence of sentences/documents (can be a once-only generator stream) and the set of labels.
         Each sentence must be a list of unicode strings. `labels` is an iterable over the label names.
@@ -216,11 +217,11 @@ class LabeledWord2Vec(Word2Vec):
             sentences = HashIter(sentences, self.bucket, with_labels=False)
         # Build words and labels vocabularies in two different objects
         self.scan_vocab(sentences, progress_per=progress_per, trim_rule=trim_rule)
-        self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule)
-        self.finalize_vocab()  # build tables & arrays
-        self.build_lvocab(labels, progress_per=progress_per)
+        self.scale_vocab(keep_raw_vocab=keep_raw_vocab, trim_rule=trim_rule, update=update)
+        self.finalize_vocab(update=update)  # build tables & arrays
+        self.build_lvocab(labels, progress_per=progress_per, update=update)
 
-    def build_lvocab(self, labels, progress_per=10000):
+    def build_lvocab(self, labels, progress_per=10000, update=False):
         """Only build data structures for labels. `labels` is an iterable over the label names."""
 
         class FakeSelf(LabeledWord2Vec):
@@ -236,19 +237,19 @@ class LabeledWord2Vec(Word2Vec):
         # FIXME set the right estimate memory for labels
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.__class__.scan_vocab(labels_vocab, [labels], progress_per=progress_per, trim_rule=None)
-        self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None)
+        self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None, update=update)
         self.lvocab = labels_vocab.wv.vocab
         self.index2label = labels_vocab.wv.index2word
         # If we want to sample more negative labels that their count
         if self.negative and self.negative >= len(self.index2label) > 0:
             self.negative = len(self.index2label) - 1
-        self.finalize_lvocab()
+        self.finalize_lvocab(update=update)
 
-    def finalize_vocab(self):
+    def finalize_vocab(self, update=False):
         """Build tables and model weights based on final word vocabulary settings."""
         if not self.wv.index2word:
             self.scale_vocab()
-        if self.sorted_vocab:
+        if self.sorted_vocab and not update:
             self.sort_vocab()
         if self.null_word:
             # create null pseudo-word for padding when using concatenative L1 (run-of-words)
@@ -258,9 +259,12 @@ class LabeledWord2Vec(Word2Vec):
             self.wv.index2word.append(word)
             self.wv.vocab[word] = v
         # set initial input/projection and hidden weights
-        self.reset_weights(outputs=False)
+        if not update:
+            self.reset_weights(outputs=False)
+        else:
+            self.update_weights()
 
-    def finalize_lvocab(self):
+    def finalize_lvocab(self, update=False):
         """Build tables and model weights based on final label vocabulary settings."""
         if self.hs:
             class FakeSelf(LabeledWord2Vec):
@@ -273,7 +277,39 @@ class LabeledWord2Vec(Word2Vec):
         if self.negative:
             # build the table for drawing random words (for negative sampling)
             self.make_cum_table()
-        self.reset_weights(inputs=False)
+        if not update:
+            self.reset_weights(inputs=False)
+        else:
+            self.update_weights()
+
+    def update_weights(self, inputs=True, outputs=True):
+        """
+        Copy all the existing weights, and reset the weights for the newly
+        added vocabulary.
+        """
+        logger.info("updating layer weights")
+
+        if inputs:
+            gained_vocab = len(self.wv.vocab) - len(self.wv.syn0)
+            newsyn0 = empty((gained_vocab, self.vector_size), dtype=REAL)
+
+            # randomize the remaining words
+            for i in range(len(self.wv.syn0), len(self.wv.vocab)):
+                # construct deterministic seed from word AND seed argument
+                newsyn0[i-len(self.wv.syn0)] = self.seeded_vector(self.wv.index2word[i] + str(self.seed))
+            self.wv.syn0 = vstack([self.wv.syn0, newsyn0])
+            self.wv.syn0norm = None
+
+            # do not suppress learning for already learned words
+            self.syn0_lockf = ones(len(self.wv.vocab), dtype=REAL)  # zeros suppress learning
+
+        if outputs:
+            gained_vocab = len(self.lvocab) - len(self.wv.syn0 if self.hs else self.syn1neg)
+            if self.hs:
+                self.syn1 = vstack([self.syn1, zeros((gained_vocab, self.layer1_size), dtype=REAL)])
+            if self.negative or self.softmax:
+                self.syn1neg = vstack([self.syn1neg, zeros((gained_vocab, self.layer1_size), dtype=REAL)])
+
 
     def reset_weights(self, inputs=True, outputs=True):
         """Reset all projection weights to an initial (untrained) state, but keep the existing vocabulary."""
@@ -321,8 +357,8 @@ class LabeledWord2Vec(Word2Vec):
         train_words_pow = float(sum([self.lvocab[word].count ** power for word in self.lvocab]))
         cumulative = 0.0
         for word_index in range(vocab_size):
-            cumulative += self.lvocab[self.index2label[word_index]].count ** power / train_words_pow
-            self.cum_table[word_index] = round(cumulative * domain)
+            cumulative += self.lvocab[self.index2label[word_index]].count ** power
+            self.cum_table[word_index] = round(cumulative / train_words_pow * domain)
         if len(self.cum_table) > 0:
             assert self.cum_table[-1] == domain
 
@@ -339,6 +375,8 @@ class LabeledWord2Vec(Word2Vec):
         """
         if self.bucket > 0:
             sentences = HashIter(sentences, self.bucket, with_labels=True)
+        if (self.model_trimmed_post_training):
+            raise RuntimeError("Parameters for training were discarded using model_trimmed_post_training method")
         if FAST_VERSION < 0:
             import warnings
             warnings.warn("C extension not loaded for Word2Vec, training will be slow. "
@@ -382,6 +420,9 @@ class LabeledWord2Vec(Word2Vec):
                 else:
                     setattr(new_model, attr, value)
         return new_model
+
+    def __str__(self):
+        return "%s(vocab=%s, labels=%s, size=%s, alpha=%s)" % (self.__class__.__name__, len(self.wv.index2word), len(self.index2label), self.vector_size, self.alpha)
 
     def score(self, **kwargs):
         raise NotImplementedError('This method has no reason to exist in this class (for now)')

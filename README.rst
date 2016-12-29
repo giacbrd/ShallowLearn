@@ -89,7 +89,7 @@ DeepAveragingNetworks
 
 Exclusive Features
 ------------------
-Next cool features will be listed as Issues in Github
+Next cool features will be listed as Issues in Github, for now:
 
 Persistence
 ~~~~~~~~~~~

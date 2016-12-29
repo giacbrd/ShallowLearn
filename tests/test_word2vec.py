@@ -75,10 +75,10 @@ def test_serializzation(small_model):
         pickle.dump(small_model, fileobj)
         fileobj.seek(0)
         loaded = pickle.load(fileobj)
-        assert all(str(loaded.vocab[w]) == str(small_model.vocab[w]) for w in small_model.vocab)
+        assert all(str(loaded.wv.vocab[w]) == str(small_model.wv.vocab[w]) for w in small_model.wv.vocab)
         assert all(str(loaded.lvocab[w]) == str(small_model.lvocab[w]) for w in small_model.lvocab)
         assert numpy.array_equiv(loaded.syn1, small_model.syn1)
-        assert numpy.array_equiv(loaded.syn0, small_model.syn0)
+        assert numpy.array_equiv(loaded.wv.syn0, small_model.wv.syn0)
 
 
 def test_learning_functions(bunch_of_models):

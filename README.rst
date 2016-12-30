@@ -109,6 +109,10 @@ The original interface also allows to use compression on the serialization outpu
 
 Benchmarks
 ----------
+
+Text classification
+~~~~~~~~~~~~~~~~~~~
+
 The script ``scripts/document_classification_20newsgroups.py`` refers to this
 `scikit-learn example <http://scikit-learn.org/stable/auto_examples/text/document_classification_20newsgroups.html>`_
 in which text classifiers are compared on a reference dataset;
@@ -122,8 +126,27 @@ The times take into account of *tf-idf* vectorization in the “classic” class
 training of fastText.py.
 The evaluation measure is *macro F1*.
 
-.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/benchmark.svg
+.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/images/benchmark.svg
     :alt: Text classifiers comparison
+    :align: center
+    :width: 888 px
+
+Online learning
+~~~~~~~~~~~~~~~
+
+The script ``scripts/plot_out_of_core_classification.py`` compute a benchmark on some classifiers which are able to
+learn incrementally,
+a batch of example at a time.
+These classifiers can learn online by using the scikit-learn method ``partial_fit``.
+The `original example <http://scikit-learn.org/stable/auto_examples/applications/plot_out_of_core_classification.html>`_
+describes the approach through feature hashing, which we set with parameter ``bucket``.
+
+**The results are decent but there is room for improvement**.
+We configure our classifier with ``iter=1, size=100, alpha=0.1, sample=0, min_count=0``, so to keep the model fast and
+small.
+
+.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
+    :alt: Online learning
     :align: center
     :width: 888 px
 

@@ -230,7 +230,7 @@ positive_class = 'acq'
 
 # Here are some classifiers that support the `partial_fit` method
 partial_fit_classifiers = OrderedDict({
-    'GensimFastText': GensimFastText(min_count=0, sample=0),
+    'GensimFastText': GensimFastText(bucket=N_FEATURES, iter=1, size=100, alpha=0.1, sample=0, min_count=0, workers=1),
     'SGD': SGDClassifier(),
     'Perceptron': Perceptron(),
     'NB Multinomial': MultinomialNB(alpha=0.01),

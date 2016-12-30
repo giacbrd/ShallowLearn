@@ -17,9 +17,10 @@ from gensim import matutils
 from gensim.models import Word2Vec
 from gensim.models.keyedvectors import KeyedVectors
 from gensim.models.word2vec import train_cbow_pair, Vocab
+from gensim.utils import to_utf8
 from scipy.special import expit
 
-from .utils import HashIter
+from .utils import HashIter, basestring
 
 try:
     from queue import Queue, Empty
@@ -38,6 +39,7 @@ try:
 
     from .word2vec_inner import train_batch_labeled_cbow, score_document_labeled_cbow as sdlc
     from .word2vec_inner import FAST_VERSION, MAX_WORDS_IN_BATCH
+
 
     def score_document_labeled_cbow(model, document, labels=None, work=None, neu1=None):
         if model.bucket > 0:
@@ -140,7 +142,7 @@ except ImportError:
 
 
 def custom_hash(value):
-    return zlib.adler32(value if isinstance(value, bytes) else value.encode())
+    return zlib.adler32(value if isinstance(value, basestring) else to_utf8(str(value), errors='ignore'))
 
 
 class LabeledWord2Vec(Word2Vec):
@@ -237,7 +239,8 @@ class LabeledWord2Vec(Word2Vec):
         # FIXME set the right estimate memory for labels
         labels_vocab = FakeSelf(sys.maxsize, 0, 0, self.estimate_memory)
         self.__class__.scan_vocab(labels_vocab, [labels], progress_per=progress_per, trim_rule=None)
-        self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None, update=update)
+        self.__class__.scale_vocab(labels_vocab, min_count=None, sample=None, keep_raw_vocab=False, trim_rule=None,
+                                   update=update)
         self.lvocab = labels_vocab.wv.vocab
         self.index2label = labels_vocab.wv.index2word
         # If we want to sample more negative labels that their count
@@ -296,7 +299,9 @@ class LabeledWord2Vec(Word2Vec):
             # randomize the remaining words
             for i in range(len(self.wv.syn0), len(self.wv.vocab)):
                 # construct deterministic seed from word AND seed argument
-                newsyn0[i-len(self.wv.syn0)] = self.seeded_vector(self.wv.index2word[i] + str(self.seed))
+                newsyn0[i - len(self.wv.syn0)] = self.seeded_vector(
+                    to_utf8(self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else str(
+                        self.wv.index2word[i]), errors='ignore') + str(self.seed))
             self.wv.syn0 = vstack([self.wv.syn0, newsyn0])
             self.wv.syn0norm = None
 
@@ -310,7 +315,6 @@ class LabeledWord2Vec(Word2Vec):
             if self.negative or self.softmax:
                 self.syn1neg = vstack([self.syn1neg, zeros((gained_vocab, self.layer1_size), dtype=REAL)])
 
-
     def reset_weights(self, inputs=True, outputs=True):
         """Reset all projection weights to an initial (untrained) state, but keep the existing vocabulary."""
         logger.info("resetting layer weights")
@@ -319,7 +323,10 @@ class LabeledWord2Vec(Word2Vec):
             # randomize weights vector by vector, rather than materializing a huge random matrix in RAM at once
             for i in range(len(self.wv.vocab)):
                 # construct deterministic seed from word AND seed argument
-                self.wv.syn0[i] = self.seeded_vector(str(self.wv.index2word[i]) + str(self.seed))
+                self.wv.syn0[i] = self.seeded_vector(to_utf8(
+                    self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else str(
+                        self.wv.index2word[i]),
+                    errors='ignore') + str(self.seed))
             self.wv.syn0norm = None
             self.syn0_lockf = ones(len(self.wv.vocab), dtype=REAL)  # zeros suppress learning
         if outputs:
@@ -422,7 +429,8 @@ class LabeledWord2Vec(Word2Vec):
         return new_model
 
     def __str__(self):
-        return "%s(vocab=%s, labels=%s, size=%s, alpha=%s)" % (self.__class__.__name__, len(self.wv.index2word), len(self.index2label), self.vector_size, self.alpha)
+        return "%s(vocab=%s, labels=%s, size=%s, alpha=%s)" % (
+            self.__class__.__name__, len(self.wv.index2word), len(self.index2label), self.vector_size, self.alpha)
 
     def score(self, **kwargs):
         raise NotImplementedError('This method has no reason to exist in this class (for now)')

@@ -15,26 +15,17 @@ from numbers import Number
 import fasttext
 import gensim
 from gensim.models import Word2Vec
+from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from gensim.utils import to_unicode
 from six.moves import zip_longest
-
-from .utils import argument_alternatives, HashIter
-
-try:
-    basestring = basestring
-except NameError:
-    # 'unicode' is undefined, must be Python 3
-    basestring = (str, bytes)
-
-from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from sklearn.base import BaseEstimator, ClassifierMixin
 
+from .utils import argument_alternatives, basestring
 from .word2vec import LabeledWord2Vec, score_document_labeled_cbow
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
 logger = logging.getLogger(__name__)
-
 
 CLASSIFIER_FILE_SUFFIX = '.CLF'
 
@@ -241,8 +232,7 @@ class GensimFastText(BaseClassifier):
         """
         # TODO if y=None learn a one-class classifier
         self._build_label_info(y, overwrite=True)
-        #FIXME the vocab of a pre-trained model is definitive, it should be updated instead (see Gensim 0.13.3)
-        if not self._classifier.vocab:
+        if not self._classifier.wv.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
         elif not self._classifier.lvocab:
             self._classifier.build_lvocab(self._label_set)
@@ -254,11 +244,12 @@ class GensimFastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :param y: Iterator over lists or single labels, document target values
         """
-        if not self._classifier.vocab or not self._classifier.lvocab:
+        if not self._classifier.wv.vocab or not self._classifier.lvocab:
             self.fit(documents, y)
         else:
             self._build_label_info(y)
             size = sum(1 for _ in self._data_iter(documents, y))
+            self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule, update=True)
             self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
     def _iter_predict(self, documents):
@@ -434,7 +425,8 @@ class FastText(BaseClassifier):
         :return: For each document, a list of label probabilities, which should sum to one for each prediction
         """
         result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), self._label_count)
-        result = [[1. / self._label_count] * self._label_count if not any(r) else self._extract_prediction(r) for r in result]
+        result = [[1. / self._label_count] * self._label_count if not any(r) else self._extract_prediction(r) for r in
+                  result]
         return result
 
     def decision_function(self, documents):

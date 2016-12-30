@@ -169,7 +169,7 @@ class LabeledWord2Vec(Word2Vec):
         kwargs['sg'] = 0
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
-        kwargs['hashfxn'] = custom_hash  # Same function through different Python versions
+        kwargs['hashfxn'] = custom_hash  # Force a consistent function across different Python versions
         self.softmax = self.init_loss(kwargs, loss)
         self.bucket = bucket
         super(LabeledWord2Vec, self).__init__(**kwargs)

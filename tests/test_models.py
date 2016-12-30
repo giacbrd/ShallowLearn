@@ -8,6 +8,7 @@ import os
 import tempfile
 
 import pytest
+import sys
 
 from shallowlearn.models import GensimFastText, FastText
 from tests.resources import dataset_targets, dataset_samples, pre_docs
@@ -89,7 +90,8 @@ def test_persistence_gensim(bunch_of_gensim_classifiers):
 
 
 #FIXME one day Travis must work
-@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', None), reason='Travis kills the process')
+@pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', None) and sys.version_info >= (3, 5),
+                    reason='Travis kills the process')
 def test_persistence_fasttext(bunch_of_fasttext_classifiers):
     return _persistence(bunch_of_fasttext_classifiers)
 

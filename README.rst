@@ -49,7 +49,7 @@ passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (th
 ``GensimFastText`` model by the attribute ``classifier``).
 With method ``fit_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
 
-Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this class docstring).
+Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this `class docstring <https://github.com/giacbrd/ShallowLearn/blob/develop/shallowlearn/models.py#L74>`_).
 
 .. code:: python
 
@@ -137,8 +137,8 @@ Online learning
 
 The script ``scripts/plot_out_of_core_classification.py`` computes a benchmark on some scikit-learn classifiers which are able to
 learn incrementally,
-a batch of example at a time.
-These classifiers can learn online by using the scikit-learn method ``partial_fit``.
+a batch of examples at a time.
+These classifiers can learn online by using the scikit-learn method ``partial_fit(X, y)``.
 The `original example <http://scikit-learn.org/stable/auto_examples/applications/plot_out_of_core_classification.html>`_
 describes the approach through feature hashing, which we set with parameter ``bucket``.
 

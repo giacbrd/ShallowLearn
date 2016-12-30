@@ -42,7 +42,7 @@ It is possible to choose the Softmax loss function (default) or one of its two "
 Hierarchical Softmax and Negative Sampling. 
 
 The parameter ``bucket`` configures the feature hashing space, i.e., the *hashing trick* described in [1]_.
-Using the hashing trick together with ``partial_fit(X, y)`` yields a powerful *online* text classifier (see onlinelearning_).
+Using the hashing trick together with ``partial_fit(X, y)`` yields a powerful *online* text classifier (see `Online learning`_).
 
 It is possible to load pre-trained word vectors at initialization,
 passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (the latter is retrievable from a
@@ -131,8 +131,6 @@ The evaluation measure is *macro F1*.
     :alt: Text classifiers comparison
     :align: center
     :width: 888 px
-
-.. _onlinelearning:
 
 Online learning
 ~~~~~~~~~~~~~~~

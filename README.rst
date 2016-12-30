@@ -144,7 +144,7 @@ describes the approach through feature hashing, which we set with parameter ``bu
 
 **The results are decent but there is room for improvement**.
 We configure our classifier with ``iter=1, size=100, alpha=0.1, sample=0, min_count=0``, so to keep the model fast and
-small.
+small, and to not cut off words from the few samples we have.
 
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
     :alt: Online learning

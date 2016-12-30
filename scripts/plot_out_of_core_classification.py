@@ -368,7 +368,7 @@ try:
         plt.xlabel('%s' % x_legend)
         plt.ylabel('Accuracy')
         plt.grid(True)
-        plt.plot(x, y)
+        plt.plot(x, y, linewidth=2)
 
     rcParams['legend.fontsize'] = 10
     cls_names = list(sorted(cls_stats.keys()))

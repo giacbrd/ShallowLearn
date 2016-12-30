@@ -10,7 +10,10 @@ import tempfile
 import pytest
 import sys
 
+from copy import deepcopy
+
 from shallowlearn.models import GensimFastText, FastText
+from shallowlearn.utils import basestring
 from tests.resources import dataset_targets, dataset_samples, pre_docs
 from tests.test_word2vec import bunch_of_models
 
@@ -109,3 +112,35 @@ def test_fit_embeddings(bunch_of_gensim_classifiers):
         model.fit_embeddings(pre_docs)
         model.fit(dataset_samples, dataset_targets)
         _predict(model)
+
+
+def test_buckets(bunch_of_gensim_classifiers):
+    for model in bunch_of_gensim_classifiers:
+        if model.bucket > 0:
+            assert len(model.classifier.wv.vocab) <= model.bucket
+            assert all(str(word).isdigit() for word in model.classifier.wv.vocab.keys())
+            assert all(isinstance(word, basestring) for word in model.classifier.lvocab.keys())
+
+
+def test_gensim_partial_fit(bunch_of_gensim_classifiers):
+    for model in bunch_of_gensim_classifiers:
+        params = model.get_params()
+        params['pre_trained'] = None
+        clf = GensimFastText(**params)
+
+        clf.partial_fit(dataset_samples[:2], dataset_targets[:2])
+        vocab1 = deepcopy(clf.classifier.wv.vocab)
+        m1 = clf.classifier.wv.syn0.shape[0]
+        lvocab1 = deepcopy(clf.classifier.lvocab)
+
+        clf.partial_fit(dataset_samples[2:3], dataset_targets[2:3])
+        vocab2 = clf.classifier.wv.vocab
+        lvocab2 = clf.classifier.lvocab
+        m2 = clf.classifier.wv.syn0.shape[0]
+        assert set(vocab2.keys()).issuperset(set(vocab1.keys()))
+        assert len(vocab2.keys()) > len(vocab1.keys())
+        assert len(lvocab2.keys()) > len(lvocab1.keys())
+        assert m2 > m1
+
+        clf.partial_fit(dataset_samples[3:], dataset_targets[3:])
+        _predict(clf)

@@ -309,7 +309,7 @@ class LabeledWord2Vec(Word2Vec):
             self.syn0_lockf = ones(len(self.wv.vocab), dtype=REAL)  # zeros suppress learning
 
         if outputs:
-            gained_vocab = len(self.lvocab) - len(self.wv.syn1 if self.hs else self.syn1neg)
+            gained_vocab = len(self.lvocab) - len(self.syn1 if self.hs else self.syn1neg)
             if self.hs:
                 self.syn1 = vstack([self.syn1, zeros((gained_vocab, self.layer1_size), dtype=REAL)])
             if self.negative or self.softmax:

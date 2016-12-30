@@ -1,7 +1,7 @@
 Changelog
 =========
 
-`0.0.5 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.5>`_ (2016-12-27)
+`0.0.5 <https://github.com/giacbrd/ShallowLearn/releases/tag/0.0.5>`_ (2016-12-30)
 ----------------------------------------------------------------------------------
 
 * Online learning and better pre-training in GensimFastTex:

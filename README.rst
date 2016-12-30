@@ -127,7 +127,7 @@ The times take into account of *tf-idf* vectorization in the “classic” class
 training of fastText.py.
 The evaluation measure is *macro F1*.
 
-.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/images/benchmark.svg
+.. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/benchmark.svg
     :alt: Text classifiers comparison
     :align: center
     :width: 888 px
@@ -148,7 +148,7 @@ describes the approach through feature hashing, which we set with parameter ``bu
 We configure our classifier with ``iter=1, size=100, alpha=0.1, sample=0, min_count=0``, so to keep the model fast and
 small.
 
-.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
+.. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
     :alt: Online learning
     :align: center
     :width: 888 px

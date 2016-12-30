@@ -39,14 +39,17 @@ The code is mostly taken and rewritten from `Gensim <https://radimrehurek.com/ge
 it takes advantage of its optimizations (e.g. Cython) and support.
 
 It is possible to choose the Softmax loss function (default) or one of its two "approximations":
-Hierarchical Softmax and Negative Sampling. It is also possible to load pre-trained word vectors at initialization,
+Hierarchical Softmax and Negative Sampling. 
+
+The parameter ``bucket`` configures the feature hashing space, i.e., the *hashing trick* described in [1]_.
+Using the hashing trick together with ``partial_fit(X, y)`` yields a powerful *online* text classifier (see onlinelearning_).
+
+It is possible to load pre-trained word vectors at initialization,
 passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (the latter is retrievable from a
 ``GensimFastText`` model by the attribute ``classifier``).
-
-Using the hashing trick together with ``partial_fit(X, y)`` yield a powerful *online* text classifier.
+With method ``fit_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
 
 Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this class docstring).
-In this example document features are word unigrams and bigrams, limiting the feature space to XXX with feature hashing.
 
 .. code:: python
 
@@ -55,8 +58,6 @@ In this example document features are word unigrams and bigrams, limiting the fe
     >>> clf.fit([('i', 'am', 'tall'), ('you', 'are', 'fat')], ['yes', 'no'])
     >>> clf.predict([('tall', 'am', 'i')])
     ['yes']
-
-With method ``fit_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
 
 FastText
 ~~~~~~~~
@@ -131,10 +132,12 @@ The evaluation measure is *macro F1*.
     :align: center
     :width: 888 px
 
+.. _onlinelearning:
+
 Online learning
 ~~~~~~~~~~~~~~~
 
-The script ``scripts/plot_out_of_core_classification.py`` compute a benchmark on some classifiers which are able to
+The script ``scripts/plot_out_of_core_classification.py`` computes a benchmark on some scikit-learn classifiers which are able to
 learn incrementally,
 a batch of example at a time.
 These classifiers can learn online by using the scikit-learn method ``partial_fit``.

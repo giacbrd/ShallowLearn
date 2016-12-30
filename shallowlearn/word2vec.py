@@ -142,7 +142,7 @@ except ImportError:
 
 
 def custom_hash(value):
-    return zlib.adler32(value if isinstance(value, basestring) else to_utf8(str(value), errors='ignore'))
+    return zlib.adler32(to_utf8(value if isinstance(value, basestring) else str(value), errors='ignore'))
 
 
 class LabeledWord2Vec(Word2Vec):
@@ -301,7 +301,7 @@ class LabeledWord2Vec(Word2Vec):
                 # construct deterministic seed from word AND seed argument
                 newsyn0[i - len(self.wv.syn0)] = self.seeded_vector(
                     to_utf8(self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else str(
-                        self.wv.index2word[i]), errors='ignore') + str(self.seed))
+                        self.wv.index2word[i]), errors='ignore') + str(self.seed).encode('utf-8'))
             self.wv.syn0 = vstack([self.wv.syn0, newsyn0])
             self.wv.syn0norm = None
 
@@ -326,7 +326,7 @@ class LabeledWord2Vec(Word2Vec):
                 self.wv.syn0[i] = self.seeded_vector(to_utf8(
                     self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else str(
                         self.wv.index2word[i]),
-                    errors='ignore') + str(self.seed))
+                    errors='ignore') + str(self.seed).encode('utf-8'))
             self.wv.syn0norm = None
             self.syn0_lockf = ones(len(self.wv.vocab), dtype=REAL)  # zeros suppress learning
         if outputs:

@@ -265,7 +265,7 @@ class LabeledWord2Vec(Word2Vec):
         if not update:
             self.reset_weights(outputs=False)
         else:
-            self.update_weights()
+            self.update_weights(outputs=False)
 
     def finalize_lvocab(self, update=False):
         """Build tables and model weights based on final label vocabulary settings."""
@@ -283,7 +283,7 @@ class LabeledWord2Vec(Word2Vec):
         if not update:
             self.reset_weights(inputs=False)
         else:
-            self.update_weights()
+            self.update_weights(inputs=False)
 
     def update_weights(self, inputs=True, outputs=True):
         """
@@ -309,7 +309,7 @@ class LabeledWord2Vec(Word2Vec):
             self.syn0_lockf = ones(len(self.wv.vocab), dtype=REAL)  # zeros suppress learning
 
         if outputs:
-            gained_vocab = len(self.lvocab) - len(self.wv.syn0 if self.hs else self.syn1neg)
+            gained_vocab = len(self.lvocab) - len(self.wv.syn1 if self.hs else self.syn1neg)
             if self.hs:
                 self.syn1 = vstack([self.syn1, zeros((gained_vocab, self.layer1_size), dtype=REAL)])
             if self.negative or self.softmax:

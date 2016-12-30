@@ -67,9 +67,9 @@ def test_fasttext_predict(bunch_of_fasttext_classifiers):
         _predict(model)
 
 
-def test_persistence(bunch_of_gensim_classifiers, bunch_of_fasttext_classifiers):
+def _persistence(classifiers):
     example = [('supervised', 'faster', 'is', 'machine', 'important')]
-    for model in bunch_of_gensim_classifiers + bunch_of_fasttext_classifiers:
+    for model in classifiers:
         with tempfile.NamedTemporaryFile() as temp:
             model.save(temp.name)
             loaded = model.load(temp.name)
@@ -81,6 +81,14 @@ def test_persistence(bunch_of_gensim_classifiers, bunch_of_fasttext_classifiers)
             loaded = model.load(temp.name)
             assert model.get_params() == loaded.get_params()
             assert model.predict(example) == loaded.predict(example)
+
+
+def test_persistence_gensim(bunch_of_gensim_classifiers):
+    return _persistence(bunch_of_gensim_classifiers)
+
+
+def test_persistence_fasttext(bunch_of_fasttext_classifiers):
+    return _persistence(bunch_of_fasttext_classifiers)
 
 
 def test_duplicate_arguments():

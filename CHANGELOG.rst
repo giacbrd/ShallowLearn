@@ -7,7 +7,7 @@ Changelog
 * Online learning and better pre-training in GensimFastTex:
     - Hashing trick for building the vocabulary, similar to the original fastText approach
     - It is possible to pre-fit word embeddings from a dataset with word2vec
-    - True online earning with partial_fit(), the vocabulary is incrementally updated
+    - True online earning with ``partial_fit``, the vocabulary is incrementally updated
 * New version of fastText.py: 0.8.2
 * New version of Gensim: 0.13.4
 * Fixed ``predict_proba`` output format

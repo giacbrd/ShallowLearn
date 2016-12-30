@@ -142,7 +142,7 @@ except ImportError:
 
 
 def custom_hash(value):
-    return zlib.adler32(to_utf8(value if isinstance(value, basestring) else str(value), errors='ignore'))
+    return HashIter.hash(value if isinstance(value, basestring) else str(value))
 
 
 class LabeledWord2Vec(Word2Vec):
@@ -300,8 +300,8 @@ class LabeledWord2Vec(Word2Vec):
             for i in range(len(self.wv.syn0), len(self.wv.vocab)):
                 # construct deterministic seed from word AND seed argument
                 newsyn0[i - len(self.wv.syn0)] = self.seeded_vector(
-                    to_utf8(self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else str(
-                        self.wv.index2word[i]), errors='ignore') + str(self.seed).encode('utf-8'))
+                    (self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else
+                        str(self.wv.index2word[i])) + str(self.seed))
             self.wv.syn0 = vstack([self.wv.syn0, newsyn0])
             self.wv.syn0norm = None
 
@@ -323,10 +323,9 @@ class LabeledWord2Vec(Word2Vec):
             # randomize weights vector by vector, rather than materializing a huge random matrix in RAM at once
             for i in range(len(self.wv.vocab)):
                 # construct deterministic seed from word AND seed argument
-                self.wv.syn0[i] = self.seeded_vector(to_utf8(
-                    self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else str(
-                        self.wv.index2word[i]),
-                    errors='ignore') + str(self.seed).encode('utf-8'))
+                self.wv.syn0[i] = self.seeded_vector(
+                    (self.wv.index2word[i] if isinstance(self.wv.index2word[i], basestring) else
+                        str(self.wv.index2word[i])) + str(self.seed))
             self.wv.syn0norm = None
             self.syn0_lockf = ones(len(self.wv.vocab), dtype=REAL)  # zeros suppress learning
         if outputs:

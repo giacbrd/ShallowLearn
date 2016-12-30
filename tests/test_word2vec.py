@@ -31,16 +31,19 @@ def small_model():
 def bunch_of_models():
     models = []
     for kwarg in ({'loss': 'hs', 'negative': 0}, {'loss': 'ns', 'negative': 5}, {'loss': 'softmax', 'negative': 0}):
-        models.extend([
-            LabeledWord2Vec(iter=1, size=30, min_count=0, **kwarg),
-            LabeledWord2Vec(iter=1, alpha=1.0, size=300, min_count=0, **kwarg),
-            LabeledWord2Vec(iter=1, size=100, min_count=1, **kwarg),
-            LabeledWord2Vec(iter=1, size=100, min_count=0, sample=0, **kwarg),
-            LabeledWord2Vec(iter=3, size=100, min_count=0, **kwarg),
-            LabeledWord2Vec(iter=5, workers=1, size=100, min_count=0, **kwarg)
-        ])
+        for bucket in (0, 5, 100):
+            kwarg['bucket'] = bucket
+            models.extend([
+                LabeledWord2Vec(iter=5, size=30, min_count=0, sample=0, min_alpha=0.0, **kwarg),
+                LabeledWord2Vec(iter=1, alpha=1.0, size=100, min_count=0, **kwarg),
+                LabeledWord2Vec(iter=3, size=50, min_count=1, **kwarg),
+                LabeledWord2Vec(iter=2, size=50, min_count=1, sample=0, **kwarg),
+                LabeledWord2Vec(iter=10, size=10, min_count=0, **kwarg),
+                LabeledWord2Vec(iter=5, workers=1, size=50, min_count=0, **kwarg)
+            ])
     targets = frozenset(
-        target for targets in dataset_targets for target in BaseClassifier._target_list(targets))
+        target for targets in dataset_targets for target in BaseClassifier._target_list(targets)
+    )
     for model in models:
         model.build_vocab(dataset_samples, targets)
         model.train(zip(dataset_samples, dataset_targets))
@@ -56,7 +59,7 @@ def test_init():
 
 
 def test_vocabulary(small_model):
-    assert 'to' in small_model.vocab
+    assert 'to' in small_model.wv.vocab
     assert frozenset(('aa', 'b', 'cc')) == frozenset(small_model.lvocab.keys())
     assert max(v.index for v in small_model.lvocab.values()) == 2
 
@@ -72,10 +75,10 @@ def test_serializzation(small_model):
         pickle.dump(small_model, fileobj)
         fileobj.seek(0)
         loaded = pickle.load(fileobj)
-        assert all(str(loaded.vocab[w]) == str(small_model.vocab[w]) for w in small_model.vocab)
+        assert all(str(loaded.wv.vocab[w]) == str(small_model.wv.vocab[w]) for w in small_model.wv.vocab)
         assert all(str(loaded.lvocab[w]) == str(small_model.lvocab[w]) for w in small_model.lvocab)
         assert numpy.array_equiv(loaded.syn1, small_model.syn1)
-        assert numpy.array_equiv(loaded.syn0, small_model.syn0)
+        assert numpy.array_equiv(loaded.wv.syn0, small_model.wv.syn0)
 
 
 def test_learning_functions(bunch_of_models):

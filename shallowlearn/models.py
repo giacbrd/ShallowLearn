@@ -14,26 +14,18 @@ from numbers import Number
 
 import fasttext
 import gensim
+from gensim.models import Word2Vec
+from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from gensim.utils import to_unicode
 from six.moves import zip_longest
-
-from .utils import argument_alternatives
-
-try:
-    basestring = basestring
-except NameError:
-    # 'unicode' is undefined, must be Python 3
-    basestring = (str, bytes)
-
-from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from sklearn.base import BaseEstimator, ClassifierMixin
 
+from .utils import argument_alternatives, basestring
 from .word2vec import LabeledWord2Vec, score_document_labeled_cbow
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
 logger = logging.getLogger(__name__)
-
 
 CLASSIFIER_FILE_SUFFIX = '.CLF'
 
@@ -42,15 +34,27 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def __init__(self):
         self._classifier = None
         self._label_set = None
+        self._label_count = None
         self._label_is_num = None
+        self.classes_ = None
 
     @classmethod
     def _target_list(cls, targets):
         return targets if isinstance(targets, Iterable) and not isinstance(targets, basestring) else [targets]
 
-    def _build_label_info(self, y):
-        self._label_set = frozenset(target for targets in y for target in self._target_list(targets))
+    def _build_label_info(self, y, overwrite=False):
+        label_set = set(target for targets in y for target in self._target_list(targets))
+        if self._label_set is None or overwrite:
+            self._label_set = label_set
+        else:
+            self._label_set.update(label_set)
+        self.classes_ = list(self._label_set)
+        self._label_count = len(self._label_set)
         self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
+
+    def _extract_prediction(self, prediction):
+        pred_map = dict(prediction)
+        return tuple(pred_map[label] for label in self.classes_)
 
     @classmethod
     def _data_iter(cls, documents, y):
@@ -129,8 +133,13 @@ class GensimFastText(BaseClassifier):
     thus cython routines). Default is 10000. (Larger batches will be passed if individual
     texts are longer than 10000 words, but the standard cython code truncates to that maximum.)
 
-    `pre_trained` can be set with a ``Word2Vec`` object in order to set pre-trained word vectors and vocabularies.
+    `pre_trained` can be set with a ``LabeledWord2Vec`` object,
+    or a ``Word2Vec`` or ``KeyedVectors'' object (from ``gensim.models``)
+    in order to set pre-trained word vectors and vocabularies.
     Use ``partial_fit`` method to learn a supervised model starting from the pre-trained one.
+
+    `bucket` is the maximum number of hashed words, i.e., we limit the feature space to this number,
+    ergo we use the hashing trick in the word vocabulary. Default to 0, NO hashing trick
 
     .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
 
@@ -138,7 +147,7 @@ class GensimFastText(BaseClassifier):
 
     def __init__(self, size=200, alpha=0.05, min_count=5, max_vocab_size=None, sample=1e-3, loss='softmax', negative=5,
                  workers=3, min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
-                 batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, pre_trained=None, **kwargs):
+                 batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, bucket=0, pre_trained=None, **kwargs):
         super(GensimFastText, self).__init__()
         self.set_params(
             size=argument_alternatives(size, kwargs, ('dim',), logger),
@@ -157,33 +166,35 @@ class GensimFastText(BaseClassifier):
             iter=argument_alternatives(iter, kwargs, ('epoch', 'max_iter'), logger),
             seed=argument_alternatives(seed, kwargs, ('random_state',), logger),
             loss=loss,
-            negative=argument_alternatives(negative, kwargs, ('neg',), logger)
+            negative=argument_alternatives(negative, kwargs, ('neg',), logger),
+            bucket=bucket
         )
-        params = self.get_params()
-        # Convert name conventions from Scikit-learn to Gensim
-        del params['pre_trained']
-        self._classifier = LabeledWord2Vec(**params)
-        if pre_trained is not None:
-            self._classifier.reset_from(pre_trained)
-            if hasattr(pre_trained, 'lvocab'):
-                self._build_label_info(pre_trained.lvocab.keys())
+        if pre_trained is None:
+            params = self.get_params()
+            # Convert name conventions from Scikit-learn to Gensim
+            del params['pre_trained']
+            self._classifier = LabeledWord2Vec(**params)
+        else:
+            self._classifier = LabeledWord2Vec.load_from(pre_trained)
+            self._build_label_info(self._classifier.lvocab.keys())
             self.set_params(
-                size=pre_trained.layer1_size,
-                alpha=pre_trained.alpha,
-                min_count=pre_trained.min_count,
-                max_vocab_size=pre_trained.max_vocab_size,
-                sample=pre_trained.sample,
-                workers=pre_trained.workers,
-                min_alpha=pre_trained.min_alpha,
-                cbow_mean=pre_trained.cbow_mean,
-                hashfxn=pre_trained.hashfxn,
-                null_word=pre_trained.null_word,
-                sorted_vocab=pre_trained.sorted_vocab,
-                batch_words=pre_trained.batch_words,
-                iter=pre_trained.iter,
-                seed=pre_trained.seed,
-                loss='softmax' if pre_trained.softmax else ('hs' if pre_trained.hs else 'ns'),
-                negative=pre_trained.negative
+                size=self._classifier.layer1_size,
+                alpha=self._classifier.alpha,
+                min_count=self._classifier.min_count,
+                max_vocab_size=self._classifier.max_vocab_size,
+                sample=self._classifier.sample,
+                workers=self._classifier.workers,
+                min_alpha=self._classifier.min_alpha,
+                cbow_mean=self._classifier.cbow_mean,
+                hashfxn=self._classifier.hashfxn,
+                null_word=self._classifier.null_word,
+                sorted_vocab=self._classifier.sorted_vocab,
+                batch_words=self._classifier.batch_words,
+                iter=self._classifier.iter,
+                seed=self._classifier.seed,
+                loss='softmax' if self._classifier.softmax else ('hs' if self._classifier.hs else 'ns'),
+                negative=self._classifier.negative,
+                bucket=self._classifier.bucket,
             )
 
     @property
@@ -194,6 +205,23 @@ class GensimFastText(BaseClassifier):
         """
         return self._classifier
 
+    def fit_embeddings(self, documents):
+        """
+        Train word embeddings of the classification model, using the same parameter values for classification on Gensim ``Word2Vec``.
+        Similar to use a pre-trained model.
+        :param documents:
+        """
+        params = self.get_params()
+        del params['pre_trained']
+        del params['bucket']
+        # Word2Vec has not softmax
+        if params['loss'] == 'softmax':
+            params['loss'] = 'hs'
+        LabeledWord2Vec.init_loss(LabeledWord2Vec(), params, params['loss'])
+        del params['loss']
+        w2v = Word2Vec(sentences=documents, **params)
+        self._classifier = LabeledWord2Vec.load_from(w2v)
+
     def fit(self, documents, y=None, **fit_params):
         """
         Train the supervised model with a labeled training set
@@ -203,9 +231,11 @@ class GensimFastText(BaseClassifier):
         :return:
         """
         # TODO if y=None learn a one-class classifier
-        self._build_label_info(y)
-        if not self._classifier.vocab:
+        self._build_label_info(y, overwrite=True)
+        if not self._classifier.wv.vocab:
             self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
+        elif not self._classifier.lvocab:
+            self._classifier.build_lvocab(self._label_set)
         self._classifier.train(self._data_iter(documents, y))
 
     def partial_fit(self, documents, y):
@@ -214,21 +244,25 @@ class GensimFastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :param y: Iterator over lists or single labels, document target values
         """
-        size = sum(1 for _ in self._data_iter(documents, y))
-        self._classifier.train(self._data_iter(documents, y), total_examples=size)
+        if not self._classifier.wv.vocab or not self._classifier.lvocab:
+            self.fit(documents, y)
+        else:
+            self._build_label_info(y)
+            size = sum(1 for _ in self._data_iter(documents, y))
+            self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule, update=True)
+            self._classifier.train(self._data_iter(documents, y), total_examples=size)
 
     def _iter_predict(self, documents):
         for doc in documents:
             result = list(score_document_labeled_cbow(self._classifier, document=doc))
-            result.sort(key=operator.itemgetter(1), reverse=True)
             yield result
 
     def predict_proba(self, documents):
         """
         :param documents: Iterator over lists of words
-        :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
+        :return: For each document, a list of label probabilities, which should sum to one for each prediction
         """
-        return list(self._iter_predict(documents))
+        return [self._extract_prediction(prediction) for prediction in self._iter_predict(documents)]
 
     def decision_function(self, documents):
         return self.predict_proba(documents)
@@ -239,7 +273,7 @@ class GensimFastText(BaseClassifier):
         :return: For each document, the one most probable label (i.e. the classification)
         """
         # FIXME it only returns the most probable class, so it is not multi-label (even if the training is)
-        return [predictions[0][0] for predictions in self._iter_predict(documents)]
+        return [max(predictions, key=operator.itemgetter(1))[0] for predictions in self._iter_predict(documents)]
 
     def save(self, *args, **kwargs):
         kwargs['ignore'] = kwargs.get('ignore', ['_classifier'])
@@ -306,12 +340,15 @@ class FastText(BaseClassifier):
     `silent` = disable the log output from the C++ extension [1]
 
     `encoding` = specify input_file encoding [utf-8]
+
+    `pretrained_vectors` = pretrained word vectors (.vec file) for supervised learning [None]
     """
 
     LABEL_PREFIX = '__label__'
 
     def __init__(self, lr=0.1, lr_update_rate=100, dim=100, ws=5, epoch=5, min_count=1, neg=5, word_ngrams=1,
-                 loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8'):
+                 loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8',
+                 pretrained_vectors=None):
         super(FastText, self).__init__()
         self.lr = lr
         self.lr_update_rate = lr_update_rate
@@ -329,6 +366,7 @@ class FastText(BaseClassifier):
         self.t = t
         self.silent = silent
         self.encoding = encoding
+        self.pretrained_vectors = pretrained_vectors or ''
         self._classifier = None
         self._temp_file = None
         self._temp_fname = None
@@ -384,11 +422,11 @@ class FastText(BaseClassifier):
     def predict_proba(self, documents):
         """
         :param documents: Iterator over lists of words
-        :return: For each document, a list of tuples with labels and their probabilities, which should sum to one for each prediction
+        :return: For each document, a list of label probabilities, which should sum to one for each prediction
         """
-        result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), len(self._label_set))
-        uniform = 1. / len(self._label_set)
-        result = [[(l, uniform) for l in self._label_set] if not any(r) else r for r in result]
+        result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), self._label_count)
+        result = [[1. / self._label_count] * self._label_count if not any(r) else self._extract_prediction(r) for r in
+                  result]
         return result
 
     def decision_function(self, documents):

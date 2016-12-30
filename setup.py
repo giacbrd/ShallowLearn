@@ -22,7 +22,7 @@ package_dir = os.path.join(os.path.dirname(__file__), 'shallowlearn')
 
 setup(
     name='ShallowLearn',
-    version='0.0.4',
+    version='0.0.5',
     description='A collection of supervised learning models based on shallow neural network approaches '
                 '(e.g., word2vec and fastText) with some additional exclusive features',
     long_description=readfile('README.rst'),
@@ -44,8 +44,8 @@ setup(
     install_requires=[
         'cython>=0.24.1',
         'scikit-learn>=0.18',
-        'gensim==0.13.2',
-        'fasttext==0.8.0'
+        'gensim==0.13.4',
+        'fasttext==0.8.2'
     ],
     setup_requires=['pytest-runner==2.9'],
     tests_require=['pytest==3.0.3'],

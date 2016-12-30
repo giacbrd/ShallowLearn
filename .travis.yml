@@ -16,6 +16,7 @@ before_install:
   - ./miniconda.sh -b -p $HOME/miniconda
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
+  - export PYTHONHASHSEED=1
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
   - pip install cython
@@ -23,3 +24,4 @@ install:
 script:
   - ./scripts/test.sh
   - python scripts/document_classification_20newsgroups.py --chi2_select 80
+  - python scripts/plot_out_of_core_classification.py

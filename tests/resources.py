@@ -6,11 +6,17 @@
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
+pre_docs = (
+    ('i', 'study', 'machine', 'learning', 'to', 'drive', 'a', 'car'),
+    ('important', 'topics', 'of', 'this', 'week', 'are', 'today', 'cheers'),
+    ('like', 'my', 'faster', 'bike', 'supervised', 'is', 'dedicated', 'to', 'me'),
+)
 dataset_samples = (
     ('i', 'like', 'to', 'study', 'machine', 'learning'),
     ('machine', 'learning', 'is', 'important'),
     ('my', 'car', 'is', 'faster', 'than', 'your', 'bike'),
+    ('nothing', 'is', 'faster', 'than', 'my', 'truck'),
     ('supervised', 'machine', 'learning', 'is', 'the', 'topic', 'of', 'today'),
     ('my', 'study', 'is', 'dedicated', 'to', 'me')
 )
-dataset_targets = (('aa', 'b'), 'b', 'cc', 'b', 'aa')
+dataset_targets = (('aa', 'b'), 'b', 'cc', 'cc', 'b', 'aa')

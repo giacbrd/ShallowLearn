@@ -122,8 +122,15 @@ The times take into account of *tf-idf* vectorization in the “classic” class
 training of fastText.py.
 The evaluation measure is *macro F1*.
 
-.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/benchmark.svg
+.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/images/benchmark.svg
     :alt: Text classifiers comparison
+    :align: center
+    :width: 888 px
+
+The script ``scripts/plot_out_of_core_classification.py``
+
+.. image:: https://rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
+    :alt: Online learning
     :align: center
     :width: 888 px
 

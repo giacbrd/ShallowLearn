@@ -59,7 +59,7 @@ def test_init():
 
 
 def test_vocabulary(small_model):
-    assert 'to' in small_model.vocab
+    assert 'to' in small_model.wv.vocab
     assert frozenset(('aa', 'b', 'cc')) == frozenset(small_model.lvocab.keys())
     assert max(v.index for v in small_model.lvocab.values()) == 2
 

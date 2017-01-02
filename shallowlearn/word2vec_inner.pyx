@@ -41,8 +41,7 @@ cdef sscal_ptr sscal=<sscal_ptr>PyCObject_AsVoidPtr(fblas.sscal._cpointer) # x =
 DEF EXP_TABLE_SIZE = 1000
 DEF MAX_EXP = 6
 
-# This is the "true" exp table, because EXP_TABLE contains logistics!
-cdef REAL_t[EXP_TABLE_SIZE] TRUE_EXP_TABLE
+cdef REAL_t[EXP_TABLE_SIZE] TRUE_EXP_TABLE  # This is the "true" exp table, because EXP_TABLE contains logistics!
 cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE
 cdef REAL_t[EXP_TABLE_SIZE] LOG_TABLE
 

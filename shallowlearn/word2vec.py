@@ -11,13 +11,11 @@ from __future__ import division  # py3 "true division"
 
 import logging
 import sys
-import zlib
 
 from gensim import matutils
 from gensim.models import Word2Vec
 from gensim.models.keyedvectors import KeyedVectors
 from gensim.models.word2vec import train_cbow_pair, Vocab
-from gensim.utils import to_utf8
 from scipy.special import expit
 
 from .utils import HashIter, basestring
@@ -55,7 +53,7 @@ try:
 except ImportError:
 
     # failed... fall back to plain numpy (20-80x slower training than the above)
-    logger.warning('Slow version of {0} is being used'.format(__name__))
+
     FAST_VERSION = -1
     MAX_WORDS_IN_BATCH = 10000
 

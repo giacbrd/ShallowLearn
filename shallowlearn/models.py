@@ -19,8 +19,8 @@ from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from gensim.utils import to_unicode
 from six.moves import zip_longest
 from sklearn.base import BaseEstimator, ClassifierMixin
-
-from .utils import argument_alternatives, basestring
+from six import string_types
+from .utils import argument_alternatives
 from .word2vec import LabeledWord2Vec, score_document_labeled_cbow
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -40,7 +40,7 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
 
     @classmethod
     def _target_list(cls, targets):
-        return targets if isinstance(targets, Iterable) and not isinstance(targets, basestring) else [targets]
+        return targets if isinstance(targets, Iterable) and not isinstance(targets, string_types) else [targets]
 
     def _build_label_info(self, y, overwrite=False):
         label_set = set(target for targets in y for target in self._target_list(targets))
@@ -284,7 +284,7 @@ class GensimFastText(BaseClassifier):
             args = args[1:]
         else:
             fname = kwargs['fname_or_handle']
-        if not isinstance(fname, basestring):
+        if not isinstance(fname, string_types):
             fname = fname.name
         fname += CLASSIFIER_FILE_SUFFIX
         kwargs['fname_or_handle'] = fname
@@ -468,7 +468,7 @@ class FastText(BaseClassifier):
                 fname = args[0]
             else:
                 fname = kwargs['fname_or_handle']
-            if not isinstance(fname, basestring):
+            if not isinstance(fname, string_types):
                 fname = fname.name
             fname += CLASSIFIER_FILE_SUFFIX + '.bin'
             shutil.copyfile(self._temp_fname, fname)

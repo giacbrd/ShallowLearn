@@ -13,9 +13,9 @@ import sys
 from copy import deepcopy
 
 from shallowlearn.models import GensimFastText, FastText
-from shallowlearn.utils import basestring
 from tests.resources import dataset_targets, dataset_samples, pre_docs
 from tests.test_word2vec import bunch_of_models
+from six import string_types
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
 
@@ -119,7 +119,7 @@ def test_buckets(bunch_of_gensim_classifiers):
         if model.bucket > 0:
             assert len(model.classifier.wv.vocab) <= model.bucket
             assert all(str(word).isdigit() for word in model.classifier.wv.vocab.keys())
-            assert all(isinstance(word, basestring) for word in model.classifier.lvocab.keys())
+            assert all(isinstance(word, string_types) for word in model.classifier.lvocab.keys())
 
 
 def test_gensim_partial_fit(bunch_of_gensim_classifiers):

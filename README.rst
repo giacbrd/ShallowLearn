@@ -149,7 +149,7 @@ small, and to not cut off words from the few samples we have.
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
     :alt: Online learning
     :align: center
-    :width: 888 px
+    :width: 700 px
 
 References
 ----------

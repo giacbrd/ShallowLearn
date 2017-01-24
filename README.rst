@@ -1,10 +1,3 @@
-.. raw:: html
-    <style type="text/css">
-      .align-center {
-         margin: 0px auto;
-      }
-    </style>
-
 ShallowLearn
 ============
 A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)

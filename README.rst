@@ -129,7 +129,6 @@ The evaluation measure is *macro F1*.
 
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/benchmark.svg
     :alt: Text classifiers comparison
-    :align: center
     :width: 888 px
 
 Online learning
@@ -148,9 +147,16 @@ small, and to not cut off words from the few samples we have.
 
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
     :alt: Online learning
-    :align: center
     :width: 700 px
 
 References
 ----------
 .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
+
+.. raw:: html
+
+    <style type="text/css">
+      img {
+         margin: 0px auto;
+      }
+    </style>

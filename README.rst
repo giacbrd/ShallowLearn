@@ -1,3 +1,10 @@
+.. raw:: html
+    <style type="text/css">
+      .align-center {
+         margin: 0px auto;
+      }
+    </style>
+
 ShallowLearn
 ============
 A collection of supervised learning models based on shallow neural network approaches (e.g., word2vec and fastText)
@@ -154,11 +161,3 @@ small, and to not cut off words from the few samples we have.
 References
 ----------
 .. [1] A. Joulin, E. Grave, P. Bojanowski, T. Mikolov, Bag of Tricks for Efficient Text Classification
-
-.. raw:: html
-
-    <style type="text/css">
-      .align-center {
-         margin: 0px auto;
-      }
-    </style>

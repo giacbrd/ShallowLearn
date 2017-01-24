@@ -130,6 +130,7 @@ The evaluation measure is *macro F1*.
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/benchmark.svg
     :alt: Text classifiers comparison
     :width: 888 px
+    :align: center
 
 Online learning
 ~~~~~~~~~~~~~~~
@@ -148,6 +149,7 @@ small, and to not cut off words from the few samples we have.
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
     :alt: Online learning
     :width: 700 px
+    :align: center
 
 References
 ----------
@@ -156,7 +158,7 @@ References
 .. raw:: html
 
     <style type="text/css">
-      img {
+      .align-center {
          margin: 0px auto;
       }
     </style>

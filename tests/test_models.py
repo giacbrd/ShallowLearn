@@ -5,12 +5,11 @@
 # Licensed under the GNU LGPL v3 - http://www.gnu.org/licenses/lgpl.html
 import io
 import os
+import sys
 import tempfile
+from copy import deepcopy
 
 import pytest
-import sys
-
-from copy import deepcopy
 
 from shallowlearn.models import GensimFastText, FastText
 from shallowlearn.utils import basestring
@@ -72,6 +71,16 @@ def test_fasttext_predict(bunch_of_fasttext_classifiers):
         _predict(model)
 
 
+def test_fasttext_predict_empty(bunch_of_fasttext_classifiers):
+    for model in bunch_of_fasttext_classifiers:
+        assert model.predict("") is not None
+
+
+def test_gensim_predict_empty(bunch_of_gensim_classifiers):
+    for model in bunch_of_gensim_classifiers:
+        assert model.predict("") is not None
+
+
 def _persistence(classifiers):
     example = [('supervised', 'faster', 'is', 'machine', 'important')]
     for model in classifiers:
@@ -92,7 +101,7 @@ def test_persistence_gensim(bunch_of_gensim_classifiers):
     return _persistence(bunch_of_gensim_classifiers)
 
 
-#FIXME one day Travis must work
+# FIXME one day Travis must work
 @pytest.mark.skipif(os.environ.get('TRAVIS_PYTHON_VERSION', None) and sys.version_info >= (3, 5),
                     reason='Travis kills the process')
 def test_persistence_fasttext(bunch_of_fasttext_classifiers):

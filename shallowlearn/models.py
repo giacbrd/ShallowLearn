@@ -9,7 +9,7 @@ import logging
 import operator
 import shutil
 import tempfile
-from collections import Iterable
+from collections import Iterable, Counter
 from numbers import Number
 
 import fasttext
@@ -51,6 +51,7 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
         self.classes_ = list(self._label_set)
         self._label_count = len(self._label_set)
         self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
+        self._most_freq_label = Counter(y).most_common(1)[0][0]
 
     def _extract_prediction(self, prediction):
         pred_map = dict(prediction)
@@ -432,13 +433,22 @@ class FastText(BaseClassifier):
     def decision_function(self, documents):
         return self.predict_proba(documents)
 
+    def _format_prediction(self, pred):
+        if pred is not None:
+            if self._label_is_num:
+                return float(pred[0])
+            else:
+                return pred[0]
+        else:
+            return self._most_freq_label
+
     def predict(self, documents):
         """
         :param documents: Iterator over lists of words
         :return: For each document, the one most probable label (i.e. the classification)
         """
-        return [((float(pred[0]) if self._label_is_num else pred[0])
-                 if pred else None) for pred in self._classifier.predict(iter(' '.join(d) for d in documents), 1)]
+        ft_predictions = self._classifier.predict(iter(' '.join(d) + '\n' for d in documents), k=1)
+        return [self._format_prediction(pred) for pred in ft_predictions]
 
     def __enter__(self):
         return self

@@ -6,8 +6,7 @@ Written in Python and fully compatible with `scikit-learn <http://scikit-learn.o
 
 **Discussion group** for users and developers: https://groups.google.com/d/forum/shallowlearn
 
-.. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
-    :target: https://travis-ci.org/giacbrd/ShallowLearn 
+.. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master   :target: https://travis-ci.org/giacbrd/ShallowLearn
 .. image:: https://img.shields.io/pypi/v/shallowlearn.svg?style=plastic   :target:
 
 Getting Started

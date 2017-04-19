@@ -9,7 +9,7 @@ import logging
 import operator
 import shutil
 import tempfile
-from collections import Iterable
+from collections import Iterable, Counter
 from numbers import Number
 
 import fasttext
@@ -51,6 +51,7 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
         self.classes_ = list(self._label_set)
         self._label_count = len(self._label_set)
         self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
+        self._most_freq_label = Counter(y).most_common(1)[0][0]
 
     def _extract_prediction(self, prediction):
         pred_map = dict(prediction)
@@ -325,9 +326,9 @@ class FastText(BaseClassifier):
 
     `word_ngrams` = max length of word ngram [1]
 
-    `loss` = loss function {ns, hs, softmax} [softmax]
+    `loss` = loss function {ns, hs, softmax} [ns]
 
-    `bucket` = number of buckets [0]
+    `bucket` = number of buckets [2000000]
 
     `minn` = min length of char ngram [0]
 
@@ -347,7 +348,7 @@ class FastText(BaseClassifier):
     LABEL_PREFIX = '__label__'
 
     def __init__(self, lr=0.1, lr_update_rate=100, dim=100, ws=5, epoch=5, min_count=1, neg=5, word_ngrams=1,
-                 loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8',
+                 loss='ns', bucket=2000000, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8',
                  pretrained_vectors=None):
         super(FastText, self).__init__()
         self.lr = lr
@@ -432,13 +433,22 @@ class FastText(BaseClassifier):
     def decision_function(self, documents):
         return self.predict_proba(documents)
 
+    def _format_prediction(self, pred):
+        if pred is not None:
+            if self._label_is_num:
+                return float(pred[0])
+            else:
+                return pred[0]
+        else:
+            return self._most_freq_label
+
     def predict(self, documents):
         """
         :param documents: Iterator over lists of words
         :return: For each document, the one most probable label (i.e. the classification)
         """
-        return [((float(pred[0]) if self._label_is_num else pred[0])
-                 if pred else None) for pred in self._classifier.predict(iter(' '.join(d) for d in documents), 1)]
+        ft_predictions = self._classifier.predict(iter(' '.join(d) + '\n' for d in documents), k=1)
+        return [self._format_prediction(pred) for pred in ft_predictions]
 
     def __enter__(self):
         return self

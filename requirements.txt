@@ -1,0 +1,15 @@
+boto==2.46.1
+bz2file==0.98
+Cython==0.25.2
+fasttext==0.8.2
+future==0.16.0
+gensim==0.13.4
+numpy==1.12.1
+py==1.4.33
+pytest==3.0.7
+pytest-runner==2.11.1
+requests==2.13.0
+scikit-learn==0.18.1
+scipy==0.19.0
+six==1.10.0
+smart-open==1.5.1

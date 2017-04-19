@@ -8,8 +8,8 @@ Written in Python and fully compatible with `scikit-learn <http://scikit-learn.o
 
 .. image:: https://travis-ci.org/giacbrd/ShallowLearn.svg?branch=master
     :target: https://travis-ci.org/giacbrd/ShallowLearn
-.. image:: https://badge.fury.io/py/shallowlearn.svg
-    :target: https://badge.fury.io/py/shallowlearn
+.. image:: https://img.shields.io/pypi/v/shallowlearn.svg
+    :target: https://pypi.python.org/pypi/ShallowLearn
 
 Getting Started
 ---------------
@@ -49,7 +49,7 @@ passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (th
 ``GensimFastText`` model by the attribute ``classifier``).
 With method ``fit_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
 
-Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this `class docstring <https://github.com/giacbrd/ShallowLearn/blob/develop/shallowlearn/models.py#L74>`_).
+Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this `class docstring <https://github.com/giacbrd/ShallowLearn/blob/master/shallowlearn/models.py#L74>`_).
 
 .. code:: python
 
@@ -129,8 +129,8 @@ The evaluation measure is *macro F1*.
 
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/benchmark.svg
     :alt: Text classifiers comparison
-    :align: center
     :width: 888 px
+    :align: center
 
 Online learning
 ~~~~~~~~~~~~~~~
@@ -148,8 +148,8 @@ small, and to not cut off words from the few samples we have.
 
 .. image:: https://cdn.rawgit.com/giacbrd/ShallowLearn/master/images/onlinelearning.svg
     :alt: Online learning
+    :width: 700 px
     :align: center
-    :width: 888 px
 
 References
 ----------

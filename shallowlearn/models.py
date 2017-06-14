@@ -455,7 +455,7 @@ class FastText(BaseClassifier):
         return self
 
     def close(self):
-        if hasattr(self, 'temp_file') and self._temp_file is not None:
+        if hasattr(self, '_temp_file') and self._temp_file is not None:
             self._temp_file.close()
 
     def __exit__(self, exc_type, exc_val, exc_tb):

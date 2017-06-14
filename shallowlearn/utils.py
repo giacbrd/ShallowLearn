@@ -33,6 +33,7 @@ class HashIter(object):
     def hash_doc(cls, document, bucket):
         return [cls.hash(word) % bucket for word in document]
 
+    #FIXME use Gensim implementation when it will be released
     @classmethod
     def hash(cls, word):
         # Reproduces hash method used in fastText

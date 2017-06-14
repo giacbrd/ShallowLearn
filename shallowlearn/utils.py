@@ -6,12 +6,6 @@
 
 import numpy
 
-try:
-    basestring = basestring
-except NameError:
-    # 'unicode' is undefined, must be Python 3
-    basestring = (str, bytes)
-
 
 def argument_alternatives(original_value, kwargs, alternative_names, logger):
     final_value = original_value

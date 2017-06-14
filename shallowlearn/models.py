@@ -19,8 +19,8 @@ from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from gensim.utils import to_unicode
 from six.moves import zip_longest
 from sklearn.base import BaseEstimator, ClassifierMixin
-
-from .utils import argument_alternatives, basestring
+from six import string_types
+from .utils import argument_alternatives
 from .word2vec import LabeledWord2Vec, score_document_labeled_cbow
 
 __author__ = 'Giacomo Berardi <giacbrd.com>'
@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 CLASSIFIER_FILE_SUFFIX = '.CLF'
 
 
+#TODO more logging for debug in this class (also logging simple stats would be nice)
 class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def __init__(self):
         self._classifier = None
@@ -39,10 +40,17 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
         self.classes_ = None
 
     @classmethod
+    def _check_data(cls, data, type):
+        #TODO more strict and complex checks
+        if data is None or not len(data):
+            raise ValueError('No %s to process' % type)
+
+    @classmethod
     def _target_list(cls, targets):
-        return targets if isinstance(targets, Iterable) and not isinstance(targets, basestring) else [targets]
+        return targets if isinstance(targets, Iterable) and not isinstance(targets, string_types) else [targets]
 
     def _build_label_info(self, y, overwrite=False):
+        self._check_data(y, 'labels')
         label_set = set(target for targets in y for target in self._target_list(targets))
         if self._label_set is None or overwrite:
             self._label_set = label_set
@@ -60,6 +68,8 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def _data_iter(cls, documents, y):
         class DocIter(object):
             def __init__(self, documents, y):
+                cls._check_data(y, 'samples')
+                cls._check_data(y, 'labels')
                 self.y = y
                 self.documents = documents
 
@@ -149,6 +159,7 @@ class GensimFastText(BaseClassifier):
                  workers=3, min_alpha=0.0001, cbow_mean=1, hashfxn=hash, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=MAX_WORDS_IN_BATCH, iter=5, seed=1, bucket=0, pre_trained=None, **kwargs):
         super(GensimFastText, self).__init__()
+        # Convert name conventions from Scikit-learn to Gensim
         self.set_params(
             size=argument_alternatives(size, kwargs, ('dim',), logger),
             alpha=argument_alternatives(alpha, kwargs, ('lr',), logger),
@@ -171,7 +182,6 @@ class GensimFastText(BaseClassifier):
         )
         if pre_trained is None:
             params = self.get_params()
-            # Convert name conventions from Scikit-learn to Gensim
             del params['pre_trained']
             self._classifier = LabeledWord2Vec(**params)
         else:
@@ -284,7 +294,7 @@ class GensimFastText(BaseClassifier):
             args = args[1:]
         else:
             fname = kwargs['fname_or_handle']
-        if not isinstance(fname, basestring):
+        if not isinstance(fname, string_types):
             fname = fname.name
         fname += CLASSIFIER_FILE_SUFFIX
         kwargs['fname_or_handle'] = fname
@@ -350,6 +360,7 @@ class FastText(BaseClassifier):
                  loss='softmax', bucket=0, minn=0, maxn=0, thread=12, t=0.0001, silent=1, encoding='utf-8',
                  pretrained_vectors=None):
         super(FastText, self).__init__()
+        #FIXME one could pass the same parameter names of GensimFastText
         self.lr = lr
         self.lr_update_rate = lr_update_rate
         self.dim = dim
@@ -468,7 +479,7 @@ class FastText(BaseClassifier):
                 fname = args[0]
             else:
                 fname = kwargs['fname_or_handle']
-            if not isinstance(fname, basestring):
+            if not isinstance(fname, string_types):
                 fname = fname.name
             fname += CLASSIFIER_FILE_SUFFIX + '.bin'
             shutil.copyfile(self._temp_fname, fname)

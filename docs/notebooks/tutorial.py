@@ -44,7 +44,7 @@ X_test = list(iter_file('/Users/giacomo/Desktop/temp/shallowlearn_tutorial/cooki
 y_test = list(iter_file('/Users/giacomo/Desktop/temp/shallowlearn_tutorial/cooking.valid', labels=True))
 
 classifier1 = GensimFastText(size=200, iter=5, min_count=2, sample=0.)
-classifier2 = FastText(dim=200, epoch=5, min_count=2, t=0., loss='hs')
+#classifier2 = FastText(dim=200, epoch=5, min_count=2, t=0., loss='hs')
 
 # print X_train
 # print y_train
@@ -54,16 +54,16 @@ classifier2 = FastText(dim=200, epoch=5, min_count=2, t=0., loss='hs')
 mm = MultiLabelBinarizer()
 mm.fit(y_train + y_test)
 
-for classifier in (classifier1, classifier2):
+for classifier in (classifier1,):# classifier2):
     classifier.fit(X_train, y_train)
     predictions = classifier.predict(X_test)
     yy = mm.transform(t for i, t in enumerate(y_test) if predictions[i] is not None)
     pp = mm.transform([(p,) for p in predictions if p is not None])
-    print predictions
+    # print predictions
     print metrics.classification_report(yy, pp)
 #     for i, sample in enumerate(X_test):
 #         print sample, predictions[i], y_test[i]
 #
-    print Counter(predictions).most_common(20)
-    print Counter(itertools.chain(*y_test)).most_common(20)
+    # print Counter(predictions).most_common(20)
+    # print Counter(itertools.chain(*y_test)).most_common(20)
 

@@ -39,11 +39,12 @@ cdef snrm2_ptr snrm2=<snrm2_ptr>PyCObject_AsVoidPtr(fblas.snrm2._cpointer)  # sq
 cdef sscal_ptr sscal=<sscal_ptr>PyCObject_AsVoidPtr(fblas.sscal._cpointer) # x = alpha * x
 
 DEF EXP_TABLE_SIZE = 1000
-DEF MAX_EXP = 14
+DEF MAX_EXP = 6
+DEF MAX_EXP_SCORES = 14  # This is the value we use for computing output scores, i.e. "approximations"
 
-cdef REAL_t[EXP_TABLE_SIZE] TRUE_EXP_TABLE  # This is the "true" exp table, because EXP_TABLE contains logistics!
 cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE
 cdef REAL_t[EXP_TABLE_SIZE] LOG_TABLE
+cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE_SCORES  # here we use MAX_EXP_SCORES
 
 cdef int ONE = 1
 cdef REAL_t ONEF = <REAL_t>1.0
@@ -448,11 +449,11 @@ cdef void score_labeled_pair_cbow_hs(
         sscal(&size, &inv_count, neu1, &ONE)
 
     if hs:
+        den = 0.0
         for i in range(label_count):
             if codelens[i] == 0:
                 continue
-            else:
-                work[i] = 1.0
+            work[i] = 1.0
             word_point = word_points[i]
             word_code = word_codes[i]
             for b in range(codelens[i]):
@@ -463,20 +464,26 @@ cdef void score_labeled_pair_cbow_hs(
                 if f <= -MAX_EXP or f >= MAX_EXP:
                     continue
                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+            den += work[i]
+        # we would like to have a probability distribution so...
+        for i in range(label_count):
+            work[i] /= den
     # Softmax
     else:
         den = 0.0
         for label_index in range(total_labels):
             row2 = label_index * size
             out[label_index] = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-            if -MAX_EXP < out[label_index] < MAX_EXP:
-                out[label_index] = TRUE_EXP_TABLE[<int>((out[label_index] + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+            if -MAX_EXP_SCORES < out[label_index] < MAX_EXP_SCORES:
+                out[label_index] = EXP_TABLE_SCORES[<int>((out[label_index] + MAX_EXP_SCORES) * (EXP_TABLE_SIZE / MAX_EXP_SCORES / 2))]
                 den += out[label_index]
         if den != 0.0:
             for i in range(label_count):
                 label_index = label_indexes[i]
-                if out[label_index] != 0.0:
+                if out[label_index] > 0.0:
                     work[i] = out[label_index] / den
+                elif out[label_index] < 0.0:  # negative values are possible, because approximations
+                    work[i] = 0.0
 
 
 def init():
@@ -498,9 +505,10 @@ def init():
 
     # build the sigmoid table
     for i in range(EXP_TABLE_SIZE):
-        TRUE_EXP_TABLE[i] = <REAL_t>exp((i / <REAL_t>EXP_TABLE_SIZE * 2 - 1) * MAX_EXP)
-        EXP_TABLE[i] = <REAL_t>(TRUE_EXP_TABLE[i] / (TRUE_EXP_TABLE[i] + 1))
+        EXP_TABLE[i] = <REAL_t>exp((i / <REAL_t>EXP_TABLE_SIZE * 2 - 1) * MAX_EXP)
+        EXP_TABLE[i] = <REAL_t>(EXP_TABLE[i] / (EXP_TABLE[i] + 1))
         LOG_TABLE[i] = <REAL_t>log( EXP_TABLE[i] )
+        EXP_TABLE_SCORES[i] = <REAL_t>exp((i / <REAL_t>EXP_TABLE_SIZE * 2 - 1) * MAX_EXP_SCORES)
 
     # check whether sdot returns double or float
     d_res = dsdot(&size, x, &ONE, y, &ONE)

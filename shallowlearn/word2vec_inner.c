@@ -2124,13 +2124,13 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_fast_sentence_cbow_hs(__pyx_
  *             continue
  *         f = EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
  */
-    __pyx_t_5 = ((__pyx_v_f <= -13.0) != 0);
+    __pyx_t_5 = ((__pyx_v_f <= -14.0) != 0);
     if (!__pyx_t_5) {
     } else {
       __pyx_t_3 = __pyx_t_5;
       goto __pyx_L10_bool_binop_done;
     }
-    __pyx_t_5 = ((__pyx_v_f >= 13.0) != 0);
+    __pyx_t_5 = ((__pyx_v_f >= 14.0) != 0);
     __pyx_t_3 = __pyx_t_5;
     __pyx_L10_bool_binop_done:;
     if (__pyx_t_3) {
@@ -2160,7 +2160,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_fast_sentence_cbow_hs(__pyx_
  *         g = (1 - word_code[b] - f) * alpha
  *         our_saxpy(&size, &g, &syn1[row2], &ONE, work, &ONE)
  */
-    __pyx_v_f = (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 13.0) * 38.0))]);
+    __pyx_v_f = (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 14.0) * 35.0))]);
 
     /* "shallowlearn/word2vec_inner.pyx":123
  *             continue
@@ -2540,13 +2540,13 @@ static unsigned PY_LONG_LONG __pyx_f_12shallowlearn_14word2vec_inner_fast_senten
  *             continue
  *         f = EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
  */
-    __pyx_t_5 = ((__pyx_v_f <= -13.0) != 0);
+    __pyx_t_5 = ((__pyx_v_f <= -14.0) != 0);
     if (!__pyx_t_5) {
     } else {
       __pyx_t_3 = __pyx_t_5;
       goto __pyx_L12_bool_binop_done;
     }
-    __pyx_t_5 = ((__pyx_v_f >= 13.0) != 0);
+    __pyx_t_5 = ((__pyx_v_f >= 14.0) != 0);
     __pyx_t_3 = __pyx_t_5;
     __pyx_L12_bool_binop_done:;
     if (__pyx_t_3) {
@@ -2576,7 +2576,7 @@ static unsigned PY_LONG_LONG __pyx_f_12shallowlearn_14word2vec_inner_fast_senten
  *         g = (label - f) * alpha
  *         our_saxpy(&size, &g, &syn1neg[row2], &ONE, work, &ONE)
  */
-    __pyx_v_f = (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 13.0) * 38.0))]);
+    __pyx_v_f = (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 14.0) * 35.0))]);
 
     /* "shallowlearn/word2vec_inner.pyx":175
  *             continue
@@ -2860,13 +2860,13 @@ static unsigned PY_LONG_LONG __pyx_f_12shallowlearn_14word2vec_inner_fast_senten
  *             continue
  *         f = EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
  */
-    __pyx_t_4 = ((__pyx_v_f <= -13.0) != 0);
+    __pyx_t_4 = ((__pyx_v_f <= -14.0) != 0);
     if (!__pyx_t_4) {
     } else {
       __pyx_t_3 = __pyx_t_4;
       goto __pyx_L10_bool_binop_done;
     }
-    __pyx_t_4 = ((__pyx_v_f >= 13.0) != 0);
+    __pyx_t_4 = ((__pyx_v_f >= 14.0) != 0);
     __pyx_t_3 = __pyx_t_4;
     __pyx_L10_bool_binop_done:;
     if (__pyx_t_3) {
@@ -2896,7 +2896,7 @@ static unsigned PY_LONG_LONG __pyx_f_12shallowlearn_14word2vec_inner_fast_senten
  *         g = ((1.0 if d == label_index else 0.0)  - f) * alpha
  *         our_saxpy(&size, &g, &syn1neg[row2], &ONE, work, &ONE)
  */
-    __pyx_v_f = (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 13.0) * 38.0))]);
+    __pyx_v_f = (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 14.0) * 35.0))]);
 
     /* "shallowlearn/word2vec_inner.pyx":217
  *             continue
@@ -5379,7 +5379,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *     if hs:
  *         for i in range(label_count):             # <<<<<<<<<<<<<<
  *             if codelens[i] == 0:
- *                 work[i] = 0.0
+ *                 continue
  */
     __pyx_t_1 = __pyx_v_label_count;
     for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
@@ -5389,7 +5389,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *     if hs:
  *         for i in range(label_count):
  *             if codelens[i] == 0:             # <<<<<<<<<<<<<<
- *                 work[i] = 0.0
+ *                 continue
  *             else:
  */
       __pyx_t_3 = (((__pyx_v_codelens[__pyx_v_i]) == 0) != 0);
@@ -5398,24 +5398,23 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
         /* "shallowlearn/word2vec_inner.pyx":453
  *         for i in range(label_count):
  *             if codelens[i] == 0:
- *                 work[i] = 0.0             # <<<<<<<<<<<<<<
+ *                 continue             # <<<<<<<<<<<<<<
  *             else:
  *                 work[i] = 1.0
  */
-        (__pyx_v_work[__pyx_v_i]) = 0.0;
+        goto __pyx_L8_continue;
 
         /* "shallowlearn/word2vec_inner.pyx":452
  *     if hs:
  *         for i in range(label_count):
  *             if codelens[i] == 0:             # <<<<<<<<<<<<<<
- *                 work[i] = 0.0
+ *                 continue
  *             else:
  */
-        goto __pyx_L10;
       }
 
       /* "shallowlearn/word2vec_inner.pyx":455
- *                 work[i] = 0.0
+ *                 continue
  *             else:
  *                 work[i] = 1.0             # <<<<<<<<<<<<<<
  *             word_point = word_points[i]
@@ -5424,7 +5423,6 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
       /*else*/ {
         (__pyx_v_work[__pyx_v_i]) = 1.0;
       }
-      __pyx_L10:;
 
       /* "shallowlearn/word2vec_inner.pyx":456
  *             else:
@@ -5498,13 +5496,13 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                     continue
  *                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
  */
-        __pyx_t_6 = ((__pyx_v_f <= -13.0) != 0);
+        __pyx_t_6 = ((__pyx_v_f <= -14.0) != 0);
         if (!__pyx_t_6) {
         } else {
           __pyx_t_3 = __pyx_t_6;
           goto __pyx_L14_bool_binop_done;
         }
-        __pyx_t_6 = ((__pyx_v_f >= 13.0) != 0);
+        __pyx_t_6 = ((__pyx_v_f >= 14.0) != 0);
         __pyx_t_3 = __pyx_t_6;
         __pyx_L14_bool_binop_done:;
         if (__pyx_t_3) {
@@ -5535,9 +5533,10 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *     else:
  */
         __pyx_t_7 = __pyx_v_i;
-        (__pyx_v_work[__pyx_t_7]) = ((__pyx_v_work[__pyx_t_7]) * (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 13.0) * 38.0))]));
+        (__pyx_v_work[__pyx_t_7]) = ((__pyx_v_work[__pyx_t_7]) * (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 14.0) * 35.0))]));
         __pyx_L11_continue:;
       }
+      __pyx_L8_continue:;
     }
 
     /* "shallowlearn/word2vec_inner.pyx":450
@@ -5596,9 +5595,9 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                 out[label_index] = TRUE_EXP_TABLE[<int>((out[label_index] + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
  *                 den += out[label_index]
  */
-      __pyx_t_3 = (-13.0 < (__pyx_v_out[__pyx_v_label_index]));
+      __pyx_t_3 = (-14.0 < (__pyx_v_out[__pyx_v_label_index]));
       if (__pyx_t_3) {
-        __pyx_t_3 = ((__pyx_v_out[__pyx_v_label_index]) < 13.0);
+        __pyx_t_3 = ((__pyx_v_out[__pyx_v_label_index]) < 14.0);
       }
       __pyx_t_6 = (__pyx_t_3 != 0);
       if (__pyx_t_6) {
@@ -5610,7 +5609,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                 den += out[label_index]
  *         if den != 0.0:
  */
-        (__pyx_v_out[__pyx_v_label_index]) = (__pyx_v_12shallowlearn_14word2vec_inner_TRUE_EXP_TABLE[((int)(((__pyx_v_out[__pyx_v_label_index]) + 13.0) * 38.0))]);
+        (__pyx_v_out[__pyx_v_label_index]) = (__pyx_v_12shallowlearn_14word2vec_inner_TRUE_EXP_TABLE[((int)(((__pyx_v_out[__pyx_v_label_index]) + 14.0) * 35.0))]);
 
         /* "shallowlearn/word2vec_inner.pyx":474
  *             if -MAX_EXP < out[label_index] < MAX_EXP:
@@ -5806,7 +5805,7 @@ static PyObject *__pyx_pf_12shallowlearn_14word2vec_inner_4init(CYTHON_UNUSED Py
  *         EXP_TABLE[i] = <REAL_t>(TRUE_EXP_TABLE[i] / (TRUE_EXP_TABLE[i] + 1))
  *         LOG_TABLE[i] = <REAL_t>log( EXP_TABLE[i] )
  */
-    (__pyx_v_12shallowlearn_14word2vec_inner_TRUE_EXP_TABLE[__pyx_v_i]) = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t)exp(((((__pyx_v_i / ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t)0x3E8)) * 2.0) - 1.0) * 13.0)));
+    (__pyx_v_12shallowlearn_14word2vec_inner_TRUE_EXP_TABLE[__pyx_v_i]) = ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t)exp(((((__pyx_v_i / ((__pyx_t_12shallowlearn_14word2vec_inner_REAL_t)0x3E8)) * 2.0) - 1.0) * 14.0)));
 
     /* "shallowlearn/word2vec_inner.pyx":502
  *     for i in range(EXP_TABLE_SIZE):

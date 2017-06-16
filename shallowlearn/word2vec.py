@@ -169,7 +169,8 @@ class LabeledWord2Vec(Word2Vec):
         kwargs['window'] = sys.maxsize
         kwargs['sentences'] = None
         kwargs['hashfxn'] = custom_hash  # Force a consistent function across different Python versions
-        self.softmax = self.init_loss(kwargs, loss)
+        self.softmax = loss == 'softmax'
+        self.init_loss(kwargs, loss)
         self.bucket = bucket
         super(LabeledWord2Vec, self).__init__(**kwargs)
 
@@ -183,10 +184,9 @@ class LabeledWord2Vec(Word2Vec):
         elif loss == 'softmax':
             kwargs['hs'] = 0
             kwargs['negative'] = 0
-            return True
         else:
             raise ValueError('loss argument must be set with "ns", "hs" or "softmax"')
-        return False
+        return kwargs
 
     def _raw_word_count(self, job):
         """Return the number of words in a given job."""

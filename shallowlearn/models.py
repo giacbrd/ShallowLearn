@@ -233,8 +233,9 @@ class GensimFastText(BaseClassifier):
         w2v = Word2Vec(sentences=documents, **params)
         self._classifier = LabeledWord2Vec.load_from(w2v)
         params = self.get_params()
-        #FIXME init loss should be redesigned for this case
-        self._classifier.softmax = self._classifier.init_loss(params, params['loss'])
+        # Restoring the chosen loss
+        self._classifier.softmax = params['loss'] == 'softmax'
+        params = self._classifier.init_loss(params, params['loss'])
         self._classifier.hs = params['hs']
         self._classifier.negative = params['negative']
         return self

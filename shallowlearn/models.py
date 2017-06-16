@@ -14,6 +14,7 @@ from numbers import Number
 
 import fasttext
 import gensim
+from copy import deepcopy
 from gensim.models import Word2Vec
 from gensim.models.word2vec_inner import MAX_WORDS_IN_BATCH
 from gensim.utils import to_unicode
@@ -215,13 +216,13 @@ class GensimFastText(BaseClassifier):
         """
         return self._classifier
 
-    def fit_embeddings(self, documents):
+    def with_embeddings(self, documents):
         """
         Train word embeddings of the classification model, using the same parameter values for classification on Gensim ``Word2Vec``.
         Similar to use a pre-trained model.
         :param documents:
         """
-        params = self.get_params()
+        params = deepcopy(self.get_params())
         del params['pre_trained']
         del params['bucket']
         # Word2Vec has not softmax
@@ -231,6 +232,12 @@ class GensimFastText(BaseClassifier):
         del params['loss']
         w2v = Word2Vec(sentences=documents, **params)
         self._classifier = LabeledWord2Vec.load_from(w2v)
+        params = self.get_params()
+        #FIXME init loss should be redesigned for this case
+        self._classifier.softmax = self._classifier.init_loss(params, params['loss'])
+        self._classifier.hs = params['hs']
+        self._classifier.negative = params['negative']
+        return self
 
     def fit(self, documents, y=None, **fit_params):
         """

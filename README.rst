@@ -47,7 +47,7 @@ Using the hashing trick together with ``partial_fit(X, y)`` yields a powerful *o
 It is possible to load pre-trained word vectors at initialization,
 passing a Gensim ``Word2Vec`` or a ShallowLearn ``LabeledWord2Vec`` instance (the latter is retrievable from a
 ``GensimFastText`` model by the attribute ``classifier``).
-With method ``fit_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
+With method ``with_embeddings(X)`` it is possible to pre-train word vectors, using the current parameter values of the model.
 
 Constructor argument names are a mix between the ones of Gensim and the ones of fastText (see this `class docstring <https://github.com/giacbrd/ShallowLearn/blob/master/shallowlearn/models.py#L74>`_).
 

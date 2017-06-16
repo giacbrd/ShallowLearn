@@ -109,7 +109,7 @@ def test_duplicate_arguments():
 
 def test_fit_embeddings(bunch_of_gensim_classifiers):
     for model in bunch_of_gensim_classifiers:
-        model.fit_embeddings(pre_docs)
+        model.with_embeddings(pre_docs)
         model.fit(dataset_samples, dataset_targets)
         _predict(model)
 

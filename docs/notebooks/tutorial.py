@@ -43,7 +43,7 @@ y_train = list(iter_file('/Users/giacomo/Desktop/temp/shallowlearn_tutorial/cook
 X_test = list(iter_file('/Users/giacomo/Desktop/temp/shallowlearn_tutorial/cooking.valid', labels=False))
 y_test = list(iter_file('/Users/giacomo/Desktop/temp/shallowlearn_tutorial/cooking.valid', labels=True))
 
-classifier1 = GensimFastText(size=200, iter=5, min_count=2, sample=0.)
+classifier1 = GensimFastText(size=300, iter=25, min_count=2)
 #classifier2 = FastText(dim=200, epoch=5, min_count=2, t=0., loss='hs')
 
 # print X_train

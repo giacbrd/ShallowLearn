@@ -40,11 +40,11 @@ cdef sscal_ptr sscal=<sscal_ptr>PyCObject_AsVoidPtr(fblas.sscal._cpointer) # x =
 
 DEF EXP_TABLE_SIZE = 1000
 DEF MAX_EXP = 6
-DEF MAX_EXP_SCORES = 14  # This is the value we use for computing output scores, i.e. "approximations"
+DEF MAX_EXP_SOFTMAX = 14  # This is the value we use for computing softmax scores, i.e. with less "approximations"
 
 cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE
 cdef REAL_t[EXP_TABLE_SIZE] LOG_TABLE
-cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE_SCORES  # here we use MAX_EXP_SCORES
+cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE_SOFTMAX  # here we use MAX_EXP_SOFTMAX
 
 cdef int ONE = 1
 cdef REAL_t ONEF = <REAL_t>1.0
@@ -212,9 +212,9 @@ cdef unsigned long long fast_sentence_cbow_softmax(
     for d in range(label_count):
         row2 = d * size
         f = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-        if f <= -MAX_EXP or f >= MAX_EXP:
+        if f <= -MAX_EXP_SOFTMAX or f >= MAX_EXP_SOFTMAX:
             continue
-        f = EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
+        f = EXP_TABLE_SOFTMAX[<int>((f + MAX_EXP_SOFTMAX) * (EXP_TABLE_SIZE / MAX_EXP_SOFTMAX / 2))]
         g = ((1.0 if d == label_index else 0.0)  - f) * alpha
         our_saxpy(&size, &g, &syn1neg[row2], &ONE, work, &ONE)
         our_saxpy(&size, &g, neu1, &ONE, &syn1neg[row2], &ONE)
@@ -475,8 +475,8 @@ cdef void score_labeled_pair_cbow_hs(
         for label_index in range(total_labels):
             row2 = label_index * size
             out[label_index] = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
-            if -MAX_EXP_SCORES < out[label_index] < MAX_EXP_SCORES:
-                out[label_index] = EXP_TABLE_SCORES[<int>((out[label_index] + MAX_EXP_SCORES) * (EXP_TABLE_SIZE / MAX_EXP_SCORES / 2))]
+            if -MAX_EXP_SOFTMAX < out[label_index] < MAX_EXP_SOFTMAX:
+                out[label_index] = EXP_TABLE_SOFTMAX[<int>((out[label_index] + MAX_EXP_SOFTMAX) * (EXP_TABLE_SIZE / MAX_EXP_SOFTMAX / 2))]
                 den += out[label_index]
         if den != 0.0:
             for i in range(label_count):
@@ -509,7 +509,7 @@ def init():
         EXP_TABLE[i] = <REAL_t>exp((i / <REAL_t>EXP_TABLE_SIZE * 2 - 1) * MAX_EXP)
         EXP_TABLE[i] = <REAL_t>(EXP_TABLE[i] / (EXP_TABLE[i] + 1))
         LOG_TABLE[i] = <REAL_t>log( EXP_TABLE[i] )
-        EXP_TABLE_SCORES[i] = <REAL_t>exp((i / <REAL_t>EXP_TABLE_SIZE * 2 - 1) * MAX_EXP_SCORES)
+        EXP_TABLE_SOFTMAX[i] = <REAL_t>exp((i / <REAL_t>EXP_TABLE_SIZE * 2 - 1) * MAX_EXP_SOFTMAX)
 
     # check whether sdot returns double or float
     d_res = dsdot(&size, x, &ONE, y, &ONE)

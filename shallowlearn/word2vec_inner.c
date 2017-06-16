@@ -5537,7 +5537,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                     continue
  *                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]             # <<<<<<<<<<<<<<
  *             den += work[i]
- *         # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
+ *         #TODO # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
  */
         __pyx_t_7 = __pyx_v_i;
         (__pyx_v_work[__pyx_t_7]) = ((__pyx_v_work[__pyx_t_7]) * (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 6.0) * 83.0))]));
@@ -5548,60 +5548,11 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                     continue
  *                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
  *             den += work[i]             # <<<<<<<<<<<<<<
- *         # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
- *         if label_count == total_labels and den != 0.0:
+ *         #TODO # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
+ *         # if label_count == total_labels and den != 0.0:
  */
       __pyx_v_den = (__pyx_v_den + (__pyx_v_work[__pyx_v_i]));
       __pyx_L8_continue:;
-    }
-
-    /* "shallowlearn/word2vec_inner.pyx":469
- *             den += work[i]
- *         # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
- *         if label_count == total_labels and den != 0.0:             # <<<<<<<<<<<<<<
- *             for i in range(label_count):
- *                 work[i] /= den
- */
-    __pyx_t_6 = ((__pyx_v_label_count == __pyx_v_total_labels) != 0);
-    if (__pyx_t_6) {
-    } else {
-      __pyx_t_3 = __pyx_t_6;
-      goto __pyx_L17_bool_binop_done;
-    }
-    __pyx_t_6 = ((__pyx_v_den != 0.0) != 0);
-    __pyx_t_3 = __pyx_t_6;
-    __pyx_L17_bool_binop_done:;
-    if (__pyx_t_3) {
-
-      /* "shallowlearn/word2vec_inner.pyx":470
- *         # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
- *         if label_count == total_labels and den != 0.0:
- *             for i in range(label_count):             # <<<<<<<<<<<<<<
- *                 work[i] /= den
- *     # Softmax
- */
-      __pyx_t_1 = __pyx_v_label_count;
-      for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_1; __pyx_t_2+=1) {
-        __pyx_v_i = __pyx_t_2;
-
-        /* "shallowlearn/word2vec_inner.pyx":471
- *         if label_count == total_labels and den != 0.0:
- *             for i in range(label_count):
- *                 work[i] /= den             # <<<<<<<<<<<<<<
- *     # Softmax
- *     else:
- */
-        __pyx_t_4 = __pyx_v_i;
-        (__pyx_v_work[__pyx_t_4]) = ((__pyx_v_work[__pyx_t_4]) / __pyx_v_den);
-      }
-
-      /* "shallowlearn/word2vec_inner.pyx":469
- *             den += work[i]
- *         # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
- *         if label_count == total_labels and den != 0.0:             # <<<<<<<<<<<<<<
- *             for i in range(label_count):
- *                 work[i] /= den
- */
     }
 
     /* "shallowlearn/word2vec_inner.pyx":451
@@ -5751,7 +5702,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                     work[i] = out[label_index] / den
  *                 elif out[label_index] < 0.0:  # negative values are possible, because approximations
  */
-          goto __pyx_L27;
+          goto __pyx_L22;
         }
 
         /* "shallowlearn/word2vec_inner.pyx":486
@@ -5781,7 +5732,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  * 
  */
         }
-        __pyx_L27:;
+        __pyx_L22:;
       }
 
       /* "shallowlearn/word2vec_inner.pyx":481

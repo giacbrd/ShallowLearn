@@ -2,7 +2,7 @@
 
 # Arguments: <version>
 
-read -r -p "Have you updated the CHANGELOG and renamed every version occurrence to $1? [y/N] " response
+read -r -p "Have you updated the CHANGELOG, renamed every version occurrence to $1 and regenerated the evaluations/plots? [y/N] " response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
 then
     export LC_ALL=en_US.UTF-8

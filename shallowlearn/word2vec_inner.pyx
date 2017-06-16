@@ -450,7 +450,7 @@ cdef void score_labeled_pair_cbow_hs(
     if hs:
         for i in range(label_count):
             if codelens[i] == 0:
-                work[i] = 0.0
+                continue
             else:
                 work[i] = 1.0
             word_point = word_points[i]

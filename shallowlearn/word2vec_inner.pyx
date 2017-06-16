@@ -449,7 +449,7 @@ cdef void score_labeled_pair_cbow_hs(
         sscal(&size, &inv_count, neu1, &ONE)
 
     if hs:
-        den = 0.0
+        # den = 0.0
         for i in range(label_count):
             if codelens[i] == 0:
                 continue
@@ -464,7 +464,7 @@ cdef void score_labeled_pair_cbow_hs(
                 if f <= -MAX_EXP or f >= MAX_EXP:
                     continue
                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
-            den += work[i]
+            # den += work[i]
         #TODO # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
         # if label_count == total_labels and den != 0.0:
         #     for i in range(label_count):

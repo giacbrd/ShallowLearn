@@ -45,6 +45,7 @@ DEF MAX_EXP_SOFTMAX = 14  # This is the value we use for computing softmax score
 cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE
 cdef REAL_t[EXP_TABLE_SIZE] LOG_TABLE
 cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE_SOFTMAX  # here we use MAX_EXP_SOFTMAX
+cdef REAL_t[EXP_TABLE_SIZE] EXP_TABLE_SOFTMAX_LF  # logistics from EXP_TABLE_SOFTMAX
 
 cdef int ONE = 1
 cdef REAL_t ONEF = <REAL_t>1.0
@@ -214,7 +215,7 @@ cdef unsigned long long fast_sentence_cbow_softmax(
         f = our_dot(&size, neu1, &ONE, &syn1neg[row2], &ONE)
         if f <= -MAX_EXP_SOFTMAX or f >= MAX_EXP_SOFTMAX:
             continue
-        f = EXP_TABLE_SOFTMAX[<int>((f + MAX_EXP_SOFTMAX) * (EXP_TABLE_SIZE / MAX_EXP_SOFTMAX / 2))]
+        f = EXP_TABLE_SOFTMAX_LF[<int>((f + MAX_EXP_SOFTMAX) * (EXP_TABLE_SIZE / MAX_EXP_SOFTMAX / 2))]
         g = ((1.0 if d == label_index else 0.0)  - f) * alpha
         our_saxpy(&size, &g, &syn1neg[row2], &ONE, work, &ONE)
         our_saxpy(&size, &g, neu1, &ONE, &syn1neg[row2], &ONE)
@@ -510,6 +511,7 @@ def init():
         EXP_TABLE[i] = <REAL_t>(EXP_TABLE[i] / (EXP_TABLE[i] + 1))
         LOG_TABLE[i] = <REAL_t>log( EXP_TABLE[i] )
         EXP_TABLE_SOFTMAX[i] = <REAL_t>exp((i / <REAL_t>EXP_TABLE_SIZE * 2 - 1) * MAX_EXP_SOFTMAX)
+        EXP_TABLE_SOFTMAX_LF[i] = <REAL_t>(EXP_TABLE_SOFTMAX[i] / (EXP_TABLE_SOFTMAX[i] + 1))
 
     # check whether sdot returns double or float
     d_res = dsdot(&size, x, &ONE, y, &ONE)

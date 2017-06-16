@@ -465,9 +465,10 @@ cdef void score_labeled_pair_cbow_hs(
                     continue
                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
             den += work[i]
-        # we would like to have a probability distribution so...
-        for i in range(label_count):
-            work[i] /= den
+        # we would like to have a probability distribution so... unfortunately this works only if we compute all scores
+        if label_count == total_labels and den != 0.0:
+            for i in range(label_count):
+                work[i] /= den
     # Softmax
     else:
         den = 0.0

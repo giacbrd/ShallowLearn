@@ -5368,24 +5368,15 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *         sscal(&size, &inv_count, neu1, &ONE)
  * 
  *     if hs:             # <<<<<<<<<<<<<<
- *         den = 0.0
+ *         # den = 0.0
  *         for i in range(label_count):
  */
   __pyx_t_3 = (__pyx_v_hs != 0);
   if (__pyx_t_3) {
 
-    /* "shallowlearn/word2vec_inner.pyx":452
- * 
- *     if hs:
- *         den = 0.0             # <<<<<<<<<<<<<<
- *         for i in range(label_count):
- *             if codelens[i] == 0:
- */
-    __pyx_v_den = 0.0;
-
     /* "shallowlearn/word2vec_inner.pyx":453
  *     if hs:
- *         den = 0.0
+ *         # den = 0.0
  *         for i in range(label_count):             # <<<<<<<<<<<<<<
  *             if codelens[i] == 0:
  *                 continue
@@ -5395,7 +5386,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
       __pyx_v_i = __pyx_t_2;
 
       /* "shallowlearn/word2vec_inner.pyx":454
- *         den = 0.0
+ *         # den = 0.0
  *         for i in range(label_count):
  *             if codelens[i] == 0:             # <<<<<<<<<<<<<<
  *                 continue
@@ -5414,7 +5405,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
         goto __pyx_L8_continue;
 
         /* "shallowlearn/word2vec_inner.pyx":454
- *         den = 0.0
+ *         # den = 0.0
  *         for i in range(label_count):
  *             if codelens[i] == 0:             # <<<<<<<<<<<<<<
  *                 continue
@@ -5519,7 +5510,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                 if f <= -MAX_EXP or f >= MAX_EXP:
  *                     continue             # <<<<<<<<<<<<<<
  *                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
- *             den += work[i]
+ *             # den += work[i]
  */
           goto __pyx_L11_continue;
 
@@ -5536,22 +5527,13 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *                 if f <= -MAX_EXP or f >= MAX_EXP:
  *                     continue
  *                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]             # <<<<<<<<<<<<<<
- *             den += work[i]
+ *             # den += work[i]
  *         #TODO # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
  */
         __pyx_t_7 = __pyx_v_i;
         (__pyx_v_work[__pyx_t_7]) = ((__pyx_v_work[__pyx_t_7]) * (__pyx_v_12shallowlearn_14word2vec_inner_EXP_TABLE[((int)((__pyx_v_f + 6.0) * 83.0))]));
         __pyx_L11_continue:;
       }
-
-      /* "shallowlearn/word2vec_inner.pyx":467
- *                     continue
- *                 work[i] *= EXP_TABLE[<int>((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))]
- *             den += work[i]             # <<<<<<<<<<<<<<
- *         #TODO # we would like to have a probability distribution so... unfortunately this only works if we compute all scores
- *         # if label_count == total_labels and den != 0.0:
- */
-      __pyx_v_den = (__pyx_v_den + (__pyx_v_work[__pyx_v_i]));
       __pyx_L8_continue:;
     }
 
@@ -5559,7 +5541,7 @@ static void __pyx_f_12shallowlearn_14word2vec_inner_score_labeled_pair_cbow_hs(i
  *         sscal(&size, &inv_count, neu1, &ONE)
  * 
  *     if hs:             # <<<<<<<<<<<<<<
- *         den = 0.0
+ *         # den = 0.0
  *         for i in range(label_count):
  */
     goto __pyx_L7;

@@ -34,10 +34,10 @@ CLASSIFIER_FILE_SUFFIX = '.CLF'
 #TODO more logging for debug in this class (also logging simple stats would be nice)
 class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def __init__(self):
-        self._classifier = None
-        self._label_set = None
-        self._label_count = None
-        self._label_is_num = None
+        self._classifier_ = None
+        self._label_set_ = None
+        self._label_count_ = None
+        self._label_is_num_ = None
         self.classes_ = None
 
     @classmethod
@@ -53,13 +53,13 @@ class BaseClassifier(ClassifierMixin, BaseEstimator, gensim.utils.SaveLoad):
     def _build_label_info(self, y, overwrite=False):
         self._check_data(y, 'labels')
         label_set = set(target for targets in y for target in self._target_list(targets))
-        if self._label_set is None or overwrite:
-            self._label_set = label_set
+        if self._label_set_ is None or overwrite:
+            self._label_set_ = label_set
         else:
-            self._label_set.update(label_set)
-        self.classes_ = list(self._label_set)
-        self._label_count = len(self._label_set)
-        self._label_is_num = isinstance(next(iter(self._label_set)), (int, float, complex, Number))
+            self._label_set_.update(label_set)
+        self.classes_ = list(self._label_set_)
+        self._label_count_ = len(self._label_set_)
+        self._label_is_num_ = isinstance(next(iter(self._label_set_)), (int, float, complex, Number))
 
     def _extract_prediction(self, prediction):
         pred_map = dict(prediction)
@@ -184,28 +184,28 @@ class GensimFastText(BaseClassifier):
         if pre_trained is None:
             params = self.get_params()
             del params['pre_trained']
-            self._classifier = LabeledWord2Vec(**params)
+            self._classifier_ = LabeledWord2Vec(**params)
         else:
-            self._classifier = LabeledWord2Vec.load_from(pre_trained)
-            self._build_label_info(self._classifier.lvocab.keys())
+            self._classifier_ = LabeledWord2Vec.load_from(pre_trained)
+            self._build_label_info(self._classifier_.lvocab.keys())
             self.set_params(
-                size=self._classifier.layer1_size,
-                alpha=self._classifier.alpha,
-                min_count=self._classifier.min_count,
-                max_vocab_size=self._classifier.max_vocab_size,
-                sample=self._classifier.sample,
-                workers=self._classifier.workers,
-                min_alpha=self._classifier.min_alpha,
-                cbow_mean=self._classifier.cbow_mean,
-                hashfxn=self._classifier.hashfxn,
-                null_word=self._classifier.null_word,
-                sorted_vocab=self._classifier.sorted_vocab,
-                batch_words=self._classifier.batch_words,
-                iter=self._classifier.iter,
-                seed=self._classifier.seed,
-                loss='softmax' if self._classifier.softmax else ('hs' if self._classifier.hs else 'ns'),
-                negative=self._classifier.negative,
-                bucket=self._classifier.bucket,
+                size=self._classifier_.layer1_size,
+                alpha=self._classifier_.alpha,
+                min_count=self._classifier_.min_count,
+                max_vocab_size=self._classifier_.max_vocab_size,
+                sample=self._classifier_.sample,
+                workers=self._classifier_.workers,
+                min_alpha=self._classifier_.min_alpha,
+                cbow_mean=self._classifier_.cbow_mean,
+                hashfxn=self._classifier_.hashfxn,
+                null_word=self._classifier_.null_word,
+                sorted_vocab=self._classifier_.sorted_vocab,
+                batch_words=self._classifier_.batch_words,
+                iter=self._classifier_.iter,
+                seed=self._classifier_.seed,
+                loss='softmax' if self._classifier_.softmax else ('hs' if self._classifier_.hs else 'ns'),
+                negative=self._classifier_.negative,
+                bucket=self._classifier_.bucket,
             )
 
     @property
@@ -214,7 +214,7 @@ class GensimFastText(BaseClassifier):
         The word embeddings model
         :return: An instance of ``LabeledWord2Vec``, a CBOW model in wich input vectors are words, output vectors are labels.
         """
-        return self._classifier
+        return self._classifier_
 
     def with_embeddings(self, documents):
         """
@@ -231,13 +231,13 @@ class GensimFastText(BaseClassifier):
         LabeledWord2Vec.init_loss(LabeledWord2Vec(), params, params['loss'])
         del params['loss']
         w2v = Word2Vec(sentences=documents, **params)
-        self._classifier = LabeledWord2Vec.load_from(w2v)
+        self._classifier_ = LabeledWord2Vec.load_from(w2v)
         params = self.get_params()
         # Restoring the chosen loss
-        self._classifier.softmax = params['loss'] == 'softmax'
-        params = self._classifier.init_loss(params, params['loss'])
-        self._classifier.hs = params['hs']
-        self._classifier.negative = params['negative']
+        self._classifier_.softmax = params['loss'] == 'softmax'
+        params = self._classifier_.init_loss(params, params['loss'])
+        self._classifier_.hs = params['hs']
+        self._classifier_.negative = params['negative']
         return self
 
     def fit(self, documents, y=None, **fit_params):
@@ -250,11 +250,12 @@ class GensimFastText(BaseClassifier):
         """
         # TODO if y=None learn a one-class classifier
         self._build_label_info(y, overwrite=True)
-        if not self._classifier.wv.vocab:
-            self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule)
-        elif not self._classifier.lvocab:
-            self._classifier.build_lvocab(self._label_set)
-        self._classifier.train(self._data_iter(documents, y))
+        if not self._classifier_.wv.vocab:
+            self._classifier_.build_vocab(documents, self._label_set_, trim_rule=self.trim_rule)
+        elif not self._classifier_.lvocab:
+            self._classifier_.build_lvocab(self._label_set_)
+        self._classifier_.train(self._data_iter(documents, y))
+        return self
 
     def partial_fit(self, documents, y):
         """
@@ -262,17 +263,18 @@ class GensimFastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :param y: Iterator over lists or single labels, document target values
         """
-        if not self._classifier.wv.vocab or not self._classifier.lvocab:
+        if not self._classifier_.wv.vocab or not self._classifier_.lvocab:
             self.fit(documents, y)
         else:
             self._build_label_info(y)
             size = sum(1 for _ in self._data_iter(documents, y))
-            self._classifier.build_vocab(documents, self._label_set, trim_rule=self.trim_rule, update=True)
-            self._classifier.train(self._data_iter(documents, y), total_examples=size)
+            self._classifier_.build_vocab(documents, self._label_set_, trim_rule=self.trim_rule, update=True)
+            self._classifier_.train(self._data_iter(documents, y), total_examples=size)
+        return self
 
     def _iter_predict(self, documents):
         for doc in documents:
-            result = list(score_document_labeled_cbow(self._classifier, document=doc))
+            result = list(score_document_labeled_cbow(self._classifier_, document=doc))
             yield result
 
     def predict_proba(self, documents):
@@ -294,7 +296,7 @@ class GensimFastText(BaseClassifier):
         return [max(predictions, key=operator.itemgetter(1))[0] for predictions in self._iter_predict(documents)]
 
     def save(self, *args, **kwargs):
-        kwargs['ignore'] = kwargs.get('ignore', ['_classifier'])
+        kwargs['ignore'] = kwargs.get('ignore', ['_classifier_'])
         super(GensimFastText, self).save(*args, **kwargs)
         # Get the file name of this object serialization
         if any(args) and 'fname_or_handle' not in kwargs:
@@ -306,7 +308,7 @@ class GensimFastText(BaseClassifier):
             fname = fname.name
         fname += CLASSIFIER_FILE_SUFFIX
         kwargs['fname_or_handle'] = fname
-        self._classifier.save(*args, **kwargs)
+        self._classifier_.save(*args, **kwargs)
 
     save.__doc__ = gensim.utils.SaveLoad.save.__doc__
 
@@ -318,7 +320,7 @@ class GensimFastText(BaseClassifier):
             kwargs['fname'] = args[0]
             args = args[1:]
         kwargs['fname'] += CLASSIFIER_FILE_SUFFIX
-        model._classifier = LabeledWord2Vec.load(*args, **kwargs)
+        model._classifier_ = LabeledWord2Vec.load(*args, **kwargs)
         return model
 
 
@@ -386,9 +388,9 @@ class FastText(BaseClassifier):
         self.silent = silent
         self.encoding = encoding
         self.pretrained_vectors = pretrained_vectors or ''
-        self._classifier = None
-        self._temp_file = None
-        self._temp_fname = None
+        self._classifier_ = None
+        self._temp_file_ = None
+        self._temp_fname_ = None
 
     @property
     def classifier(self):
@@ -396,7 +398,7 @@ class FastText(BaseClassifier):
         The fastText.py supervised model
         :return: An instance of ``fasttext.supervised``
         """
-        return self._classifier
+        return self._classifier_
 
     def fit(self, documents, y, **fit_params):
         """
@@ -415,6 +417,7 @@ class FastText(BaseClassifier):
                         sample = ' '.join(x)
                         dataset.write(to_unicode(targets + ' ' + sample + '\n'))
             self.fit_file(train_temp.name)
+        return self
 
     def fit_file(self, train_path, output_path=None, label_prefix=None):
         """
@@ -427,24 +430,25 @@ class FastText(BaseClassifier):
         """
 
         def train_classifier(output):
-            self._classifier = fasttext.supervised(input_file=train_path, output=output,
-                                                   label_prefix=label_prefix or self.LABEL_PREFIX, **self.get_params())
+            self._classifier_ = fasttext.supervised(input_file=train_path, output=output,
+                                                    label_prefix=label_prefix or self.LABEL_PREFIX, **self.get_params())
 
         if output_path is None:
-            self._temp_file = tempfile.NamedTemporaryFile(suffix='.bin')
-            self._temp_fname = self._temp_file.name
-            train_classifier(self._temp_fname[:-4])
+            self._temp_file_ = tempfile.NamedTemporaryFile(suffix='.bin')
+            self._temp_fname_ = self._temp_file_.name
+            train_classifier(self._temp_fname_[:-4])
         else:
-            self._temp_fname = output_path
+            self._temp_fname_ = output_path
             train_classifier(output_path)
+        return self
 
     def predict_proba(self, documents):
         """
         :param documents: Iterator over lists of words
         :return: For each document, a list of label probabilities, which should sum to one for each prediction
         """
-        result = self._classifier.predict_proba(iter(' '.join(d) for d in documents), self._label_count)
-        result = [[1. / self._label_count] * self._label_count if not any(r) else self._extract_prediction(r) for r in
+        result = self._classifier_.predict_proba(iter(' '.join(d) for d in documents), self._label_count_)
+        result = [[1. / self._label_count_] * self._label_count_ if not any(r) else self._extract_prediction(r) for r in
                   result]
         return result
 
@@ -456,15 +460,15 @@ class FastText(BaseClassifier):
         :param documents: Iterator over lists of words
         :return: For each document, the one most probable label (i.e. the classification)
         """
-        return [((float(pred[0]) if self._label_is_num else pred[0])
-                 if pred else None) for pred in self._classifier.predict(iter(' '.join(d) for d in documents), 1)]
+        return [((float(pred[0]) if self._label_is_num_ else pred[0])
+                 if pred else None) for pred in self._classifier_.predict(iter(' '.join(d) for d in documents), 1)]
 
     def __enter__(self):
         return self
 
     def close(self):
-        if hasattr(self, '_temp_file') and self._temp_file is not None:
-            self._temp_file.close()
+        if hasattr(self, '_temp_file') and self._temp_file_ is not None:
+            self._temp_file_.close()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         return self.close()
@@ -473,15 +477,15 @@ class FastText(BaseClassifier):
         return self.close()
 
     def save(self, *args, **kwargs):
-        _temp_file = self._temp_file
-        self._temp_file = None
-        _classifier = self._classifier
-        self._classifier = None
-        kwargs['ignore'] = kwargs.get('ignore', ['_classifier', '_temp_file', '_temp_fname'])
+        _temp_file = self._temp_file_
+        self._temp_file_ = None
+        _classifier = self._classifier_
+        self._classifier_ = None
+        kwargs['ignore'] = kwargs.get('ignore', ['_classifier_', '_temp_file', '_temp_fname'])
         super(FastText, self).save(*args, **kwargs)
-        self._temp_file = _temp_file
-        self._classifier = _classifier
-        if self._temp_fname is not None and self._temp_file:
+        self._temp_file_ = _temp_file
+        self._classifier_ = _classifier
+        if self._temp_fname_ is not None and self._temp_file_:
             # Get the file name of this object serialization
             if any(args) and 'fname_or_handle' not in kwargs:
                 fname = args[0]
@@ -490,7 +494,7 @@ class FastText(BaseClassifier):
             if not isinstance(fname, string_types):
                 fname = fname.name
             fname += CLASSIFIER_FILE_SUFFIX + '.bin'
-            shutil.copyfile(self._temp_fname, fname)
+            shutil.copyfile(self._temp_fname_, fname)
 
     save.__doc__ = gensim.utils.SaveLoad.save.__doc__
 
@@ -501,7 +505,7 @@ class FastText(BaseClassifier):
         if any(args) and 'fname' not in kwargs:
             kwargs['fname'] = args[0]
         kwargs['fname'] += CLASSIFIER_FILE_SUFFIX + '.bin'
-        model._temp_fname = kwargs['fname']
-        model._temp_file = None
-        model._classifier = fasttext.load_model(kwargs['fname'], label_prefix=cls.LABEL_PREFIX)
+        model._temp_fname_ = kwargs['fname']
+        model._temp_file_ = None
+        model._classifier_ = fasttext.load_model(kwargs['fname'], label_prefix=cls.LABEL_PREFIX)
         return model
